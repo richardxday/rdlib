@@ -29,8 +29,7 @@ typedef struct {
 	uint16_t  Attrib;
 } FILE_FIND;
 
-enum {RECURSE_ALL_SUBDIRS = MAX_UNSIGNED(uint_t)};
-
+#define RECURSE_ALL_SUBDIRS (MAX_UNSIGNED(uint_t))
 #define RECURSE_SUBDIRS(b) ((b) ? RECURSE_ALL_SUBDIRS : 0)
 
 extern bool Recurse(const AString& PathPattern, uint_t nSubDirs, bool (*fn)(const FILE_FIND *file, void *Context), void *Context = NULL);
