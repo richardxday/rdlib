@@ -1,0 +1,15 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@/rdlib-@RDLIB_MAJORMINOR@
+toolsdir=${exec_prefix}/bin
+
+
+Name: rdlib-@RDLIB_MAJORMINOR@
+Description: Utility Library
+Requires.private: @RDLIB_PKG_DEPS@
+Version: @VERSION@
+Libs: -L${libdir} -lrdlib-@RDLIB_MAJORMINOR@
+Cflags: -I${includedir} @RDLIB_DEFINES@
+
+

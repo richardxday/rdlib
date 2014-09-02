@@ -1,0 +1,10 @@
+prefix=
+exec_prefix=
+libdir=${pcfiledir}/rdlib/
+includedir=${pcfiledir}/
+
+Name: rdlib-@RDLIB_MAJORMINOR@ uninstalled
+Description: Utility Library
+Version: @VERSION@
+Libs: -L${libdir} -lrdlib-@RDLIB_MAJORMINOR@
+Cflags: -I${includedir} -I@srcdir@
