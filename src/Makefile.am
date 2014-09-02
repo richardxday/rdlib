@@ -123,6 +123,6 @@ pkginclude_HEADERS = 							\
 
 noinst_HEADERS =
 
-nodist_pkginclude_HEADERS = rdlib-stdint.h
+nodist_pkginclude_HEADERS =
 
-DISTCLEANFILES = rdlib-stdint.h
+DISTCLEANFILES =
