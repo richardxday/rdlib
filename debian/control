@@ -1,6 +1,6 @@
 Source: rdlib
 Priority: optional
-Maintainer: Richard Day <richard.day@bbc.co.uk>
+Maintainer: Richard Day <r.day80@gmail.com>
 Standards-Version: 3.9.3
 Build-Depends: debhelper (>= 9), pkg-config, libjpeg8-dev
 
