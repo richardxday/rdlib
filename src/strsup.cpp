@@ -1297,7 +1297,7 @@ sint_t AString::BackwardWord(sint_t pos) const
 
 sint_t AString::StartOfNextWord(sint_t pos, uint_t flags) const
 {
-	pos = EndOfThisWord(pos, flags);
+	pos = MIN(pos, Length);
 	while ((pos < Length) && IsWhiteSpaceEx(pText[pos])) pos++;
 
 	return pos;
