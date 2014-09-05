@@ -11,8 +11,6 @@
 
 */
 
-#include <vector>
-
 #include "misc.h"
 
 class ADataList {
@@ -33,13 +31,13 @@ public:
 	void EnableDuplication(bool bEnable = true) {bDuplication = bEnable;}
 
 	// overloaded operators
-	ADataList& operator  = (const ADataList& List);
-	ADataList& operator  = (ADataList *pList);
+	ADataList& operator = (const ADataList& List);
+	ADataList& operator = (ADataList *pList);
 	ADataList& operator += (uptr_t Item) {Add(Item);    return *this;}
-	ADataList& operator += (void *ptr)   {Add(ptr);     return *this;}
+	ADataList& operator += (void *ptr)  {Add(ptr);     return *this;}
 	ADataList& operator += (const ADataList& List);
 	ADataList& operator -= (uptr_t Item) {Remove(Item); return *this;}
-	ADataList& operator -= (void *ptr)   {Remove(ptr);  return *this;}
+	ADataList& operator -= (void *ptr)  {Remove(ptr);  return *this;}
 	ADataList& operator -= (const ADataList& List);
 
 	// FIFO/LIFO type operations
@@ -131,10 +129,11 @@ protected:
 	void SwapAndSort(sint_t Index, int (*fn)(uptr_t Item1, uptr_t Item2, void *pContext), void *pContext);
 
 protected:
-	void (*pDestructor)(uptr_t item, void *context);
-	void *pDestructorContext;
-	std::vector<uptr_t> Data;
-	bool bDuplication;
+	void   (*pDestructor)(uptr_t item, void *context);
+	void   *pDestructorContext;
+	uptr_t *pData;
+	size_t nItems, nMaxItems, nIncItems;
+	bool   bDuplication;
 };
 
 #endif
