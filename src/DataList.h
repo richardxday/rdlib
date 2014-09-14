@@ -2,6 +2,8 @@
 #ifndef __DATA_LIST__
 #define __DATA_LIST__
 
+#include <vector>
+
 /*
   ADataList object
 
