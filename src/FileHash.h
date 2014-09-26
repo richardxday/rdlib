@@ -10,7 +10,7 @@
 class AFileHash : public AListNode {
 public:
 	AFileHash(const AString& Line);
-	AFileHash(const FILE_FIND *pFile);
+	AFileHash(const FILE_INFO *pFile);
 	virtual ~AFileHash();
 
 	LIST_FUNCTIONS(AFileHash);

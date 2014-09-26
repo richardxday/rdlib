@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "Recurse.h"
 #include "SettingsHandler.h"
 
 AString ASettingsHandler::homedir;
@@ -77,6 +78,12 @@ void ASettingsHandler::Read()
 		}
 
 		fp.close();
+
+		FILE_INFO info;
+		if (GetFileInfo(filename, &info)) {
+			timestamp = info.WriteTime;
+			//debug("Set timestamp for %s at %s\n", filename.str(), timestamp.DateFormat("%h:%m:%s.%S %D-%N-%Y").str());
+		}
 	}
 
 	changed = false;
@@ -107,8 +114,11 @@ void ASettingsHandler::Write()
 
 			fp.close();
 
-			changed = false;
+			changed    = false;
 			write_tick = GetTickCount();
+
+			FILE_INFO info;
+			if (GetFileInfo(filename, &info)) timestamp = info.WriteTime;
 		}
 	}
 }
@@ -120,6 +130,19 @@ void ASettingsHandler::CheckWrite()
 		 ((GetTickCount() - write_tick)   >= 60000))) {
 		Write();
 	}
+}
+
+bool ASettingsHandler::HasFileChanged()
+{
+	FILE_INFO info;
+	bool      changed = false;
+
+	if (GetFileInfo(filename, &info)) {
+		changed = (info.WriteTime > timestamp);
+		//if (changed) debug("%s changed by %ld (%s, %s)\n", filename.str(), (long)(sint64_t)(info.WriteTime - timestamp), info.WriteTime.DateFormat("%h:%m:%s.%S %D-%N-%Y").str(), timestamp.DateFormat("%h:%m:%s.%S %D-%N-%Y").str());
+	}
+
+	return changed;
 }
 
 const AString& ASettingsHandler::Get(const AString& name, const AString& defval) const

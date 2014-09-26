@@ -1,4 +1,4 @@
-
+#
 #ifndef __RECURSE__
 #define __RECURSE__
 
@@ -27,18 +27,18 @@ typedef struct {
 	ADateTime AccessTime;
 	ADateTime WriteTime;
 	uint16_t  Attrib;
-} FILE_FIND;
+} FILE_INFO;
 
 #define RECURSE_ALL_SUBDIRS (MAX_UNSIGNED(uint_t))
 #define RECURSE_SUBDIRS(b) ((b) ? RECURSE_ALL_SUBDIRS : 0)
 
-extern bool Recurse(const AString& PathPattern, uint_t nSubDirs, bool (*fn)(const FILE_FIND *file, void *Context), void *Context = NULL);
-extern bool Recurse(const AString& Path, const AString& Pattern, uint_t nSubDirs, bool (*fn)(const FILE_FIND *file, void *Context), void *Context = NULL);
+extern bool Recurse(const AString& PathPattern, uint_t nSubDirs, bool (*fn)(const FILE_INFO *file, void *Context), void *Context = NULL);
+extern bool Recurse(const AString& Path, const AString& Pattern, uint_t nSubDirs, bool (*fn)(const FILE_INFO *file, void *Context), void *Context = NULL);
 
-extern bool GetFileDetails(const AString& Filename, FILE_FIND *file);
+extern bool GetFileInfo(const AString& Filename, FILE_INFO *file);
 
 extern bool CollectFiles(const AString& Path, const AString& Pattern, uint_t nSubdirs, AList& list, uint16_t attribMask = FILE_FLAG_IS_DIR, uint16_t attribCmp = 0, AQuitHandler *pQuitHandler = NULL);
-extern bool TraverseFiles(const AList& list, bool (*fn)(const FILE_FIND *file, void *context), void *context = NULL);
+extern bool TraverseFiles(const AList& list, bool (*fn)(const FILE_INFO *file, void *context), void *context = NULL);
 
 #ifdef CreateDirectory
 #undef CreateDirectory
@@ -51,7 +51,7 @@ extern AString GetCurrentDirectory();
 class AFileNode : public AListNode {
 public:
 	AFileNode(const AString& filename);
-	AFileNode(const FILE_FIND& file);
+	AFileNode(const FILE_INFO& file);
 	virtual ~AFileNode();
 
 	LIST_FUNCTIONS(AFileNode);
@@ -89,7 +89,7 @@ public:
 	static COMPARE_FUNC GetSortFunction(uint_t n);
 
 protected:
-	FILE_FIND FileData;
+	FILE_INFO FileData;
 
 	NODETYPE_DEFINE(AFileNode);
 };

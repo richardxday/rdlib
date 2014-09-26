@@ -33,13 +33,13 @@ extern "C" {
 
 /* end of includes */
 
-bool Recurse(const AString& PathPattern, uint_t nSubDirs, bool (*fn)(const FILE_FIND *file, void *Context), void *Context)
+bool Recurse(const AString& PathPattern, uint_t nSubDirs, bool (*fn)(const FILE_INFO *file, void *Context), void *Context)
 {
 	return ::Recurse(PathPattern.PathPart(), PathPattern.FilePart(), nSubDirs, fn, Context);
 }
 
 #ifdef __LINUX__
-static bool SetFileData(const AString& path, const struct dirent& finddata, FILE_FIND *file)
+static bool SetFileData(const AString& path, const struct dirent& finddata, FILE_INFO *file)
 {
 	struct stat statdata;
 	bool success = false;
@@ -74,10 +74,10 @@ static bool SetFileData(const AString& path, const struct dirent& finddata, FILE
 	return success;
 }
 
-bool Recurse(const AString& Path, const AString& Pattern, uint_t nSubDirs, bool (*fn)(const FILE_FIND *file, void *Context), void *Context)
+bool Recurse(const AString& Path, const AString& Pattern, uint_t nSubDirs, bool (*fn)(const FILE_INFO *file, void *Context), void *Context)
 {
 	AString   pattern = ParsePathRegex(Pattern);
-	FILE_FIND file;
+	FILE_INFO file;
 	DIR		  *handle;
 	bool      ok = true, any = IsRegexAnyPattern(pattern);
 
@@ -113,7 +113,7 @@ bool Recurse(const AString& Path, const AString& Pattern, uint_t nSubDirs, bool 
 	return ok;
 }
 
-bool GetFileDetails(const AString& FileName, FILE_FIND *file)
+bool GetFileInfo(const AString& FileName, FILE_INFO *file)
 {
 	struct dirent ent;
 
@@ -135,7 +135,7 @@ static uint64_t ConvertTime(const FILETIME& ft)
 	return t;
 }
 
-static void SetFileData(const AString& path, const WIN32_FIND_DATA& finddata, FILE_FIND *file)
+static void SetFileData(const AString& path, const WIN32_FIND_DATA& finddata, FILE_INFO *file)
 {
 	file->FileName   = path.CatPath(finddata.cFileName);
 	file->ShortName  = file->FileName.FilePart();
@@ -155,11 +155,11 @@ static void SetFileData(const AString& path, const WIN32_FIND_DATA& finddata, FI
 	if (finddata.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) file->Attrib |= FILE_FLAG_IS_DIR;
 }
 
-bool Recurse(const AString& Path, const AString& Pattern, uint_t nSubDirs, bool (*fn)(const FILE_FIND *file, void *Context), void *Context)
+bool Recurse(const AString& Path, const AString& Pattern, uint_t nSubDirs, bool (*fn)(const FILE_INFO *file, void *Context), void *Context)
 {
 	WIN32_FIND_DATA finddata;
 	AString   pattern, pattern1 = ParsePathRegex(Pattern);
-	FILE_FIND file;
+	FILE_INFO file;
 	HANDLE    handle;
 	bool      ok = true, any = IsRegexAnyPattern(pattern1);
 
@@ -194,7 +194,7 @@ bool Recurse(const AString& Path, const AString& Pattern, uint_t nSubDirs, bool 
 	return ok;
 }
 
-bool GetFileDetails(const AString& FileName, FILE_FIND *file)
+bool GetFileInfo(const AString& FileName, FILE_INFO *file)
 {
 	WIN32_FIND_DATA finddata;
 	HANDLE handle;
@@ -223,7 +223,7 @@ typedef struct {
 	bool		 bAnyName;
 } COLLECT_CONTEXT;
 
-static bool __CollectFiles(const FILE_FIND *file, void *Context)
+static bool __CollectFiles(const FILE_INFO *file, void *Context)
 {
 	COLLECT_CONTEXT *p = (COLLECT_CONTEXT *)Context;
 
@@ -258,16 +258,16 @@ bool CollectFiles(const AString& Path, const AString& Pattern, uint_t nSubdirs, 
 	return ::Recurse(Path.CatPath("*"), nSubdirs, &__CollectFiles, &context);
 }
 
-bool TraverseFiles(const AList& list, bool (*fn)(const FILE_FIND *file, void *context), void *context)
+bool TraverseFiles(const AList& list, bool (*fn)(const FILE_INFO *file, void *context), void *context)
 {
-	FILE_FIND file;
+	FILE_INFO file;
 	const AListNode *node = list.First();
 	const AString *str;
 	bool  success = true;
 
 	while (node && success) {
 		if ((str = AString::Cast(node)) != NULL) {
-			success = ::GetFileDetails(*str, &file);
+			success = ::GetFileInfo(*str, &file);
 			if (success) success = (*fn)(&file, context);
 		}
 
@@ -280,12 +280,12 @@ bool TraverseFiles(const AList& list, bool (*fn)(const FILE_FIND *file, void *co
 bool CreateDirectory(const AString& dir)
 {
 	AString parentdir = dir.PathPart();
-	FILE_FIND file;
+	FILE_INFO file;
 	bool success = true;
 
-	if (parentdir.Valid() && (parentdir != "/") && !::GetFileDetails(parentdir, &file)) success = CreateDirectory(parentdir);
+	if (parentdir.Valid() && (parentdir != "/") && !::GetFileInfo(parentdir, &file)) success = CreateDirectory(parentdir);
 
-	if (success && (dir.FilePart().Valid()) && !::GetFileDetails(dir, &file)) {
+	if (success && (dir.FilePart().Valid()) && !::GetFileInfo(dir, &file)) {
 #ifdef __LINUX__
 		success = (mkdir(dir, S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IWGRP | S_IXGRP | S_IROTH | S_IWOTH | S_IXOTH) == 0);
 #else
@@ -330,10 +330,10 @@ NODETYPE_IMPLEMENT(AFileNode);
 
 AFileNode::AFileNode(const AString& filename) : AListNode()
 {
-	::GetFileDetails(filename, &FileData);
+	::GetFileInfo(filename, &FileData);
 }
 
-AFileNode::AFileNode(const FILE_FIND& file) : AListNode()
+AFileNode::AFileNode(const FILE_INFO& file) : AListNode()
 {
 	FileData = file;
 }
@@ -462,7 +462,7 @@ typedef struct {
 	uint_t		 CmpFlags;
 } COLLECTEX_CONTEXT;
 
-static bool __CollectFilesEx(const FILE_FIND *file, void *Context)
+static bool __CollectFilesEx(const FILE_INFO *file, void *Context)
 {
 	COLLECTEX_CONTEXT *p = (COLLECTEX_CONTEXT *)Context;
 
