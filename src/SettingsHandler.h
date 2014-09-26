@@ -5,6 +5,7 @@
 #include "strsup.h"
 #include "StdFile.h"
 #include "Hash.h"
+#include "DateTime.h"
 
 class ASettingsHandler {
 public:
@@ -17,6 +18,7 @@ public:
 	void Read();
 	void Write();
 	void CheckWrite();
+	bool HasFileChanged();
 
 	const AString& Get(const AString& name, const AString& defval = "") const;
 	void Set(const AString& name, const AString& value);
@@ -40,6 +42,7 @@ protected:
 
 protected:
 	AString   filename;
+	ADateTime timestamp;
 	AList 	  list;
 	AHash     hash;
 	uint32_t  changed_tick, write_tick;
