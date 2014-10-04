@@ -41,15 +41,21 @@ public:
 	uint32_t GetDays()  const {return DateTime.Days;}
 	uint32_t GetMS()    const {return DateTime.MilliSeconds;}
 	
-	uint8_t GetWeekDay() const;
-	uint8_t GetDay()     const;
-	uint8_t GetMonth()   const;
-	uint16_t GetYear()  const;
+	uint8_t  GetWeekDay() const;
+	uint8_t  GetDay()     const;
+	uint8_t  GetMonth()   const;
+	uint16_t GetYear()    const;
 
-	uint8_t GetHours()   const;
-	uint8_t GetMinutes() const;
-	uint8_t GetSeconds() const;
+	uint8_t  GetHours()   const;
+	uint8_t  GetMinutes() const;
+	uint8_t  GetSeconds() const;
 	uint16_t GetMilliSeconds() const;
+
+	uint64_t GetAbsoluteSecond() const {return (uint64_t)DateTime.Days * SECONDS_PER_DAY + DateTime.MilliSeconds / 1000;}
+	uint32_t GetAbsoluteHour() 	 const {return DateTime.Days * 24 + GetHours();}
+	uint32_t GetAbsoluteDay()  	 const {return DateTime.Days;}
+	uint32_t GetAbsoluteWeek() 	 const {return DateTime.Days / 7;}
+	uint32_t GetAbsoluteMonth()  const {return (uint32_t)GetYear() * 12 + GetMonth();}
 
 	static int FindDay(const char *str);
 	static int FindMonth(const char *str);
@@ -112,7 +118,7 @@ public:
 	AString ToTimeStamp(uint_t format = TIMESTAMP_FORMAT_TERSE) const;
 	bool    FromTimeStamp(const AString& str, bool utc = false);
 
-	static sint32_t    GetLocalOffsetMinutes();
+	static sint32_t  GetLocalOffsetMinutes();
 	static ADateTime GetLocalOffset(bool& backwards);
 
 	static const ADateTime MinDateTime;
