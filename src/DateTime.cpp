@@ -642,6 +642,7 @@ ADateTime& ADateTime::StrToDate(const AString& String, bool current, uint_t *spe
 			uint32_t days = 0, ms = 0;
 			bool   	 neg = (word.FirstChar() == '-');
 			bool   	 pos = (word.FirstChar() == '+');
+			bool     pm  = false;
 			sint_t   p;
 
 			word.Replace(":", " ");
@@ -659,12 +660,22 @@ ADateTime& ADateTime::StrToDate(const AString& String, bool current, uint_t *spe
 				word = word.Left(p + 1) + " " + word.Mid(p + 1);
 			}
 
-			bool   valid = false;
+			bool    valid = false;
+			AString suffix;
+			if ((suffix = word.Right(2).ToLower()) == "am") {
+				word = word.Left(word.len() - 2);
+			}
+			else if (suffix == "pm") {
+				word = word.Left(word.len() - 2);
+				pm   = true;
+			}
+
 			uint_t j, k, nsubwords = word.CountWords();
 			for (j = k = 0; j < nsubwords; j++) {
 				AString subword = word.Word(j);
 
 				valid |= IsNumeralChar(subword.FirstChar());
+
 				switch (subword.LastChar()) {
 					case 'd':
 						days   = (uint32_t)fabs((double)subword);
@@ -708,16 +719,8 @@ ADateTime& ADateTime::StrToDate(const AString& String, bool current, uint_t *spe
 				}
 			}
 
-			AString suffix;
-			if ((suffix = word.Right(2).ToLower()) == "am") {
-				hour  = (hour % (12ul * 3600ul * 1000ul));
-			}
-			else if (suffix == "pm") {
-				hour  = (hour % (12ul * 3600ul * 1000ul));
-				hour += 12ul * 3600ul * 1000ul;
-			}
-
 			ms += hour + minute + second;
+			if (pm) ms += 12ul * 3600ul * 1000ul;
 			if (ms >= MS_PER_DAY) {
 				days += ms / MS_PER_DAY;
 				ms   %= MS_PER_DAY;
