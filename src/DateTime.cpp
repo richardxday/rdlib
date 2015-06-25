@@ -592,9 +592,12 @@ ADateTime& ADateTime::StrToDate(const AString& String, bool current, uint_t *spe
 			if (pos || neg) word1 = word1.Mid(1);
 			if (am  || pm)  word1 = word1.Left(word.len() - 2).Words(0);
 
-			if (sscanf(word1.str(), "%lf:%lf:%lf.%lf", &hours, &minutes, &seconds, &milliseconds) > 1) valid = true;
+			if (sscanf(word1.str(), "%lf:%lf:%lf.%lf", &hours, &minutes, &seconds, &milliseconds) > 1) {
+				if (hours == 0.0) {am = true; pm = false;}
+				valid = true;
+			}
 			else {
-				uint_t p = 0;
+				uint_t p = 0, round = 0;
 
 				hours = minutes = seconds = milliseconds = 0;
 
@@ -609,12 +612,17 @@ ADateTime& ADateTime::StrToDate(const AString& String, bool current, uint_t *spe
 					p = p1;
 					switch (word1[p]) {
 						case 0:
-							seconds = val;
+							if (!round && (am || pm)) {
+								hours = val;
+								if (hours == 0.0) {am = true; pm = false;}
+							}
+							else seconds = val;
 							valid   = true;
 							break;
 
 						case 'h':
 							hours   = val;
+							if (hours == 0.0) {am = true; pm = false;}
 							valid   = true;
 							p++;
 							break;
@@ -636,6 +644,7 @@ ADateTime& ADateTime::StrToDate(const AString& String, bool current, uint_t *spe
 							p     = word1.len();
 							break;
 					}
+					round++;
 				}
 			}
 
