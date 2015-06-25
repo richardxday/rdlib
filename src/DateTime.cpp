@@ -28,8 +28,8 @@ const uint32_t ADateTime::DaysSince1970 = DAYSCOUNT(DATUM_YEAR) - DAYSCOUNT(1970
 const uint32_t ADateTime::DaysSince1601 = DAYSCOUNT(DATUM_YEAR) - DAYSCOUNT(1601);
 #endif
 
-const ADateTime ADateTime::MinDateTime(0, 0);
-const ADateTime ADateTime::MaxDateTime(~0, ~0);
+const ADateTime ADateTime::MinDateTime(0ull);
+const ADateTime ADateTime::MaxDateTime(~0ull);
 
 bool ADateTime::bDataInit = false;
 
@@ -469,7 +469,7 @@ ADateTime& ADateTime::StrToDate(const AString& String, bool current, uint_t *spe
 	DAYMONTHYEAR dmy;
 	DATETIME     dt;
 	AString String1 = String.SearchAndReplace(",", " ");
-	uint_t i, j, n = String1.CountWords();
+	uint_t  i, j, n = String1.CountWords();
 
 	if (current) {
 		CurrentTime(DateTime);
@@ -480,18 +480,6 @@ ADateTime& ADateTime::StrToDate(const AString& String, bool current, uint_t *spe
 
 	for (i = 0; i < n; i++) {
 		AString word = String1.Word(i);
-
-		if (IsAlphaChar(word[0])) {
-			uint_t j;
-
-			for (j = 0; IsAlphaChar(word[j]); j++) ;
-
-			if (j < (uint_t)word.len()) {
-				String1 = String1.Words(0, i) + " " + word.Left(j) + " " + word.Mid(j) + " " + String1.Words(i + 1);
-				word = word.Left(j);
-				n = String1.CountWords();
-			}
-		}
 
 		//debug("word %u='%s'\n", i, word.str());
 
@@ -592,161 +580,152 @@ ADateTime& ADateTime::StrToDate(const AString& String, bool current, uint_t *spe
 			DateTime.Days += 1;
 			if (specified) *specified |= Specified_Date;
 		}
-		else if ((word.Pos("-") > 0) || (word.Pos("/") > 0)) {
-			AString word1;
-			AString str;
-			uint_t day, month, year;
+		else {
+			AString suffix, word1 = word;
+			double  hours = 0.0, minutes = 0.0, seconds = 0.0, milliseconds = 0.0;
+			bool   	neg   = (word1.FirstChar() == '-');
+			bool   	pos   = (word1.FirstChar() == '+');
+			bool    am    = ((suffix = word1.Right(2).ToLower()) == "am");
+			bool    pm    = (suffix                              == "pm");
+			bool    valid = false;
 
-			word.Replace("-", " ");
-			word.Replace("/", " ");
+			if (pos || neg) word1 = word1.Mid(1);
+			if (am  || pm)  word1 = word1.Left(word.len() - 2).Words(0);
 
-			DateTimeToDMY(DateTime, dmy);
+			if (sscanf(word1.str(), "%lf:%lf:%lf.%lf", &hours, &minutes, &seconds, &milliseconds) > 1) valid = true;
+			else {
+				uint_t p = 0;
 
-			day   = (uint_t)word.Word(0);
-			month = dmy.Month;
-			year  = dmy.Year;
+				hours = minutes = seconds = milliseconds = 0;
 
-			uint_t nwords = word.CountWords();
-			if (nwords > 2) {
-				year = (uint_t)word.Word(2);
-				if      (RANGE(year, 80, 99)) year += 1900;
-				else if (year <= 79)		  year += 2000;
-			}
+				while (word1[p]) {
+					AValue val;
+					uint_t p1 = val.EvalNumber(word1, p);
 
-			if (nwords > 1) {
-				word1 = word.Word(1);
-				
-				for (j = 0; j < NUMBEROF(MonthNames); j++) {
-					if ((CompareNoCase(word1, MonthNames[j]) == 0) || (CompareNoCase(word1, ShortMonthNames[j]) == 0)) {
-						month = j + 1;
-						break;
+					if (p1 == p) break;
+
+					//debug("String '%s' value %0.1lf terminator '%c'\n", word1.Mid(p, p1 - p).str(), (double)val, word1[p1]);
+
+					p = p1;
+					switch (word1[p]) {
+						case 0:
+							seconds = val;
+							valid   = true;
+							break;
+
+						case 'h':
+							hours   = val;
+							valid   = true;
+							p++;
+							break;
+
+						case 'm':
+							minutes = val;
+							valid   = true;
+							p++;
+							break;
+
+						case 's':
+							seconds = val;
+							valid   = true;
+							p++;
+							break;
+
+						default:
+							valid = false;
+							p     = word1.len();
+							break;
 					}
 				}
-				
-				if (j == NUMBEROF(ShortMonthNames)) month = (uint_t)word1;
 			}
 
-			if (RANGE(day, 1, 31) && RANGE(month, 1, 12) && (year >= 2000)) {
-				dmy.Day   = day;
-				dmy.Month = month;
-				dmy.Year  = year;
-				DMYToDateTime(dmy, dt);
-				DateTime.Days = dt.Days;
-				if (specified) *specified |= Specified_Date;
-			}
+			if (valid) {
+				if (am || pm) hours = fmod(hours, 12.0);
 
-			word.Delete();
-		}
-		else {
-			uint32_t hour = 0, minute = 0, second = 0;
-			uint32_t days = 0, ms = 0;
-			bool   	 neg = (word.FirstChar() == '-');
-			bool   	 pos = (word.FirstChar() == '+');
-			bool     pm  = false;
-			sint_t   p;
+				seconds += milliseconds * .001 + minutes * 60.0 + hours * 3600.0;
 
-			word.Replace(":", " ");
-
-			if ((p = word.Pos("d")) >= 0) {
-				word = word.Left(p + 1) + " " + word.Mid(p + 1);
-			}
-			if ((p = word.Pos("h")) >= 0) {
-				word = word.Left(p + 1) + " " + word.Mid(p + 1);
-			}
-			if ((p = word.Pos("m")) >= 0) {
-				word = word.Left(p + 1) + " " + word.Mid(p + 1);
-			}
-			if ((p = word.ToLower().Pos("s")) >= 0) {
-				word = word.Left(p + 1) + " " + word.Mid(p + 1);
-			}
-
-			bool    valid = false;
-			AString suffix;
-			if ((suffix = word.Right(2).ToLower()) == "am") {
-				word = word.Left(word.len() - 2);
-			}
-			else if (suffix == "pm") {
-				word = word.Left(word.len() - 2);
-				pm   = true;
-			}
-
-			uint_t j, k, nsubwords = word.CountWords();
-			for (j = k = 0; j < nsubwords; j++) {
-				AString subword = word.Word(j);
-
-				valid |= IsNumeralChar(subword.FirstChar());
-
-				switch (subword.LastChar()) {
-					case 'd':
-						days   = (uint32_t)fabs((double)subword);
-						break;
-
-					case 'h':
-						hour   = (uint32_t)(fabs((double)subword) * 3600.0 * 1000.0);
-						break;
-
-					case 'm':
-						minute = (uint32_t)(fabs((double)subword) *   60.0 * 1000.0);
-						break;
-
-					case 's':
-						second = (uint32_t)(fabs((double)subword)          * 1000.0);
-						break;
-
-					case 'S':
-						ms     = (uint32_t)fabs((double)subword);
-						break;
-
-					default:
-						switch (k++) {
-							case 0:
-								hour   = (uint32_t)(fabs((double)subword) * 3600.0 * 1000.0);
-								break;
-
-							case 1:
-								minute = (uint32_t)(fabs((double)subword) *   60.0 * 1000.0);
-								break;
-
-							case 2:
-								second = (uint32_t)(fabs((double)subword)          * 1000.0);
-								break;
-
-							case 3:
-								ms     = (uint32_t)fabs((double)subword);
-								break;
-						}
-						break;
+				if (seconds < 0.0)
+				{
+					seconds = -seconds;
+					pos     = !pos;
+					neg     = !neg;
 				}
-			}
 
-			ms += hour + minute + second;
-			if (pm) ms += 12ul * 3600ul * 1000ul;
-			if (ms >= MS_PER_DAY) {
-				days += ms / MS_PER_DAY;
-				ms   %= MS_PER_DAY;
-			}
+				uint32_t ms = (uint32_t)(seconds * 1000.0), days = 0;
+				if (pm) ms += 12ul * 3600ul * 1000ul;
+				if (ms >= MS_PER_DAY) {
+					days += ms / MS_PER_DAY;
+					ms   %= MS_PER_DAY;
+				}
  
-			if (neg) {
-				DateTime.Days -= days;
-				if (ms > DateTime.MilliSeconds) {
-					DateTime.Days--;
-					DateTime.MilliSeconds += MS_PER_DAY;
+				if (neg) {
+					DateTime.Days -= days;
+					if (ms > DateTime.MilliSeconds) {
+						DateTime.Days--;
+						DateTime.MilliSeconds += MS_PER_DAY;
+					}
+					DateTime.MilliSeconds -= ms;
 				}
-				DateTime.MilliSeconds -= ms;
-			}
-			else {
-				if (!pos) DateTime.MilliSeconds = 0;
+				else {
+					if (!pos) DateTime.MilliSeconds = 0;
 
-				DateTime.Days         += days;
-				DateTime.MilliSeconds += ms;
+					DateTime.Days         += days;
+					DateTime.MilliSeconds += ms;
 
-				if (DateTime.MilliSeconds >= MS_PER_DAY) {
-					DateTime.Days         += DateTime.MilliSeconds / MS_PER_DAY;
-					DateTime.MilliSeconds %= MS_PER_DAY;
+					if (DateTime.MilliSeconds >= MS_PER_DAY) {
+						DateTime.Days         += DateTime.MilliSeconds / MS_PER_DAY;
+						DateTime.MilliSeconds %= MS_PER_DAY;
+					}
 				}
-			}
 
-			if (specified && valid) *specified |= Specified_Time;
+				if (specified) *specified |= Specified_Time;
+			}
+			else if ((word.Pos("-") > 0) || (word.Pos("/") > 0)) {
+				AString word1;
+				AString str;
+				uint_t day, month, year;
+
+				word.Replace("-", " ");
+				word.Replace("/", " ");
+
+				DateTimeToDMY(DateTime, dmy);
+
+				day   = (uint_t)word.Word(0);
+				month = dmy.Month;
+				year  = dmy.Year;
+
+				uint_t nwords = word.CountWords();
+				if (nwords > 2) {
+					year = (uint_t)word.Word(2);
+					if      (RANGE(year, 80, 99)) year += 1900;
+					else if (year <= 79)		  year += 2000;
+				}
+
+				if (nwords > 1) {
+					word1 = word.Word(1);
+				
+					for (j = 0; j < NUMBEROF(MonthNames); j++) {
+						if ((CompareNoCase(word1, MonthNames[j]) == 0) || (CompareNoCase(word1, ShortMonthNames[j]) == 0)) {
+							month = j + 1;
+							break;
+						}
+					}
+				
+					if (j == NUMBEROF(ShortMonthNames)) month = (uint_t)word1;
+				}
+
+				if (RANGE(day, 1, 31) && RANGE(month, 1, 12) && (year >= 2000)) {
+					dmy.Day   = day;
+					dmy.Month = month;
+					dmy.Year  = year;
+					DMYToDateTime(dmy, dt);
+					DateTime.Days = dt.Days;
+					if (specified) *specified |= Specified_Date;
+				}
+
+				word.Delete();
+			}
+			else debug("Failed to evaluate '%s'!\n", word.str());
 		}
 	}
 
