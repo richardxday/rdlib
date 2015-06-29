@@ -102,11 +102,13 @@ public:
 	uint_t GetMonthStartDay(uint_t m) const;
 
 	time_t     totime() const;
+	time_t	   totime_local() const;
 	ADateTime& fromtime(time_t t);
 	ADateTime& fromtime(const struct tm *tm);
 	ADateTime& fromtime_local(time_t t);
 
 	ADateTime  UTCToLocal() const;
+	ADateTime  LocalToUTC() const;
 
 	enum {
 		TIMESTAMP_FORMAT_TERSE = 0,

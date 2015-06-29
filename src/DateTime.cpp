@@ -29,7 +29,7 @@ const uint32_t ADateTime::DaysSince1601 = DAYSCOUNT(DATUM_YEAR) - DAYSCOUNT(1601
 #endif
 
 const ADateTime ADateTime::MinDateTime(0ull);
-const ADateTime ADateTime::MaxDateTime(~0ull);
+const ADateTime ADateTime::MaxDateTime("31-dec-2037 23:59:59");
 
 bool ADateTime::bDataInit = false;
 
@@ -478,8 +478,9 @@ ADateTime& ADateTime::StrToDate(const AString& String, bool current, uint_t *spe
 
 	if (specified) *specified = 0;
 
-	for (i = 0; i < n; i++) {
-		AString word = String1.Word(i);
+	AString word = String1.Word(0);
+	for (i = 0; i < n;) {
+		uint_t splitat = 0;
 
 		//debug("word %u='%s'\n", i, word.str());
 
@@ -496,26 +497,40 @@ ADateTime& ADateTime::StrToDate(const AString& String, bool current, uint_t *spe
 			DateTime.Days += (j + 7 - dmy.WeekDay) % 7;
 			if (specified) *specified |= Specified_Day;
 		}
-		else if (CompareNoCase(word, "now") == 0) {
+		else if (CompareNoCase(word.Left(3), "now") == 0) {
 			CurrentTime(DateTime);
 			if (specified) *specified |= Specified_Time | Specified_Date;
+			splitat = 3;
 		}
-		else if (CompareNoCase(word, "today") == 0) {
+		else if (CompareNoCase(word.Left(3), "min") == 0) {
+			*this = MinDateTime;
+			if (specified) *specified |= Specified_Time | Specified_Date;
+			splitat = 3;
+		}
+		else if (CompareNoCase(word.Left(3), "max") == 0) {
+			*this = MaxDateTime;
+			if (specified) *specified |= Specified_Time | Specified_Date;
+			splitat = 3;
+		}
+		else if (CompareNoCase(word.Left(5), "today") == 0) {
 			CurrentTime(dt);
 			DateTime.Days = dt.Days;
 			if (specified) *specified |= Specified_Date;
+			splitat = 5;
 		}
-		else if (CompareNoCase(word, "yesterday") == 0) {
+		else if (CompareNoCase(word.Left(9), "yesterday") == 0) {
 			CurrentTime(dt);
 			DateTime.Days = dt.Days - 1;
 			if (specified) *specified |= Specified_Date;
+			splitat = 9;
 		}
-		else if (CompareNoCase(word, "tomorrow") == 0) {
+		else if (CompareNoCase(word.Left(8), "tomorrow") == 0) {
 			CurrentTime(dt);
 			DateTime.Days = dt.Days + 1;
 			if (specified) *specified |= Specified_Date;
+			splitat = 8;
 		}
-		else if (CompareNoCase(word, "lastmonth") == 0) {
+		else if (CompareNoCase(word.Left(9), "lastmonth") == 0) {
 			DateTimeToDMY(DateTime, dmy);
 
 			if ((--dmy.Month) < 1) {
@@ -525,60 +540,70 @@ ADateTime& ADateTime::StrToDate(const AString& String, bool current, uint_t *spe
 
 			DateTime.Days -= MonthLengths[dmy.Month - 1] + (((dmy.Month == 2) && ISLEAP(dmy.Year)) ? 1 : 0);
 			if (specified) *specified |= Specified_Date;
+			splitat = 9;
 		}
-		else if (CompareNoCase(word, "nextmonth") == 0) {
+		else if (CompareNoCase(word.Left(9), "nextmonth") == 0) {
 			DateTimeToDMY(DateTime, dmy);
 
 			DateTime.Days += MonthLengths[dmy.Month - 1] + (((dmy.Month == 2) && ISLEAP(dmy.Year)) ? 1 : 0);
 			if (specified) *specified |= Specified_Date;
+			splitat = 9;
 		}
-		else if (CompareNoCase(word, "firstdayofmonth") == 0) {
+		else if (CompareNoCase(word.Left(15), "firstdayofmonth") == 0) {
 			DateTimeToDMY(DateTime, dmy);
 
 			DateTime.Days -= dmy.Day - 1;
 			if (specified) *specified |= Specified_Date;
+			splitat = 15;
 		}
-		else if (CompareNoCase(word, "lastdayofmonth") == 0) {
+		else if (CompareNoCase(word.Left(14), "lastdayofmonth") == 0) {
 			DateTimeToDMY(DateTime, dmy);
 
 			DateTime.Days += MonthLengths[dmy.Month] - dmy.Day + (((dmy.Month == 2) && ISLEAP(dmy.Year)) ? 1 : 0);
 			if (specified) *specified |= Specified_Date;
+			splitat = 14;
 		}
-		else if (CompareNoCase(word, "lastweek") == 0) {
+		else if (CompareNoCase(word.Left(8), "lastweek") == 0) {
 			DateTimeToDMY(DateTime, dmy);
 
 			DateTime.Days -= 7;
 			if (specified) *specified |= Specified_Date;
+			splitat = 8;
 		}
-		else if (CompareNoCase(word, "nextweek") == 0) {
+		else if (CompareNoCase(word.Left(8), "nextweek") == 0) {
 			DateTimeToDMY(DateTime, dmy);
 
 			DateTime.Days += 7;
 			if (specified) *specified |= Specified_Date;
+			splitat = 8;
 		}
-		else if (CompareNoCase(word, "firstdayofweek") == 0) {
+		else if (CompareNoCase(word.Left(14), "firstdayofweek") == 0) {
 			DateTimeToDMY(DateTime, dmy);
 
 			DateTime.Days -= dmy.WeekDay;
 			if (specified) *specified |= Specified_Date;
+			splitat = 14;
 		}
-		else if (CompareNoCase(word, "lastdayofweek") == 0) {
+		else if (CompareNoCase(word.Left(13), "lastdayofweek") == 0) {
 			DateTimeToDMY(DateTime, dmy);
 
 			DateTime.Days += 6 - dmy.WeekDay;
 			if (specified) *specified |= Specified_Date;
+			splitat = 13;
 		}
-		else if (CompareNoCase(word, "lastday") == 0) {
+		else if (CompareNoCase(word.Left(7), "lastday") == 0) {
 			DateTimeToDMY(DateTime, dmy);
 
 			DateTime.Days -= 1;
 			if (specified) *specified |= Specified_Date;
+			splitat = 7;
 		}
-		else if (CompareNoCase(word, "nextday") == 0) {
+		else if (CompareNoCase(word.Left(7), "nextday") == 0) {
 			DateTimeToDMY(DateTime, dmy);
 
 			DateTime.Days += 1;
 			if (specified) *specified |= Specified_Date;
+			splitat = 7;
 		}
 		else {
 			AString suffix, word1 = word;
@@ -736,6 +761,12 @@ ADateTime& ADateTime::StrToDate(const AString& String, bool current, uint_t *spe
 			}
 			else debug("Failed to evaluate '%s'!\n", word.str());
 		}
+
+		if (splitat) {
+			word = word.Mid(splitat);
+		}
+
+		if (!splitat || word.Empty()) word = String1.Word(++i);
 	}
 
 	return *this;
@@ -751,6 +782,15 @@ time_t ADateTime::totime() const
 	uint32_t days = DateTime.Days + DaysSince1970;
 	uint32_t sec  = DateTime.MilliSeconds / 1000;
 	return (time_t)(days * SECONDS_PER_DAY + sec);
+}
+
+time_t ADateTime::totime_local() const
+{
+	time_t t = totime();
+	struct tm *tm = gmtime(&t);
+	time_t t1 = mktime(tm);
+	if (tm->tm_isdst == 1) t1 -= 3600;
+	return t1;
 }
 
 ADateTime& ADateTime::fromtime(const struct tm *tm)
@@ -793,6 +833,18 @@ ADateTime ADateTime::UTCToLocal() const
 	return res;
 }
 
+ADateTime ADateTime::LocalToUTC() const
+{
+	ADateTime res;
+	uint32_t ms = DateTime.MilliSeconds % 1000;
+	time_t t = totime_local();
+
+	res.fromtime(t);
+	res.DateTime.MilliSeconds += ms;
+	
+	return res;
+}
+
 AString ADateTime::ToTimeStamp(uint_t format) const
 {
 	AString res;
@@ -829,7 +881,7 @@ bool ADateTime::FromTimeStamp(const AString& str, bool utc)
 
 		DateTime.MilliSeconds += ms;
 
-		if (utc && (((p = str.Pos("+")) >= 0) || ((p = str.Pos("-")) >= 0))) {
+		if (utc && (((p = str.Pos(" +")) >= 0) || ((p = str.Pos(" -")) >= 0))) {
 			AString _offset = str.Mid(p).SearchAndReplace(":", "");
 			int     offset;
 
