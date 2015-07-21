@@ -3,19 +3,41 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <rdlib-0.1/rdlib/DateTime.h>
+#include <rdlib/StdFile.h>
+#include <rdlib/DateTime.h>
 
 int main(int argc, char *argv[])
 {
-	int i;
+	AStdFile fp;
+	int errors = 0, passes = 0;
+	
+	if (fp.open("tests.txt")) {
+		const AString format = "%d %Y-%M-%D %h:%m:%s.%S";
+		ADateTime a("min"), b("min");
+		AString line;
 
-	for (i = 1; i < argc; i++) {
-		ADateTime dt;
-		uint_t    specified = 0;
+		while (line.ReadLn(fp) >= 0) {
+			int p;
 
-		dt.StrToDate(argv[i], false, &specified);
-		printf("'%s' => '%s' (%u)\n", argv[i], dt.DateToStr().str(), specified);
+			if ((p = line.Pos("=")) >= 0) {
+				a.StrToDate(line.Left(p),    ADateTime::Time_Existing);
+				b.StrToDate(line.Mid(p + 1), ADateTime::Time_Existing);
+
+				if (a != b) {
+					printf("%s != %s ('%s') ****\n", a.DateFormat(format).str(), b.DateFormat(format).str(), line.str());
+					errors++;
+				}
+				else {
+					printf("%s == %s ('%s')\n", a.DateFormat(format).str(), b.DateFormat(format).str(), line.str());
+					passes++;
+				}
+			}
+		}
+
+		fp.close();
 	}
 
-	return 0;
+	printf("%d passes, %d errors\n", passes, errors);
+	
+	return errors;
 }
