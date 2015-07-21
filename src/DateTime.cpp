@@ -21,6 +21,7 @@
 
 #define ISLEAP(y) ((((y) % 4) == 0) && ((((y) % 100) != 0) || (((y) % 400) == 0)))
 #define DAYSCOUNT(y) (365 * (y) + (((y) - 1) / 4) - (((y) - 1) / 100) + (((y) - 1) / 400))
+#define DAYSCOUNTSINCEDATUM(y) (DAYSCOUNT(y) - DAYSCOUNT(DATUM_YEAR))
 #define DAYSINYEAR(y) (ISLEAP(y) ? 366 : 365)
 
 const uint32_t ADateTime::DaysSince1970 = DAYSCOUNT(DATUM_YEAR) - DAYSCOUNT(1970);
@@ -88,7 +89,7 @@ const uint_t ADateTime::MonthLengths[12] = {
 	31, 31, 30, 31, 30, 31,
 };
 
-uint_t ADateTime::MonthStartDay[12] = {0};
+uint_t ADateTime::MonthStartDay[13] = {0};
 
 ADateTime::ADateTime()
 {
@@ -120,11 +121,11 @@ ADateTime::ADateTime(const ADateTime& object)
 	DateTime = object.DateTime;
 }
 
-ADateTime::ADateTime(const AString& str)
+ADateTime::ADateTime(const AString& str, uint_t relative, uint_t *specified)
 {
 	InitData();
 
-	StrToDate(str);
+	StrToDate(str, relative, specified);
 }
 
 void ADateTime::InitData()
@@ -132,14 +133,30 @@ void ADateTime::InitData()
 	if (!bDataInit) {
 		bDataInit = true;
 
-		int i, n = 0;
-		for (i = 0; i < 12; i++) {
+		uint i, n = 0;
+		for (i = 0; i < NUMBEROF(MonthLengths); i++) {
 			MonthStartDay[i] = n;
 			n += MonthLengths[i];
 		}
+		MonthStartDay[i] = n;
 
 		assert(n == 365);
 	}
+}
+
+uint_t ADateTime::GetMonthLength(uint_t m, uint_t y) const
+{
+	return MonthLengths[m] + (ISLEAP(y) && (m == 1));
+}
+
+uint_t ADateTime::GetMonthStart(uint_t m, uint_t y) const
+{
+	return MonthStartDay[m] + (ISLEAP(y) && (m >= 2));
+}
+
+uint_t ADateTime::GetMonthEnd(uint_t m, uint_t y) const
+{
+	return MonthStartDay[m + 1] + (ISLEAP(y) && (m >= 1)) - 1;
 }
 
 ADateTime& ADateTime::TimeStamp(bool utc)
@@ -159,8 +176,8 @@ void ADateTime::CurrentTime(DATETIME& dt, bool utc) const
 	else	 ::GetLocalTime(&st);
 
 	memset(&dmy, 0, sizeof(dmy));
-	dmy.Day   = (uint8_t)st.wDay;
-	dmy.Month = (uint8_t)st.wMonth;
+	dmy.Day   = SUBZ((uint_t)st.wDay, 1);
+	dmy.Month = SUBZ((uint_t)st.wMonth, 1);
 	dmy.Year  = st.wYear;
 
 	DMYToDateTime(dmy, dt);
@@ -196,14 +213,14 @@ ADateTime& ADateTime::operator = (uint64_t ms)
 
 ADateTime& ADateTime::operator += (const ADateTime& object)
 {
-	operator = ((uint64_t)*this + (uint64_t)object);
+	operator = (operator uint64_t() + (uint64_t)object);
 
 	return *this;
 }
 
 ADateTime& ADateTime::operator -= (const ADateTime& object)
 {
-	uint64_t val1 = (uint64_t)*this;
+	uint64_t val1 = operator uint64_t();
 	uint64_t val2 = (uint64_t)object;
 
 	if (val1 >= val2) val1 -= val2;
@@ -214,14 +231,14 @@ ADateTime& ADateTime::operator -= (const ADateTime& object)
 	return *this;
 }
 
-ADateTime& ADateTime::Set(uint8_t day, uint8_t month, uint16_t year, uint8_t hour, uint8_t minute, uint8_t second)
+ADateTime& ADateTime::Set(uint_t day, uint_t month, uint_t year, uint_t hour, uint_t minute, uint_t second)
 {
 	DAYMONTHYEAR dmy;
 
 	memset(&dmy, 0, sizeof(dmy));
 
-	dmy.Day   = day;
-	dmy.Month = month;
+	dmy.Day   = SUBZ(day, 1);
+	dmy.Month = SUBZ(month, 1);
 	dmy.Year  = year;
 
 	DMYToDateTime(dmy, DateTime);
@@ -239,113 +256,103 @@ ADateTime& ADateTime::Set(uint64_t ms)
 	return *this;
 }
 
-uint8_t ADateTime::GetWeekDay() const
+uint_t ADateTime::GetWeekDay() const
 {
 	DAYMONTHYEAR dmy;
 	DateTimeToDMY(DateTime, dmy);
 	return dmy.WeekDay;
 }
 
-uint8_t ADateTime::GetDay() const
+uint_t ADateTime::GetDay() const
 {
 	DAYMONTHYEAR dmy;
 	DateTimeToDMY(DateTime, dmy);
-	return dmy.Day;
+	return dmy.Day + 1;
 }
 
-uint8_t ADateTime::GetMonth() const
+uint_t ADateTime::GetMonth() const
 {
 	DAYMONTHYEAR dmy;
 	DateTimeToDMY(DateTime, dmy);
-	return dmy.Month;
+	return dmy.Month + 1;
 }
 
-uint16_t ADateTime::GetYear() const
+uint_t ADateTime::GetYear() const
 {
 	DAYMONTHYEAR dmy;
 	DateTimeToDMY(DateTime, dmy);
 	return dmy.Year;
 }
 
-uint8_t ADateTime::GetHours() const
+uint_t ADateTime::GetHours() const
 {
-	return (uint8_t)(DateTime.MilliSeconds / (1000 * 60 * 60));
+	return (uint_t)(DateTime.MilliSeconds / (1000 * 60 * 60));
 }
 
-uint8_t ADateTime::GetMinutes() const
+uint_t ADateTime::GetMinutes() const
 {
-	return (uint8_t)((DateTime.MilliSeconds / (1000 * 60)) % 60);
+	return (uint_t)((DateTime.MilliSeconds / (1000 * 60)) % 60);
 }
 
-uint8_t ADateTime::GetSeconds() const
+uint_t ADateTime::GetSeconds() const
 {
-	return (uint8_t)((DateTime.MilliSeconds / 1000) % 60);
+	return (uint_t)((DateTime.MilliSeconds / 1000) % 60);
 }
 
-uint16_t ADateTime::GetMilliSeconds() const
+uint_t ADateTime::GetMilliSeconds() const
 {
-	return (uint16_t)(DateTime.MilliSeconds % 1000);
+	return (uint_t)(DateTime.MilliSeconds % 1000);
 }
 
 void ADateTime::DateTimeToDMY(const DATETIME& dt, DAYMONTHYEAR& dmy) const
 {
 	uint32_t days = dt.Days + (dt.MilliSeconds / MS_PER_DAY);
-	uint32_t n, m;
+	uint_t inc;
 
 	memset(&dmy, 0, sizeof(dmy));
 
-	dmy.WeekDay = (uint8_t)((days + DATUM_DAY) % 7);
+	dmy.WeekDay = (days + DATUM_DAY) % 7;
 
-	n = DATUM_YEAR;
-	while (true) {
-		m = ISLEAP(n) ? 366 : 365;
-
-		if (days >= m) {
-			days -= m;
-			n++;
-		}
-		else break;
+	dmy.Year = DATUM_YEAR;
+	inc = 128;
+	while (inc && (days > DAYSCOUNTSINCEDATUM(dmy.Year))) {
+		if (days >= DAYSCOUNTSINCEDATUM(dmy.Year + inc)) dmy.Year += inc;
+		else inc >>= 1;
 	}
 	
+	days -= DAYSCOUNTSINCEDATUM(dmy.Year);
+
 	assert(days <= 366);
 
-	dmy.Year = (uint16_t)n;
-	n = 0;
-	while (true) {
-		assert(n < 12);
-
-		m = ((n == 1) && ISLEAP(dmy.Year)) ? 29 : MonthLengths[n];
-
-		if (days >= m) {
-			days -= m;
-			n++;
-		}
-		else break;
+	dmy.Month = NUMBEROF(MonthLengths) >> 1;
+	inc = dmy.Month >> 1;
+	while ((days < GetMonthStart(dmy)) || (days > GetMonthEnd(dmy))) {
+		if (days < GetMonthStart(dmy)) dmy.Month = SUBZ(dmy.Month, inc);
+		else						   dmy.Month = MIN(dmy.Month + inc, NUMBEROF(MonthLengths) - 1);
+		inc = (inc + 1) >> 1;
 	}
+	days -= GetMonthStart(dmy);
 
-	assert(n < 12);
+	assert(dmy.Month < NUMBEROF(MonthLengths));
 	assert(days < 31);
 
-	dmy.Month = (uint8_t)(1 + n);
-	dmy.Day   = (uint8_t)(1 + days);
+	dmy.Day = days;
 }
 
 void ADateTime::DMYToDateTime(const DAYMONTHYEAR& dmy, DATETIME& dt) const
 {
 	DAYMONTHYEAR dmy1 = dmy;
 
-	dmy1.Year  = MAX(dmy1.Year, DATUM_YEAR);
-	dmy1.Month = LIMIT(dmy1.Month, 1, 12);
-	dmy1.Day   = LIMIT(dmy1.Day, 1, 31);
-
 	memset(&dt, 0, sizeof(dt));
 
-	dt.Days  = DAYSCOUNT(dmy1.Year) - DAYSCOUNT(DATUM_YEAR);
-	dt.Days += MonthStartDay[dmy1.Month - 1];
-	dt.Days += ((dmy1.Month > 2) && ISLEAP(dmy1.Year));
-	dt.Days += dmy1.Day - 1;
-	
-	dt.MilliSeconds = 0;
+	dmy1.Year  += dmy1.Month / NUMBEROF(MonthLengths);
+	dmy1.Month %= NUMBEROF(MonthLengths);
+
+	dmy1.Year = MAX(dmy1.Year, DATUM_YEAR);
+	dt.Days   = DAYSCOUNTSINCEDATUM(dmy1.Year);
+
+	dt.Days  += GetMonthStart(dmy1);
+	dt.Days  += dmy1.Day;
 }
 
 AString ADateTime::DateToStr() const
@@ -364,7 +371,7 @@ AString ADateTime::DateToStr() const
 	secs = t - mins * 60;
 
 	String.Format("%s %02u-%s-%4u %02u:%02u:%02u",
-				  ShortDayNames[dmy.WeekDay], dmy.Day, ShortMonthNames[dmy.Month - 1], dmy.Year,
+				  ShortDayNames[dmy.WeekDay], dmy.Day + 1, ShortMonthNames[dmy.Month], dmy.Year,
 				  hrs, mins, secs);
 
 	return String;
@@ -464,310 +471,635 @@ int ADateTime::FindMonth(const char *str)
 	return -1;
 }
 
-ADateTime& ADateTime::StrToDate(const AString& String, bool current, uint_t *specified)
+void ADateTime::AddDateTime(DATETIME& dt, uint32_t days, uint32_t ms) const
 {
-	DAYMONTHYEAR dmy;
-	DATETIME     dt;
-	AString String1 = String.SearchAndReplace(",", " ");
-	uint_t  i, j, n = String1.CountWords();
+	days += ms / MS_PER_DAY;
+	ms   %= MS_PER_DAY;
 
-	if (current) {
-		CurrentTime(DateTime);
-		DateTime.MilliSeconds = 0;
+	if (days) dt.Days   += days;
+	if (ms) {
+		dt.MilliSeconds += ms;
+		dt.Days         += dt.MilliSeconds / MS_PER_DAY;
+		dt.MilliSeconds %= MS_PER_DAY;
+	}
+}
+
+void ADateTime::SubDateTime(DATETIME& dt, uint32_t days, uint32_t ms) const
+{
+	days += ms / MS_PER_DAY;
+	ms   %= MS_PER_DAY;
+
+	if (days) dt.Days = SUBZ(dt.Days, days);
+	if (ms) {
+		if (dt.MilliSeconds < ms) {
+			dt.MilliSeconds += MS_PER_DAY;
+			dt.Days          = SUBZ(dt.Days, 1);
+		}
+		dt.MilliSeconds = SUBZ(dt.MilliSeconds, ms);
+	}
+}
+
+void ADateTime::AddDMY(DAYMONTHYEAR& dmy, uint_t years, uint_t months, uint_t days) const
+{
+	if (days) {
+		DATETIME dt;
+
+		DMYToDateTime(dmy, dt);
+		AddDateTime(dt, days, 0);
+		DateTimeToDMY(dt, dmy);
 	}
 
-	if (specified) *specified = 0;
+	dmy.Month += months % NUMBEROF(MonthLengths);
+	dmy.Year  += (months / NUMBEROF(MonthLengths)) + (dmy.Month / NUMBEROF(MonthLengths)) + years;
+	dmy.Month %= NUMBEROF(MonthLengths);
+}
 
-	AString word = String1.Word(0);
-	for (i = 0; i < n;) {
-		uint_t splitat = 0;
+void ADateTime::SubDMY(DAYMONTHYEAR& dmy, uint_t years, uint_t months, uint_t days) const
+{
+	if (days) {
+		DATETIME dt;
 
-		//debug("word %u='%s'\n", i, word.str());
+		DMYToDateTime(dmy, dt);
+		SubDateTime(dt, days, 0);
+		DateTimeToDMY(dt, dmy);
+	}
 
-		for (j = 0; j < NUMBEROF(DayNames); j++) {
-			if ((CompareNoCase(word, DayNames[j]) == 0) || (CompareNoCase(word, ShortDayNames[j]) == 0)) {
-				break;
-			}
+	if (months) {
+		dmy.Year  = SUBZ(dmy.Year, months / NUMBEROF(MonthLengths));
+		months   %= NUMBEROF(MonthLengths);
+		if (dmy.Month < months) {
+			dmy.Month += NUMBEROF(MonthLengths);
+			dmy.Year   = SUBZ(dmy.Year, 1);
+		}
+		dmy.Month -= months;
+	}
+	dmy.Year = SUBZ(dmy.Year, years);
+	dmy.Year = MAX(dmy.Year, DATUM_YEAR);
+}
+
+void ADateTime::ModifyYear(DATETIME& dt, double n, bool pos, bool neg) const
+{
+	DAYMONTHYEAR dmy;
+	uint32_t ms = dt.MilliSeconds;
+
+	if ((n < 0.0) && (pos || neg)) {
+		n   = -n;
+		pos = !pos;
+		neg = !neg;
+	}
+	else n = MAX(n, 0.0);
+
+	uint_t _n = (uint_t)n;
+	
+	DateTimeToDMY(dt, dmy);
+
+	if		(pos) AddDMY(dmy, _n, 0, 0);
+	else if (neg) SubDMY(dmy, _n, 0, 0);
+	else          dmy.Year = MAX(_n, DATUM_YEAR);
+
+	DMYToDateTime(dmy, dt);
+	dt.MilliSeconds = ms;
+
+	double _f = n - floor(n);
+	if (_f != 0.0) ModifyDays(dt, _f * (double)DAYSINYEAR(dmy.Year), pos || !neg, neg);
+}
+
+void ADateTime::ModifyMonth(DATETIME& dt, double n, bool pos, bool neg) const
+{
+	DAYMONTHYEAR dmy;
+	uint32_t ms = dt.MilliSeconds;
+
+	if ((n < 0.0) && (pos || neg)) {
+		n   = -n;
+		pos = !pos;
+		neg = !neg;
+	}
+	else n = MAX(n, 0.0);
+
+	uint_t _n = (uint_t)n;
+	
+	DateTimeToDMY(dt, dmy);
+	if		(pos) AddDMY(dmy, 0, _n, 0);
+	else if (neg) SubDMY(dmy, 0, _n, 0);
+	else {
+		_n = SUBZ(_n, 1);
+		dmy.Month  = _n % NUMBEROF(MonthLengths);
+		dmy.Year  += _n / NUMBEROF(MonthLengths);
+	}
+
+	DMYToDateTime(dmy, dt);
+	dt.MilliSeconds = ms;
+
+	double _f = n - floor(n);
+	if (_f != 0.0) ModifyDays(dt, _f * (double)GetMonthLength(dmy), pos || !neg, neg);
+}
+
+void ADateTime::ModifyDay(DATETIME& dt, double n, bool pos, bool neg) const
+{
+	if (!pos && !neg) {
+		DAYMONTHYEAR dmy;
+	
+		DateTimeToDMY(dt, dmy);
+
+		n  -= (double)(dmy.Day + 1);
+		pos = true;
+	}
+	
+	ModifyDays(dt, n, pos, neg);
+}
+
+void ADateTime::ModifyDays(DATETIME& dt, double n, bool pos, bool neg) const
+{
+	if ((n < 0.0) && (pos || neg)) {
+		n   = -n;
+		pos = !pos;
+		neg = !neg;
+	}
+	else n = MAX(n, 0.0);
+
+	uint32_t days = (uint32_t)n;
+	uint32_t ms   = (uint32_t)((n - (double)days) * 24.0 * 3600.0 * 1000.0);
+
+	if		(pos) AddDateTime(dt, days, ms);
+	else if (neg) SubDateTime(dt, days, ms);
+	else {
+		dt.Days          = days;
+		dt.MilliSeconds  = ms;
+	}
+}
+
+void ADateTime::ModifyMS(DATETIME& dt, sint64_t n, bool pos, bool neg) const
+{
+	pos |= !neg;
+
+	if (n < 0) {
+		n   = -n;
+		pos = !pos;
+		neg = !neg;
+	}
+
+	uint32_t days = n / MS_PER_DAY;
+	uint32_t ms   = n % MS_PER_DAY;
+	
+	if (pos) AddDateTime(dt, days, ms);
+	else     SubDateTime(dt, days, ms);
+}
+
+uint_t ADateTime::ParseTerms(const AString& str, ADataList& list) const
+{
+	uint_t p = 0;
+
+	list.SetDestructor(&__DeleteTerm);
+
+	while (IsWhiteSpace(str[p]) || (str[p] == ',')) p++;
+
+	while (str[p]) {
+		TERM *term;
+		uint_t p0 = p;
+
+		if ((term = new TERM) != NULL) {
+			uint_t p0 = term->val.EvalNumber(str, p, false);
+
+			term->numstr = str.Mid(p, p0 - p);
+			
+			p = p0;
+			if ((str[p] == '/') || (str[p] == '-') || (str[p] == '+') || (str[p] == ':')) p++;
+			else if (IsWhiteSpace(str[p]) || (str[p] == ',')) p++;
+			else while (IsAlphaChar(str[p])) p++;
+			
+			term->str.Create(str.str() + p0, p - p0);
+
+			list.Add((uptr_t)term);
 		}
 		
-		if (j < 7) {
-			//CurrentTime(dt);
-			DateTimeToDMY(DateTime, dmy);
+		if (p == p0) break;
+	}
 
-			DateTime.Days += (j + 7 - dmy.WeekDay) % 7;
-			if (specified) *specified |= Specified_Day;
-		}
-		else if (CompareNoCase(word.Left(3), "now") == 0) {
-			CurrentTime(DateTime);
-			if (specified) *specified |= Specified_Time | Specified_Date;
-			splitat = 3;
-		}
-		else if (CompareNoCase(word.Left(3), "min") == 0) {
-			*this = MinDateTime;
-			if (specified) *specified |= Specified_Time | Specified_Date;
-			splitat = 3;
-		}
-		else if (CompareNoCase(word.Left(3), "max") == 0) {
-			*this = MaxDateTime;
-			if (specified) *specified |= Specified_Time | Specified_Date;
-			splitat = 3;
-		}
-		else if (CompareNoCase(word.Left(5), "today") == 0) {
-			CurrentTime(dt);
-			DateTime.Days = dt.Days;
-			if (specified) *specified |= Specified_Date;
-			splitat = 5;
-		}
-		else if (CompareNoCase(word.Left(9), "yesterday") == 0) {
-			CurrentTime(dt);
-			DateTime.Days = dt.Days - 1;
-			if (specified) *specified |= Specified_Date;
-			splitat = 9;
-		}
-		else if (CompareNoCase(word.Left(8), "tomorrow") == 0) {
-			CurrentTime(dt);
-			DateTime.Days = dt.Days + 1;
-			if (specified) *specified |= Specified_Date;
-			splitat = 8;
-		}
-		else if (CompareNoCase(word.Left(9), "lastmonth") == 0) {
-			DateTimeToDMY(DateTime, dmy);
+	return list.Count();
+}
 
-			if ((--dmy.Month) < 1) {
-				dmy.Month += NUMBEROF(MonthNames);
-				dmy.Year--;
+ADateTime& ADateTime::StrToDate(const AString& String, uint_t relative, uint_t *specified)
+{
+	ADataList terms;
+	uint_t    _specified = 0;
+
+	ParseTerms(String, terms);
+
+	switch (relative) {
+		default:
+		case Time_Absolute:
+			memset(&DateTime, 0, sizeof(DateTime));
+			break;
+
+		case Time_Existing:
+			break;
+
+		case Time_Relative_Today:
+		case Time_Relative_Today_UTC:
+			CurrentTime(DateTime, (relative == Time_Relative_Today_UTC));
+			DateTime.MilliSeconds = 0;
+			break;
+
+		case Time_Relative_UTC:
+		case Time_Relative_Local:
+			CurrentTime(DateTime, (relative == Time_Relative_UTC));
+			break;
+	}
+
+	uint_t i, n = terms.Count();
+	bool   pos = false, neg = false;
+	const TERM **termlist = (const TERM **)terms.List();
+	for (i = 0; i < terms.Count(); i++) {
+		const AValue&  val 	  = termlist[i]->val;
+		const AString& str 	  = termlist[i]->str;
+		const AString& numstr = termlist[i]->numstr;
+		int ind;
+
+#if 0
+		debug("%u/%u: '%s' / '%s' ('%s', %s, pos=%u, neg=%u)\n",
+			  i, n,
+			  val.IsValid() ? val.GenerateStringNice().str() : "<invalid>",
+			  str.str(),
+			  termlist[i]->numstr.str(),
+			  DateToStr().str(),
+			  (uint_t)pos, (uint_t)neg);
+#endif
+		
+		if (!val.IsValid()) {
+			if		(str == "+") {pos = true;  neg = false;}
+			else if	(str == "-") {pos = false; neg = true;}
+			else if	((str == "now") || (str == "utc")) {
+				DATETIME dt;
+
+				CurrentTime(dt, (str == "utc"));
+
+				if		(pos) AddDateTime(DateTime, dt.Days, dt.MilliSeconds);
+				else if (neg) SubDateTime(DateTime, dt.Days, dt.MilliSeconds);
+				else		  DateTime = dt;
+
+				_specified |= Specified_Date | Specified_Time;
 			}
+			else if	(str == "min") {
+				const DATETIME& dt = ADateTime::MinDateTime.DateTime;
 
-			DateTime.Days -= MonthLengths[dmy.Month - 1] + (((dmy.Month == 2) && ISLEAP(dmy.Year)) ? 1 : 0);
-			if (specified) *specified |= Specified_Date;
-			splitat = 9;
-		}
-		else if (CompareNoCase(word.Left(9), "nextmonth") == 0) {
-			DateTimeToDMY(DateTime, dmy);
+				if		(pos) AddDateTime(DateTime, dt.Days, dt.MilliSeconds);
+				else if (neg) SubDateTime(DateTime, dt.Days, dt.MilliSeconds);
+				else		  DateTime = dt;
 
-			DateTime.Days += MonthLengths[dmy.Month - 1] + (((dmy.Month == 2) && ISLEAP(dmy.Year)) ? 1 : 0);
-			if (specified) *specified |= Specified_Date;
-			splitat = 9;
-		}
-		else if (CompareNoCase(word.Left(15), "firstdayofmonth") == 0) {
-			DateTimeToDMY(DateTime, dmy);
-
-			DateTime.Days -= dmy.Day - 1;
-			if (specified) *specified |= Specified_Date;
-			splitat = 15;
-		}
-		else if (CompareNoCase(word.Left(14), "lastdayofmonth") == 0) {
-			DateTimeToDMY(DateTime, dmy);
-
-			DateTime.Days += MonthLengths[dmy.Month] - dmy.Day + (((dmy.Month == 2) && ISLEAP(dmy.Year)) ? 1 : 0);
-			if (specified) *specified |= Specified_Date;
-			splitat = 14;
-		}
-		else if (CompareNoCase(word.Left(8), "lastweek") == 0) {
-			DateTimeToDMY(DateTime, dmy);
-
-			DateTime.Days -= 7;
-			if (specified) *specified |= Specified_Date;
-			splitat = 8;
-		}
-		else if (CompareNoCase(word.Left(8), "nextweek") == 0) {
-			DateTimeToDMY(DateTime, dmy);
-
-			DateTime.Days += 7;
-			if (specified) *specified |= Specified_Date;
-			splitat = 8;
-		}
-		else if (CompareNoCase(word.Left(14), "firstdayofweek") == 0) {
-			DateTimeToDMY(DateTime, dmy);
-
-			DateTime.Days -= dmy.WeekDay;
-			if (specified) *specified |= Specified_Date;
-			splitat = 14;
-		}
-		else if (CompareNoCase(word.Left(13), "lastdayofweek") == 0) {
-			DateTimeToDMY(DateTime, dmy);
-
-			DateTime.Days += 6 - dmy.WeekDay;
-			if (specified) *specified |= Specified_Date;
-			splitat = 13;
-		}
-		else if (CompareNoCase(word.Left(7), "lastday") == 0) {
-			DateTimeToDMY(DateTime, dmy);
-
-			DateTime.Days -= 1;
-			if (specified) *specified |= Specified_Date;
-			splitat = 7;
-		}
-		else if (CompareNoCase(word.Left(7), "nextday") == 0) {
-			DateTimeToDMY(DateTime, dmy);
-
-			DateTime.Days += 1;
-			if (specified) *specified |= Specified_Date;
-			splitat = 7;
-		}
-		else {
-			AString suffix, word1 = word;
-			double  hours = 0.0, minutes = 0.0, seconds = 0.0, milliseconds = 0.0;
-			bool   	neg   = (word1.FirstChar() == '-');
-			bool   	pos   = (word1.FirstChar() == '+');
-			bool    am    = ((suffix = word1.Right(2).ToLower()) == "am");
-			bool    pm    = (suffix                              == "pm");
-			bool    valid = false;
-
-			if (pos || neg) word1 = word1.Mid(1);
-			if (am  || pm)  word1 = word1.Left(word.len() - 2).Words(0);
-
-			if (sscanf(word1.str(), "%lf:%lf:%lf.%lf", &hours, &minutes, &seconds, &milliseconds) > 1) {
-				if (hours == 0.0) {am = true; pm = false;}
-				valid = true;
+				_specified |= Specified_Date | Specified_Time;
 			}
-			else {
-				uint_t p = 0, round = 0;
+			else if	(str == "max") {
+				const DATETIME& dt = ADateTime::MaxDateTime.DateTime;
 
-				hours = minutes = seconds = milliseconds = 0;
+				if		(pos) AddDateTime(DateTime, dt.Days, dt.MilliSeconds);
+				else if (neg) SubDateTime(DateTime, dt.Days, dt.MilliSeconds);
+				else		  DateTime = dt;
 
-				while (word1[p]) {
-					AValue val;
-					uint_t p1 = val.EvalNumber(word1, p);
-
-					if (p1 == p) break;
-
-					//debug("String '%s' value %0.1lf terminator '%c'\n", word1.Mid(p, p1 - p).str(), (double)val, word1[p1]);
-
-					p = p1;
-					switch (word1[p]) {
-						case 0:
-							if (!round && (am || pm)) {
-								hours = val;
-								if (hours == 0.0) {am = true; pm = false;}
-							}
-							else seconds = val;
-							valid   = true;
-							break;
-
-						case 'h':
-							hours   = val;
-							if (hours == 0.0) {am = true; pm = false;}
-							valid   = true;
-							p++;
-							break;
-
-						case 'm':
-							minutes = val;
-							valid   = true;
-							p++;
-							break;
-
-						case 's':
-							seconds = val;
-							valid   = true;
-							p++;
-							break;
-
-						default:
-							valid = false;
-							p     = word1.len();
-							break;
-					}
-					round++;
-				}
+				_specified |= Specified_Date | Specified_Time;
 			}
+			else if	((str == "today") || (str == "todayutc")) {
+				DATETIME dt;
 
-			if (valid) {
-				if (am || pm) hours = fmod(hours, 12.0);
+				CurrentTime(dt, (str == "todayutc"));
 
-				seconds += milliseconds * .001 + minutes * 60.0 + hours * 3600.0;
+				if		(pos) AddDateTime(DateTime, dt.Days, 0);
+				else if (neg) SubDateTime(DateTime, dt.Days, 0);
+				else		  DateTime.Days = dt.Days;
 
-				if (seconds < 0.0)
-				{
-					seconds = -seconds;
-					pos     = !pos;
-					neg     = !neg;
-				}
-
-				uint32_t ms = (uint32_t)(seconds * 1000.0), days = 0;
-				if (pm) ms += 12ul * 3600ul * 1000ul;
-				if (ms >= MS_PER_DAY) {
-					days += ms / MS_PER_DAY;
-					ms   %= MS_PER_DAY;
-				}
- 
-				if (neg) {
-					DateTime.Days -= days;
-					if (ms > DateTime.MilliSeconds) {
-						DateTime.Days--;
-						DateTime.MilliSeconds += MS_PER_DAY;
-					}
-					DateTime.MilliSeconds -= ms;
-				}
-				else {
-					if (!pos) DateTime.MilliSeconds = 0;
-
-					DateTime.Days         += days;
-					DateTime.MilliSeconds += ms;
-
-					if (DateTime.MilliSeconds >= MS_PER_DAY) {
-						DateTime.Days         += DateTime.MilliSeconds / MS_PER_DAY;
-						DateTime.MilliSeconds %= MS_PER_DAY;
-					}
-				}
-
-				if (specified) *specified |= Specified_Time;
+				_specified |= Specified_Date;
 			}
-			else if ((word.Pos("-") > 0) || (word.Pos("/") > 0)) {
-				AString word1;
-				AString str;
-				uint_t day, month, year;
+			else if	((str == "tomorrow") || (str == "tomorrowutc")) {
+				DATETIME dt;
 
-				word.Replace("-", " ");
-				word.Replace("/", " ");
+				CurrentTime(dt, (str == "tomorrowutc"));
+
+				dt.Days++;
+
+				if		(pos) AddDateTime(DateTime, dt.Days, 0);
+				else if (neg) SubDateTime(DateTime, dt.Days, 0);
+				else		  DateTime.Days = dt.Days;
+
+				_specified |= Specified_Date;
+			}
+			else if	((str == "yesterday") || (str == "yesterdayutc")) {
+				DATETIME dt;
+
+				CurrentTime(dt, (str == "yesterdayutc"));
+
+				dt.Days = SUBZ(dt.Days, 1);
+
+				if		(pos) AddDateTime(DateTime, dt.Days, 0);
+				else if (neg) SubDateTime(DateTime, dt.Days, 0);
+				else		  DateTime.Days = dt.Days;
+
+				_specified |= Specified_Date;
+			}
+			else if	((str == "noon") || (str == "midday")) {
+				if		(pos) AddDateTime(DateTime, 0, MS_PER_DAY / 2);
+				else if (neg) SubDateTime(DateTime, 0, MS_PER_DAY / 2);
+				else		  DateTime.MilliSeconds = MS_PER_DAY / 2;
+
+				_specified |= Specified_Time;
+			}
+			else if	(str == "midnight") {
+				if (!pos && !neg) DateTime.MilliSeconds = 0;
+
+				_specified |= Specified_Time;
+			}
+			else if	(str == "utctolocal") {
+				*this = UTCToLocal();
+				_specified |= Specified_Time;
+			}
+			else if	(str == "localtoutc") {
+				*this = LocalToUTC();
+				_specified |= Specified_Time;
+			}
+			else if ((ind = FindDay(str)) >= 0) {
+				DAYMONTHYEAR dmy;
 
 				DateTimeToDMY(DateTime, dmy);
 
-				day   = (uint_t)word.Word(0);
-				month = dmy.Month;
-				year  = dmy.Year;
+				DateTime.Days += (ind + 7 - dmy.WeekDay) % 7;
 
-				uint_t nwords = word.CountWords();
-				if (nwords > 2) {
-					year = (uint_t)word.Word(2);
-					if      (RANGE(year, 80, 99)) year += 1900;
-					else if (year <= 79)		  year += 2000;
-				}
-
-				if (nwords > 1) {
-					word1 = word.Word(1);
-				
-					for (j = 0; j < NUMBEROF(MonthNames); j++) {
-						if ((CompareNoCase(word1, MonthNames[j]) == 0) || (CompareNoCase(word1, ShortMonthNames[j]) == 0)) {
-							month = j + 1;
-							break;
-						}
-					}
-				
-					if (j == NUMBEROF(ShortMonthNames)) month = (uint_t)word1;
-				}
-
-				if (RANGE(day, 1, 31) && RANGE(month, 1, 12) && (year >= 2000)) {
-					dmy.Day   = day;
-					dmy.Month = month;
-					dmy.Year  = year;
-					DMYToDateTime(dmy, dt);
-					DateTime.Days = dt.Days;
-					if (specified) *specified |= Specified_Date;
-				}
-
-				word.Delete();
+				_specified |= Specified_Day;
 			}
-			else debug("Failed to evaluate '%s'!\n", word.str());
-		}
+			else if ((ind = FindMonth(str)) >= 0) {
+				DAYMONTHYEAR dmy;
 
-		if (splitat) {
-			word = word.Mid(splitat);
-		}
+				uint32_t ms = DateTime.MilliSeconds;
+				DateTimeToDMY(DateTime, dmy);
 
-		if (!splitat || word.Empty()) word = String1.Word(++i);
+				dmy.Month = ind;
+
+				DMYToDateTime(dmy, DateTime);
+				DateTime.MilliSeconds = ms;
+
+				_specified |= Specified_Date;
+			}
+			else if (((str == "next") || (str == "last")) &&
+					 ((i + 2) < n) &&
+					 !termlist[i + 1]->val.IsValid() &&
+					 (termlist[i + 1]->str.Words(0).Empty() || (termlist[i + 1]->str == ",")) &&
+					 !termlist[i + 2]->val.IsValid()) {
+				const AString& str2 = termlist[i + 2]->str;
+				
+				i += 2;
+
+				if (str2 == "week") {
+					if (str == "next") DateTime.Days += 7;
+					else			   DateTime.Days  = SUBZ(DateTime.Days, 7);
+
+					_specified |= Specified_Date;
+				}
+				else if (str2 == "month") {
+					ModifyMonth(DateTime, 1.0, (str == "next"), (str == "last"));
+
+					_specified |= Specified_Date;
+				}
+				else if (str2 == "year") {
+					ModifyYear(DateTime, 1.0, (str == "next"), (str == "last"));
+
+					_specified |= Specified_Date;
+				}
+				else if ((ind = FindDay(str2)) >= 0) {
+					DAYMONTHYEAR dmy;
+
+					if (str == "next") DateTime.Days += 7;
+					else			   DateTime.Days  = SUBZ(DateTime.Days, 7);
+
+					DateTimeToDMY(DateTime, dmy);
+
+					DateTime.Days += (ind + 7 - dmy.WeekDay) % 7;
+
+					_specified |= Specified_Day;
+				}
+				else if ((ind = FindMonth(str2)) >= 0) {
+					DAYMONTHYEAR dmy;
+
+					uint32_t ms = DateTime.MilliSeconds;
+					DateTimeToDMY(DateTime, dmy);
+
+					if (str == "next") dmy.Year++;
+					else			   dmy.Year = SUBZ(dmy.Year, 1);
+					dmy.Year   = MAX(dmy.Year, DATUM_YEAR);
+
+					dmy.Month += (ind + NUMBEROF(MonthLengths) - dmy.Month) % NUMBEROF(MonthLengths);
+
+					DMYToDateTime(dmy, DateTime);
+					DateTime.MilliSeconds = ms;
+
+					_specified |= Specified_Date;
+				}
+				else debug("Unrecognized next/last string '%s' in date\n", str2.str());
+			}
+			else if (str.Words(0).Empty() || (str == ",")) pos = neg = false;
+			else debug("Unrecognized string '%s' in date\n", str.str());
+		}
+		else if ((str == "y") || (str == "Y")) {
+			ModifyYear(DateTime, (double)val, pos, neg);
+
+			_specified |= Specified_Date;
+		}
+		else if (str == "M") {
+			ModifyMonth(DateTime, (double)val, pos, neg);
+
+			_specified |= Specified_Date;
+		}
+		else if ((str == "d") || (str == "D")) {
+			ModifyDay(DateTime, (double)val, pos, neg);
+
+			_specified |= Specified_Date;
+		}
+		else if (str == "w") {
+			ModifyDays(DateTime, (double)val * 7.0, pos, neg);
+
+			_specified |= Specified_Date;
+		}
+		else if (str == "h") {
+			if (!pos && !neg) DateTime.MilliSeconds = 0;
+			ModifyMS(DateTime, (sint64_t)((double)val * 3600.0 * 1000.0), pos, neg);
+
+			_specified |= Specified_Time;
+		}
+		else if (str == "m") {
+			if (!pos && !neg) DateTime.MilliSeconds -= DateTime.MilliSeconds % (3600ul * 1000ul);
+			ModifyMS(DateTime, (sint64_t)((double)val * 60.0 * 1000.0), pos, neg);
+
+			_specified |= Specified_Time;
+		}
+		else if (str == "s") {
+			if (!pos && !neg) DateTime.MilliSeconds -= DateTime.MilliSeconds % (60ul * 1000ul);
+			ModifyMS(DateTime, (sint64_t)((double)val * 1000.0), pos, neg);
+
+			_specified |= Specified_Time;
+		}
+		else if (str == "S") {
+			if (!pos && !neg) DateTime.MilliSeconds -= DateTime.MilliSeconds % 1000ul;
+			ModifyMS(DateTime, (sint64_t)val, pos, neg);
+
+			_specified |= Specified_Time;
+		}
+		else if (str == "am") {
+			if (!pos && !neg) DateTime.MilliSeconds = 0;
+			ModifyMS(DateTime, (sint64_t)(fmod((double)val, 12.0) * 3600.0 * 1000.0), pos, neg);
+
+			_specified |= Specified_Time;
+		}
+		else if (str == "pm") {
+			if (!pos && !neg) DateTime.MilliSeconds = 0;
+			ModifyMS(DateTime, (sint64_t)((12.0 + fmod((double)val, 12.0)) * 3600.0 * 1000.0), pos, neg);
+
+			_specified |= Specified_Time;
+		}
+		else if (str.Words(0).Empty() || (str == ",")) {
+			DAYMONTHYEAR dmy;
+			uint_t h, m;
+			double s;
+			
+			if ((numstr.len() >= 14) &&
+				(sscanf(numstr.str(), "%4u%2u%2u%2u%2u%lf",
+						&dmy.Year, &dmy.Month, &dmy.Day,
+						&h, &m, &s) == 6)) {
+				DATETIME dt;
+
+				dmy.Month = SUBZ(dmy.Month, 1);
+				dmy.Day   = SUBZ(dmy.Day, 1);
+				
+				DMYToDateTime(dmy, dt);
+
+				dt.MilliSeconds = ((uint32_t)h * 60 + (uint32_t)m) * 60000 + (uint32_t)(s * 1000.0);
+
+				if		(pos) AddDateTime(DateTime, dt.Days, dt.MilliSeconds);
+				else if (neg) SubDateTime(DateTime, dt.Days, dt.MilliSeconds);
+				else		  DateTime = dt;
+
+				_specified |= Specified_Date | Specified_Time;
+			}
+			else {
+				if (!pos && !neg) DateTime.MilliSeconds = 0;
+				ModifyMS(DateTime, (sint64_t)((double)val * 3600.0 * 1000.0), pos, neg);
+
+				_specified |= Specified_Time;
+			}
+			
+			pos = neg = false;
+		}
+		else if ((str == ":") && ((i + 1) < n) && termlist[i + 1]->val.IsValid()) {
+			double vals[6];
+			uint_t j;
+
+			memset(vals, 0, sizeof(vals));
+
+			for (j = 1; (((i + j + 1) < n) &&
+						 (j < (NUMBEROF(vals) - 1)) &&
+						 termlist[i + j]->val.IsValid() &&
+						 (termlist[i + j]->str == ":") &&
+						 termlist[i + j + 1]->val.IsValid()); j++) ;
+
+			uint_t nterms = j + 1;
+			for (j = 0; j < nterms; j++) {
+				vals[NUMBEROF(vals) - nterms - (nterms <= 2) + j] = (double)termlist[i + j]->val;
+			}
+
+			i += nterms - 1;
+
+			if (nterms >= 6) ModifyYear(DateTime,  vals[0], pos, neg);
+			if (nterms >= 5) ModifyMonth(DateTime, vals[1], pos, neg);
+			if (nterms >= 4) ModifyDay(DateTime,   vals[2], pos, neg);
+
+			if (nterms >= 4) {
+				_specified |= Specified_Date;
+			}
+
+			if		(termlist[i]->str == "am") vals[3] = fmod(vals[3], 12.0);
+			else if (termlist[i]->str == "pm") vals[3] = 12.0 + fmod(vals[3], 12.0);
+
+			uint32_t ms = (uint32_t)(vals[3] * 3600.0 * 1000.0 + vals[4] * 60.0 * 1000.0 + vals[5] * 1000.0);
+			if (ms) {
+				if		(pos) AddDateTime(DateTime, 0, ms);
+				else if (neg) SubDateTime(DateTime, 0, ms);
+				else {
+					DateTime.MilliSeconds  = ms;
+					DateTime.Days         += DateTime.MilliSeconds / MS_PER_DAY;
+					DateTime.MilliSeconds %= MS_PER_DAY;
+				}
+				
+				_specified |= Specified_Time;
+			}
+		}
+		else if (((str == "-") || (str == "/")) && ((i + 1) < n)) {
+			const AValue&  val2 = termlist[++i]->val;
+			const AString& str2 = termlist[i]->str;
+			uint_t inc = 0;
+
+			if ((uint_t)val >= DATUM_YEAR) {
+				ModifyYear(DateTime, (double)val, false, false);
+
+				_specified |= Specified_Date;
+			}
+			else if (val2.IsValid() && (str2 == str) && ((i + 1) < n) && termlist[i + 1]->val.IsValid()) {
+				ModifyYear(DateTime, (double)termlist[i + 1]->val, false, false);
+				inc = 1;
+
+				_specified |= Specified_Date;
+			}
+			else if (!val2.IsValid() && ((i + 2) < n) &&
+					 !termlist[i + 1]->val.IsValid() && (termlist[i + 1]->str == str) &&
+					 termlist[i + 2]->val.IsValid()) {
+				ModifyYear(DateTime, (double)termlist[i + 2]->val, false, false);
+				inc = 2;
+
+				_specified |= Specified_Date;
+			}
+
+			if (val2.IsValid()) {
+				ModifyMonth(DateTime, (double)val2, false, false);
+
+				_specified |= Specified_Date;
+			}
+			else if ((ind = FindMonth(str2)) >= 0) {
+				DAYMONTHYEAR dmy;
+
+				uint32_t ms = DateTime.MilliSeconds;
+				DateTimeToDMY(DateTime, dmy);
+
+				dmy.Month = ind;
+
+				DMYToDateTime(dmy, DateTime);
+				DateTime.MilliSeconds = ms;
+
+				_specified |= Specified_Date;
+			}
+
+			if ((uint_t)val < DATUM_YEAR) {
+				ModifyDay(DateTime, (double)val, false, false);
+
+				_specified |= Specified_Date;
+			}
+			else if (val2.IsValid() && (str2 == str) && ((i + 1) < n) && termlist[i + 1]->val.IsValid()) {
+				ModifyDay(DateTime, (double)termlist[i + 1]->val, false, false);
+				inc = 1;
+
+				_specified |= Specified_Date;
+			}
+			else if (!val2.IsValid() && ((i + 2) < n) &&
+					 !termlist[i + 1]->val.IsValid() && (termlist[i + 1]->str == str) &&
+					 termlist[i + 2]->val.IsValid()) {
+				ModifyDay(DateTime, (double)termlist[i + 2]->val, false, false);
+				inc = 2;
+
+				_specified |= Specified_Date;
+			}
+
+			i += inc;
+		}
+		else debug("Unrecognized string '%s' in date\n", str.str());
+
+		if		(termlist[i]->str == "+") {pos = true;  neg = false;}
+		else if (termlist[i]->str == "-") {pos = false; neg = true;}
 	}
+
+	if (specified) *specified = _specified;
 
 	return *this;
 }
@@ -784,21 +1116,12 @@ time_t ADateTime::totime() const
 	return (time_t)(days * SECONDS_PER_DAY + sec);
 }
 
-time_t ADateTime::totime_local() const
-{
-	time_t t = totime();
-	struct tm *tm = gmtime(&t);
-	time_t t1 = mktime(tm);
-	if (tm->tm_isdst == 1) t1 -= 3600;
-	return t1;
-}
-
 ADateTime& ADateTime::fromtime(const struct tm *tm)
 {
 	DAYMONTHYEAR dmy;
 
-	dmy.Day   = tm->tm_mday;
-	dmy.Month = tm->tm_mon  + 1;
+	dmy.Day   = SUBZ(tm->tm_mday, 1);
+	dmy.Month = tm->tm_mon;
 	dmy.Year  = tm->tm_year + 1900;
 
 	DMYToDateTime(dmy, DateTime);
@@ -810,39 +1133,29 @@ ADateTime& ADateTime::fromtime(const struct tm *tm)
 ADateTime& ADateTime::fromtime(time_t t)
 {
 	fromtime(gmtime(&t));
-
 	return *this;
 }
 
 ADateTime& ADateTime::fromtime_local(time_t t)
 {
 	fromtime(localtime(&t));
-
 	return *this;
+}
+
+sint64_t ADateTime::GetUTCOffset() const
+{
+	time_t t = totime();
+	return (uint64_t)ADateTime().fromtime_local(t) - (uint64_t)ADateTime().fromtime(t);
 }
 
 ADateTime ADateTime::UTCToLocal() const
 {
-	ADateTime res;
-	uint32_t ms = DateTime.MilliSeconds % 1000;
-	time_t t = totime();
-
-	res.fromtime_local(t);
-	res.DateTime.MilliSeconds += ms;
-	
-	return res;
+	return operator uint64_t() + GetUTCOffset();
 }
 
 ADateTime ADateTime::LocalToUTC() const
 {
-	ADateTime res;
-	uint32_t ms = DateTime.MilliSeconds % 1000;
-	time_t t = totime_local();
-
-	res.fromtime(t);
-	res.DateTime.MilliSeconds += ms;
-	
-	return res;
+	return operator uint64_t() - GetUTCOffset();
 }
 
 AString ADateTime::ToTimeStamp(uint_t format) const
@@ -870,7 +1183,7 @@ AString ADateTime::ToTimeStamp(uint_t format) const
 bool ADateTime::FromTimeStamp(const AString& str, bool utc)
 {
 	uint_t year, month, day, hour, minutes, seconds, ms = 0;
-	bool success = false;
+	bool   success = false;
 
 	if ((sscanf(str.Word(0).str(), 	   "%4u-%2u-%2uT%2u:%2u:%2u.%3u", &year, &month, &day, &hour, &minutes, &seconds, &ms) >= 6) ||
 		(sscanf(str.Words(0, 2).str(), "%4u-%2u-%2u %2u:%2u:%2u.%3u", &year, &month, &day, &hour, &minutes, &seconds, &ms) >= 6) ||
@@ -882,7 +1195,7 @@ bool ADateTime::FromTimeStamp(const AString& str, bool utc)
 		DateTime.MilliSeconds += ms;
 
 		if (utc && (((p = str.Pos(" +")) >= 0) || ((p = str.Pos(" -")) >= 0))) {
-			AString _offset = str.Mid(p).SearchAndReplace(":", "");
+			AString _offset = str.Mid(p + 1).SearchAndReplace(":", "");
 			int     offset;
 
 			if (sscanf(_offset.str(), "%d", &offset) == 1) {
