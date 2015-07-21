@@ -12,29 +12,43 @@ static const struct {
 	uint_t     Type;
 } TypeDefs[] = {
 	{"byte",   		  AValue::VALUE_UNSIGNED_INT8},
-	{"word",   		  AValue::VALUE_UNSIGNED_SHORT},
-	{"short",  		  AValue::VALUE_UNSIGNED_SHORT},
+	{"int8",   		  AValue::VALUE_UNSIGNED_INT8},
+	{"word",   		  AValue::VALUE_UNSIGNED_INT16},
+	{"short",  		  AValue::VALUE_UNSIGNED_INT16},
+	{"int16",  		  AValue::VALUE_UNSIGNED_INT16},
 	{"int",   		  AValue::VALUE_UNSIGNED_INT},
-	{"long",  		  AValue::VALUE_UNSIGNED_LONG},
-	{"dlong",  		  AValue::VALUE_UNSIGNED_LLONG},
-	{"llong",  		  AValue::VALUE_UNSIGNED_LLONG},
+	{"long",  		  AValue::VALUE_UNSIGNED_INT32},
+	{"int32",  		  AValue::VALUE_UNSIGNED_INT32},
+	{"dlong",  		  AValue::VALUE_UNSIGNED_INT64},
+	{"int64",  		  AValue::VALUE_UNSIGNED_INT64},
 	{"signed-byte",   AValue::VALUE_SIGNED_INT8},
-	{"signed-word",   AValue::VALUE_SIGNED_SHORT},
-	{"signed-short",  AValue::VALUE_SIGNED_SHORT},
+	{"signed-int8",   AValue::VALUE_SIGNED_INT8},
+	{"signed-word",   AValue::VALUE_SIGNED_INT16},
+	{"signed-short",  AValue::VALUE_SIGNED_INT16},
+	{"signed-int16",  AValue::VALUE_SIGNED_INT16},
 	{"signed-int",    AValue::VALUE_SIGNED_INT},
-	{"signed-long",   AValue::VALUE_SIGNED_LONG},
-	{"signed-dlong",  AValue::VALUE_SIGNED_LLONG},
-	{"signed-llong",  AValue::VALUE_SIGNED_LLONG},
+	{"signed-long",   AValue::VALUE_SIGNED_INT32},
+	{"signed-int32",  AValue::VALUE_SIGNED_INT32},
+	{"signed-dlong",  AValue::VALUE_SIGNED_INT64},
+	{"signed-int64",  AValue::VALUE_SIGNED_INT64},
 	{"float",  		  AValue::VALUE_FLOAT},
 	{"double", 		  AValue::VALUE_DOUBLE},
 	{"ub",   		  AValue::VALUE_UNSIGNED_INT8},
-	{"uw",   		  AValue::VALUE_UNSIGNED_SHORT},
-	{"ul",   		  AValue::VALUE_UNSIGNED_LONG},
-	{"ud",  		  AValue::VALUE_UNSIGNED_LLONG},
+	{"u8",   		  AValue::VALUE_UNSIGNED_INT8},
+	{"uw",   		  AValue::VALUE_UNSIGNED_INT16},
+	{"u16",   		  AValue::VALUE_UNSIGNED_INT16},
+	{"ul",   		  AValue::VALUE_UNSIGNED_INT32},
+	{"u32",   		  AValue::VALUE_UNSIGNED_INT32},
+	{"ud",  		  AValue::VALUE_UNSIGNED_INT64},
+	{"u64",  		  AValue::VALUE_UNSIGNED_INT64},
 	{"sb",    		  AValue::VALUE_SIGNED_INT8},
-	{"sw",    		  AValue::VALUE_SIGNED_SHORT},
-	{"sl",    		  AValue::VALUE_SIGNED_LONG},
-	{"sd",    		  AValue::VALUE_SIGNED_LLONG},
+	{"s8",    		  AValue::VALUE_SIGNED_INT8},
+	{"sw",    		  AValue::VALUE_SIGNED_INT16},
+	{"s16",    		  AValue::VALUE_SIGNED_INT16},
+	{"sl",    		  AValue::VALUE_SIGNED_INT32},
+	{"s32",    		  AValue::VALUE_SIGNED_INT32},
+	{"sd",    		  AValue::VALUE_SIGNED_INT64},
+	{"s64",    		  AValue::VALUE_SIGNED_INT64},
 	{"f",  		  	  AValue::VALUE_FLOAT},
 	{"d", 		  	  AValue::VALUE_DOUBLE},
 };
@@ -42,15 +56,15 @@ static const struct {
 uint_t AValue::TypeSizes[VALUE_ITEMS] = {
 	0,
 	sizeof(sint8_t),
-	sizeof(sshort_t),
+	sizeof(sint16_t),
 	sizeof(sint_t),
-	sizeof(slong_t),
-	sizeof(sllong_t),
+	sizeof(sint32_t),
+	sizeof(sint64_t),
 	sizeof(uint8_t),
-	sizeof(ushort_t),
+	sizeof(uint16_t),
 	sizeof(uint_t),
-	sizeof(ulong_t),
-	sizeof(ullong_t),
+	sizeof(uint32_t),
+	sizeof(uint64_t),
 	sizeof(float),
 	sizeof(double),
 };
@@ -75,20 +89,21 @@ AValue::AValue(uint8_t val) : Type(VALUE_INVALID),
 	operator = (val);
 }
 
-AValue::AValue(sshort_t val) : Type(VALUE_INVALID),
+AValue::AValue(sint16_t val) : Type(VALUE_INVALID),
 							   bReadOnly(false)
 {
 	memset(&Value, 0, sizeof(Value));
 	operator = (val);
 }
 
-AValue::AValue(ushort_t val) : Type(VALUE_INVALID),
+AValue::AValue(uint16_t val) : Type(VALUE_INVALID),
 							   bReadOnly(false)
 {
 	memset(&Value, 0, sizeof(Value));
 	operator = (val);
 }
 
+#if !LONG_IS_64BITS
 AValue::AValue(sint_t val) : Type(VALUE_INVALID),
 							 bReadOnly(false)
 {
@@ -102,29 +117,30 @@ AValue::AValue(uint_t val) : Type(VALUE_INVALID),
 	memset(&Value, 0, sizeof(Value));
 	operator = (val);
 }
+#endif
 
-AValue::AValue(slong_t val) : Type(VALUE_INVALID),
-							  bReadOnly(false)
-{
-	memset(&Value, 0, sizeof(Value));
-	operator = (val);
-}
-
-AValue::AValue(ulong_t val) : Type(VALUE_INVALID),
-							  bReadOnly(false)
-{
-	memset(&Value, 0, sizeof(Value));
-	operator = (val);
-}
-
-AValue::AValue(sllong_t val) : Type(VALUE_INVALID),
+AValue::AValue(sint32_t val) : Type(VALUE_INVALID),
 							   bReadOnly(false)
 {
 	memset(&Value, 0, sizeof(Value));
 	operator = (val);
 }
 
-AValue::AValue(ullong_t val) : Type(VALUE_INVALID),
+AValue::AValue(uint32_t val) : Type(VALUE_INVALID),
+							   bReadOnly(false)
+{
+	memset(&Value, 0, sizeof(Value));
+	operator = (val);
+}
+
+AValue::AValue(sint64_t val) : Type(VALUE_INVALID),
+							   bReadOnly(false)
+{
+	memset(&Value, 0, sizeof(Value));
+	operator = (val);
+}
+
+AValue::AValue(uint64_t val) : Type(VALUE_INVALID),
 							   bReadOnly(false)
 {
 	memset(&Value, 0, sizeof(Value));
@@ -194,7 +210,7 @@ AValue& AValue::operator = (sint8_t val)
 {
 	Clear();
 	Type    = VALUE_SIGNED_INT8;
-	Value.i = (sllong_t)val;
+	Value.i = (sint64_t)val;
 	return *this;
 }
 
@@ -202,31 +218,32 @@ AValue& AValue::operator = (uint8_t val)
 {
 	Clear();
 	Type    = VALUE_UNSIGNED_INT8;
-	Value.u = (ullong_t)val;
+	Value.u = (uint64_t)val;
 	return *this;
 }
 
-AValue& AValue::operator = (sshort_t val)
+AValue& AValue::operator = (sint16_t val)
 {
 	Clear();
-	Type    = VALUE_SIGNED_SHORT;
-	Value.i = (sllong_t)val;
+	Type    = VALUE_SIGNED_INT16;
+	Value.i = (sint64_t)val;
 	return *this;
 }
 
-AValue& AValue::operator = (ushort_t val)
+AValue& AValue::operator = (uint16_t val)
 {
 	Clear();
-	Type    = VALUE_UNSIGNED_SHORT;
-	Value.u = (ullong_t)val;
+	Type    = VALUE_UNSIGNED_INT16;
+	Value.u = (uint64_t)val;
 	return *this;
 }
 
+#if !LONG_IS_64BITS
 AValue& AValue::operator = (sint_t val)
 {
 	Clear();
 	Type    = VALUE_SIGNED_INT;
-	Value.i = (sllong_t)val;
+	Value.i = (sint64_t)val;
 	return *this;
 }
 
@@ -234,38 +251,39 @@ AValue& AValue::operator = (uint_t val)
 {
 	Clear();
 	Type    = VALUE_UNSIGNED_INT;
-	Value.u = (ullong_t)val;
+	Value.u = (uint64_t)val;
+	return *this;
+}
+#endif
+
+AValue& AValue::operator = (sint32_t val)
+{
+	Clear();
+	Type    = VALUE_SIGNED_INT32;
+	Value.i = (sint64_t)val;
 	return *this;
 }
 
-AValue& AValue::operator = (slong_t val)
+AValue& AValue::operator = (uint32_t val)
 {
 	Clear();
-	Type    = VALUE_SIGNED_LONG;
-	Value.i = (sllong_t)val;
+	Type    = VALUE_UNSIGNED_INT32;
+	Value.u = (uint64_t)val;
 	return *this;
 }
 
-AValue& AValue::operator = (ulong_t val)
+AValue& AValue::operator = (sint64_t val)
 {
 	Clear();
-	Type    = VALUE_UNSIGNED_LONG;
-	Value.u = (ullong_t)val;
-	return *this;
-}
-
-AValue& AValue::operator = (sllong_t val)
-{
-	Clear();
-	Type    = VALUE_SIGNED_LLONG;
+	Type    = VALUE_SIGNED_INT64;
 	Value.i = val;
 	return *this;
 }
 
-AValue& AValue::operator = (ullong_t val)
+AValue& AValue::operator = (uint64_t val)
 {
 	Clear();
-	Type    = VALUE_UNSIGNED_LLONG;
+	Type    = VALUE_UNSIGNED_INT64;
 	Value.u = val;
 	return *this;
 }
@@ -332,32 +350,32 @@ bool AValue::Set(const void *p, uint_t type)
 		case VALUE_SIGNED_INT8:
 			*this = *(sint8_t *)p;
 			break;
-		case VALUE_SIGNED_SHORT:
-			*this = *(sshort_t *)p;
+		case VALUE_SIGNED_INT16:
+			*this = *(sint16_t *)p;
 			break;
 		case VALUE_SIGNED_INT:
 			*this = *(sint_t *)p;
 			break;
-		case VALUE_SIGNED_LONG:
-			*this = *(slong_t *)p;
+		case VALUE_SIGNED_INT32:
+			*this = *(sint32_t *)p;
 			break;
-		case VALUE_SIGNED_LLONG:
-			*this = *(sllong_t *)p;
+		case VALUE_SIGNED_INT64:
+			*this = *(sint64_t *)p;
 			break;
 		case VALUE_UNSIGNED_INT8:
 			*this = *(uint8_t *)p;
 			break;
-		case VALUE_UNSIGNED_SHORT:
-			*this = *(ushort_t *)p;
+		case VALUE_UNSIGNED_INT16:
+			*this = *(uint16_t *)p;
 			break;
 		case VALUE_UNSIGNED_INT:
 			*this = *(uint_t *)p;
 			break;
-		case VALUE_UNSIGNED_LONG:
-			*this = *(ulong_t *)p;
+		case VALUE_UNSIGNED_INT32:
+			*this = *(uint32_t *)p;
 			break;
-		case VALUE_UNSIGNED_LLONG:
-			*this = *(ullong_t *)p;
+		case VALUE_UNSIGNED_INT64:
+			*this = *(uint64_t *)p;
 			break;
 		case VALUE_FLOAT:
 			*this = *(float *)p;
@@ -384,32 +402,32 @@ bool AValue::Get(void *p, uint_t type)
 			case VALUE_SIGNED_INT8:
 				*(sint8_t *)p = (sint8_t)*this;
 				break;
-			case VALUE_SIGNED_SHORT:
-				*(sshort_t *)p = (sshort_t)*this;
+			case VALUE_SIGNED_INT16:
+				*(sint16_t *)p = (sint16_t)*this;
 				break;
 			case VALUE_SIGNED_INT:
 				*(sint_t *)p = (sint_t)*this;
 				break;
-			case VALUE_SIGNED_LONG:
-				*(slong_t *)p = (slong_t)*this;
+			case VALUE_SIGNED_INT32:
+				*(sint32_t *)p = (sint32_t)*this;
 				break;
-			case VALUE_SIGNED_LLONG:
-				*(sllong_t *)p = (sint64_t)*this;
+			case VALUE_SIGNED_INT64:
+				*(sint64_t *)p = (sint64_t)*this;
 				break;
 			case VALUE_UNSIGNED_INT8:
 				*(uint8_t *)p = (uint8_t)*this;
 				break;
-			case VALUE_UNSIGNED_SHORT:
-				*(ushort_t *)p = (ushort_t)*this;
+			case VALUE_UNSIGNED_INT16:
+				*(uint16_t *)p = (uint16_t)*this;
 				break;
 			case VALUE_UNSIGNED_INT:
 				*(uint_t *)p = (uint_t)*this;
 				break;
-			case VALUE_UNSIGNED_LONG:
-				*(ulong_t *)p = (ulong_t)*this;
+			case VALUE_UNSIGNED_INT32:
+				*(uint32_t *)p = (uint32_t)*this;
 				break;
-			case VALUE_UNSIGNED_LLONG:
-				*(ullong_t *)p = (uint64_t)*this;
+			case VALUE_UNSIGNED_INT64:
+				*(uint64_t *)p = (uint64_t)*this;
 				break;
 			case VALUE_FLOAT:
 				*(float *)p = (float)*this;
@@ -533,7 +551,7 @@ const char *AValue::EvalNumber(const char *p, bool allowModifiers, const char *t
 	}
 
 	if (IsDoubleStartChar(p[0])) {
-		ullong_t val = 0;
+		uint64_t val = 0;
 
 		p++;
 
@@ -544,7 +562,7 @@ const char *AValue::EvalNumber(const char *p, bool allowModifiers, const char *t
 			else break;
 		}
 
-		ullong_t *ptr = &val;
+		uint64_t *ptr = &val;
 		Value.f = *(double *)ptr;
 		Type = VALUE_DOUBLE;
 	}
@@ -584,8 +602,8 @@ const char *AValue::EvalNumber(const char *p, bool allowModifiers, const char *t
 		}
 
 		if (integer) {
-			ullong_t lradix = (ullong_t)radix;
-			ullong_t val = 0;
+			uint64_t lradix = radix;
+			uint64_t val = 0;
 
 			while (p[0] && (!terminators || !strchr(terminators, p[0]))) {
 				uint_t v = charlookup[(uint_t)p[0]];
@@ -594,7 +612,7 @@ const char *AValue::EvalNumber(const char *p, bool allowModifiers, const char *t
 			}
 
 			Value.u = val;
-			Type = VALUE_UNSIGNED_LLONG;
+			Type = TypeOf(val);
 		}
 		else {
 			double fradix = (double)radix, div = 1.0, divmul = 1.0, val = 0.0;
@@ -649,8 +667,13 @@ uint_t AValue::EvalNumber(const AString& str, uint_t p, bool allowModifiers, con
 const AValue& AValue::GenerateString(AString& str) const
 {
 	str.Delete();
+#if SYSTEM_64BIT
+	if      (IsInteger()) str.Format("%ld",   Value.i);
+	else if (IsFloat())   str.Format("#%lx",  Value.u);
+#else
 	if      (IsInteger()) str.Format("%lld",  Value.i);
 	else if (IsFloat())   str.Format("#%llx", Value.u);
+#endif
 	return *this;
 }
 
@@ -673,7 +696,7 @@ const AValue& AValue::GenerateStringNice(AString& str, uint_t format, uint_t dec
 	if (format >= FORMAT_ITEMS) format = FORMAT_DEC;
 
 	if (IsInteger()) {
-		ullong_t val;
+		uint64_t val;
 		
 		if (IsSigned() && (Value.i < 0)) {
 			val = -Value.i;
@@ -682,11 +705,19 @@ const AValue& AValue::GenerateStringNice(AString& str, uint_t format, uint_t dec
 		else val = Value.u;
 
 		if (format == FORMAT_DEC) {
+#if SYSTEM_64BIT
+			numstr.Format("%lu", val);
+#else
 			numstr.Format("%llu", val);
+#endif
 		}
 		else if ((format == FORMAT_HEX) || (format == FORMAT_HEX_C) || (format == FORMAT_HEX_NO_PREFIX)) {
 			prestr += Prefixes[format]; 
+#if SYSTEM_64BIT
+			numstr.Format("%lx", val);
+#else
 			numstr.Format("%llx", val);
+#endif
 		}
 		else {
 			AStringUpdate updater(&numstr);
