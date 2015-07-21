@@ -5,13 +5,16 @@ lib_LTLIBRARIES = librdlib-@RDLIB_MAJORMINOR@.la
 librdlib_@RDLIB_MAJORMINOR@_la_LDFLAGS =		\
 	-no-undefined								\
 	-version-info $(RDLIB_LIBVERSION)			\
+     $(PTHREAD_LDFLAGS)							\
      $(RDLIB_LDFLAGS)
 
 librdlib_@RDLIB_MAJORMINOR@_la_LIBADD =			\
+    $(PTHREAD_LIBS)								\
 	$(JPEG_LIBS)
 
 librdlib_@RDLIB_MAJORMINOR@_la_CPPFLAGS =		\
 	$(RDLIB_CFLAGS)								\
+	$(PTHREAD_CFLAGS)							\
 	$(JPEG_CGLAGS)
 
 librdlib_@RDLIB_MAJORMINOR@_la_SOURCES =		\
@@ -61,6 +64,8 @@ librdlib_@RDLIB_MAJORMINOR@_la_SOURCES =		\
 	StructList.cpp								\
 	tag.cpp										\
 	TextServer.cpp								\
+	Thread.cpp									\
+	ThreadLock.cpp								\
 	UDPServer.cpp
 
 pkginclude_HEADERS = 							\
@@ -117,6 +122,8 @@ pkginclude_HEADERS = 							\
 	StructList.h								\
 	tag.h										\
 	TextServer.h								\
+	Thread.h									\
+	ThreadLock.h								\
 	types.h										\
 	UDPServer.h									\
 	wxsup.h
