@@ -50,14 +50,16 @@ public:
 	AString(const AString& String, sint_t iLength = -1);
 	AString(bool   	 v);
 	AString(char   	 c);
-	AString(sshort_t val);
-	AString(ushort_t val);
+	AString(sint16_t val);
+	AString(uint16_t val);
+#if !LONG_IS_64BITS
 	AString(sint_t 	 val);
 	AString(uint_t 	 val);
-	AString(slong_t  val);
-	AString(ulong_t  val);
-	AString(sllong_t val);
-	AString(ullong_t val);
+#endif
+	AString(sint32_t val);
+	AString(uint32_t val);
+	AString(sint64_t val);
+	AString(uint64_t val);
 	AString(float  	 val);
 	AString(double 	 val);
 	virtual ~AString();
@@ -84,14 +86,16 @@ public:
 	AString& operator = (const AString *pString);
 	AString& operator = (const AString& String);
 
-	AString& operator = (sshort_t val);
-	AString& operator = (ushort_t val);
+	AString& operator = (sint16_t val);
+	AString& operator = (uint16_t val);
+#if !LONG_IS_64BITS
 	AString& operator = (uint_t   val);
 	AString& operator = (sint_t   val);
-	AString& operator = (slong_t  val);
-	AString& operator = (ulong_t  val);
-	AString& operator = (sllong_t val);
-	AString& operator = (ullong_t val);
+#endif
+	AString& operator = (sint32_t  val);
+	AString& operator = (uint32_t  val);
+	AString& operator = (sint64_t val);
+	AString& operator = (uint64_t val);
 	AString& operator = (float    val);
 	AString& operator = (double   val);
 
@@ -133,14 +137,14 @@ public:
 
 	operator sint8_t()        const {return (sint8_t)operator sint64_t();}
 	operator uint8_t()		  const {return (uint8_t)operator uint64_t();}
-	operator sshort_t()       const {return (ushort_t)operator sint64_t();}
-	operator ushort_t()		  const {return (ushort_t)operator uint64_t();}
+	operator sint16_t()       const {return (uint16_t)operator sint64_t();}
+	operator uint16_t()		  const {return (uint16_t)operator uint64_t();}
 	operator sint_t()         const {return (sint_t)operator sint64_t();}
 	operator uint_t()		  const {return (uint_t)operator uint64_t();}
 
 #if !LONG_IS_64BITS
-	operator slong_t()        const {return (slong_t)operator sint64_t();}
-	operator ulong_t()		  const {return (ulong_t)operator uint64_t();}
+	operator sint32_t()        const {return (sint32_t)operator sint64_t();}
+	operator uint32_t()		  const {return (uint32_t)operator uint64_t();}
 #endif
 
 	operator sint64_t()       const;
@@ -155,12 +159,14 @@ public:
 	AValue EvalNumber(uint_t i = 0, uint_t *endIndex = NULL, bool allowModifiers = true, const char *terminators = NULL, AString *error = NULL) const;
 
 	AString& ConvertToHex(double   val);
+#if !LONG_IS_64BITS
 	AString& ConvertToHex(uint_t   val, bool pad = false);
 	AString& ConvertToHex(sint_t   val, bool pad = false) {return ConvertToHex((uint_t)val, pad);}
-	AString& ConvertToHex(ulong_t  val, bool pad = false);
-	AString& ConvertToHex(slong_t  val, bool pad = false) {return ConvertToHex((ulong_t)val, pad);}
-	AString& ConvertToHex(ullong_t val, bool pad = false);
-	AString& ConvertToHex(sllong_t val, bool pad = false) {return ConvertToHex((ullong_t)val, pad);}
+#endif
+	AString& ConvertToHex(uint32_t val, bool pad = false);
+	AString& ConvertToHex(sint32_t val, bool pad = false) {return ConvertToHex((uint32_t)val, pad);}
+	AString& ConvertToHex(uint64_t val, bool pad = false);
+	AString& ConvertToHex(sint64_t val, bool pad = false) {return ConvertToHex((uint64_t)val, pad);}
 
 	sint_t      GetLength()  const {return Length;}
 	const char *GetBuffer() const {return pText;}
@@ -178,15 +184,17 @@ public:
 
 	AString Arg(const char *iText) const;
 	AString Arg(const AString& String) const;
-	AString Arg(bool n) const {return Arg((ulong_t)n);}
-	AString Arg(sshort_t n) const;
-	AString Arg(ushort_t n) const;
+	AString Arg(bool n) const {return Arg((uint32_t)n);}
+	AString Arg(sint16_t n) const;
+	AString Arg(uint16_t n) const;
+#if !LONG_IS_64BITS
 	AString Arg(sint_t   n) const;
 	AString Arg(uint_t   n) const;
-	AString Arg(slong_t  n) const;
-	AString Arg(ulong_t  n) const;
-	AString Arg(sllong_t n) const;
-	AString Arg(ullong_t n) const;
+#endif
+	AString Arg(sint32_t n) const;
+	AString Arg(uint32_t n) const;
+	AString Arg(sint64_t n) const;
+	AString Arg(uint64_t n) const;
 	AString Arg(float    n) const;
 	AString Arg(double   n) const;
 	AString Arg(const void *p) const;
