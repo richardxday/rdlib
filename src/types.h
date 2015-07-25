@@ -47,9 +47,6 @@ typedef uint32_t       uptr_t;
 #define FMT64 "I64"
 #endif
 
-typedef char * STRPTR;
-typedef const char * CSTRPTR;
-
 #define MIN_SIGNED(type)   (-(type)(((ullong_t)1 << ((sizeof(type) << 3) - 1)) - 1) - (type)1)
 #define MAX_SIGNED(type)   ( (type)(((ullong_t)1 << ((sizeof(type) << 3) - 1)) - 1))
 
@@ -98,15 +95,6 @@ typedef const char * CSTRPTR;
 #define IsBinString(p) (((p)[0] == '0') && (((p)[1] == 'b') || ((p)[1] == 'B')))
 
 #define PACKEDSTRUCT struct __attribute__ ((packed))
-
-typedef PACKEDSTRUCT {
-	uint8_t b[10];
-} IEEEEXTENDED;
-
-typedef PACKEDSTRUCT {
-	uint8_t Count;
-	uint8_t String[1];
-} PSTRING;
 
 #define COMPARE_ITEMS(a,b) (((a) == (b)) ? 0 : (((a) < (b)) ? -1 : 1))
 
