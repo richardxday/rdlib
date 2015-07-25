@@ -687,22 +687,31 @@ void *Allocate(void *pData, size_t nItems, size_t& MaxItems, size_t ItemSize, si
 	return pData;
 }
 
+static bool debug_enabled = true;
+
 void debug(const char *fmt, ...)
 {
-	va_list ap;
+	if (debug_enabled) {
+		va_list ap;
 
-	va_start(ap, fmt);
+		va_start(ap, fmt);
 #ifdef _WIN32
-	char *buf = NULL;
-	vasprintf(&buf, fmt, ap);
-	if (buf) {
-		OutputDebugString(buf);
-		free(buf);
-	}
+		char *buf = NULL;
+		vasprintf(&buf, fmt, ap);
+		if (buf) {
+			OutputDebugString(buf);
+			free(buf);
+		}
 #else
-	vprintf(fmt, ap);
+		vprintf(fmt, ap);
 #endif
-	va_end(ap);
+		va_end(ap);
+	}
+}
+
+void enabledebug(bool enabled)
+{
+	debug_enabled = enabled;
 }
 
 #ifdef _WIN32

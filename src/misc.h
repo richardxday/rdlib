@@ -45,6 +45,7 @@ extern void   Sleep(uint32_t ms);
 #endif
 
 extern void debug(const char *fmt, ...) PRINTF_FORMAT_FUNCTION;
+extern void enabledebug(bool enabled = true);
 
 #ifdef __cplusplus
 };
