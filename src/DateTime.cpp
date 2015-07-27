@@ -365,7 +365,7 @@ AString ADateTime::DateToStr() const
 
 	DateTimeToDMY(DateTime, dmy);
 
-	t    = (DateTime.MilliSeconds + 500) / 1000;
+	t    = DateTime.MilliSeconds / 1000;
 	hrs  = t / 3600;
 	t   -= hrs * 3600;
 	mins = t / 60;
