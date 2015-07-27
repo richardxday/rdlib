@@ -92,14 +92,19 @@ public:
 	AString DateToStr() const;
 	AString TimeStr() const;
 
+	static const AString ISO8601Format;
+	static const AString ISO8601FormatWithMS;
+	
 	AString DateFormat(const char *format) const;
 
+	static void EnableDebugStrToDate(bool enable = true) {bDebugStrToDate = enable;}
+	
 	enum {
 		Specified_Time = 1,
 		Specified_Date = 2,
 		Specified_Day  = 4,
 	};
-	ADateTime& StrToDate(const AString& String, uint_t relative = Time_Relative_Today, uint_t *specified = NULL);
+	ADateTime& StrToDate(const AString& String, uint_t relative = Time_Relative_Today, uint_t *specified = NULL, AString *errors = NULL);
 
 	operator uint64_t() const;
 	operator sint64_t() const;
@@ -147,9 +152,9 @@ protected:
 	} DAYMONTHYEAR;
 
 	typedef struct {
-		AValue val;
+		AValue  val;
+		AString valstr;
 		AString str;
-		AString numstr;
 	} TERM;
 	static void __DeleteTerm(uptr_t item, void *context) {
 		(void)context;
@@ -176,6 +181,7 @@ protected:
 
 	void ModifyYear(DATETIME& dt, double n, bool pos, bool neg) const;
 	void ModifyMonth(DATETIME& dt, double n, bool pos, bool neg) const;
+	void ModifyWeeks(DATETIME& dt, double n, bool pos, bool neg) const;
 	void ModifyDay(DATETIME& dt, double n, bool pos, bool neg) const;
 	void ModifyDays(DATETIME& dt, double n, bool pos, bool neg) const;
 	void ModifyMS(DATETIME& dt, sint64_t n, bool pos, bool neg) const;
@@ -187,6 +193,7 @@ protected:
 	DATETIME DateTime;
 
 	static bool bDataInit;
+	static bool bDebugStrToDate;
 	static const char *DayNames[];
 	static const char *ShortDayNames[];
 	static const char *MonthNames[];

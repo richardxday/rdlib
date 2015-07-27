@@ -8,11 +8,11 @@
 
 int main(int argc, char *argv[])
 {
+	const AString format = "%d %Y-%M-%D %h:%m:%s.%S";
 	AStdFile fp;
 	int errors = 0, passes = 0;
 	
 	if (fp.open("tests.txt")) {
-		const AString format = "%d %Y-%M-%D %h:%m:%s.%S";
 		ADateTime a("min"), b("min");
 		AString line;
 
@@ -38,6 +38,16 @@ int main(int argc, char *argv[])
 	}
 
 	printf("%d passes, %d errors\n", passes, errors);
+
+	ADateTime dt("min");
+
+	ADateTime::EnableDebugStrToDate();
 	
+	int i;
+	for (i = 1; i < argc; i++) {
+		dt.StrToDate(argv[i], ADateTime::Time_Existing);
+		printf("'%s' == %s\n", argv[i], dt.DateFormat(format).str());
+	}
+
 	return errors;
 }
