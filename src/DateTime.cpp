@@ -29,7 +29,7 @@ const uint32_t ADateTime::DaysSince1970 = DAYSCOUNT(DATUM_YEAR) - DAYSCOUNT(1970
 const uint32_t ADateTime::DaysSince1601 = DAYSCOUNT(DATUM_YEAR) - DAYSCOUNT(1601);
 #endif
 
-const ADateTime ADateTime::MinDateTime(0ull);
+const ADateTime ADateTime::MinDateTime((uint64_t)0);
 const ADateTime ADateTime::MaxDateTime((sizeof(time_t) == sizeof(uint32_t)) ? "20371231235959.999" : "99991231235959.999");
 
 const AString ADateTime::ISO8601Format       = "%Y-%M-%D %h:%m:%s";
@@ -444,9 +444,11 @@ AString ADateTime::DateFormat(const char *format) const
 	return str;
 }
 
-int ADateTime::FindDay(const char *str)
+int ADateTime::FindDay(const char *str, bool utc)
 {
 	int res;
+
+	if (stricmp(str, "thisday") == 0) return ADateTime().TimeStamp(utc).GetWeekDay();
 
 	for (res = 0; res < (int)NUMBEROF(ShortDayNames); res++) {
 		if (stricmp(str, ShortDayNames[res]) == 0) return res;
@@ -458,9 +460,11 @@ int ADateTime::FindDay(const char *str)
 	return -1;
 }
 
-int ADateTime::FindMonth(const char *str)
+int ADateTime::FindMonth(const char *str, bool utc)
 {
 	int res;
+
+	if (stricmp(str, "thismonth") == 0) return ADateTime().TimeStamp(utc).GetMonth() - 1;
 
 	for (res = 0; res < (int)NUMBEROF(ShortMonthNames); res++) {
 		if (stricmp(str, ShortMonthNames[res]) == 0) return res;
@@ -742,6 +746,7 @@ ADateTime& ADateTime::StrToDate(const AString& String, uint_t relative, uint_t *
 {
 	ADataList terms;
 	uint_t    _specified = 0;
+	bool      utc = false;		// assume local times initially
 
 	// delete any errors
 	if (errors) errors->Delete();
@@ -763,18 +768,20 @@ ADateTime& ADateTime::StrToDate(const AString& String, uint_t relative, uint_t *
 
 		case Time_Relative_Today_UTC:
 			// time is relative to midnight (UTC), today
+			utc = true;
 		case Time_Relative_Today:
 			// time is relative to midnight, today
-			CurrentTime(DateTime, (relative == Time_Relative_Today_UTC));
+			CurrentTime(DateTime, utc);
 			// reset to midnight
 			DateTime.MilliSeconds = 0;
 			break;
 
 		case Time_Relative_UTC:
 			// time is relative to now (UTC)
+			utc = true;
 		case Time_Relative_Local:
 			// time is relative to now (local)
-			CurrentTime(DateTime, (relative == Time_Relative_UTC));
+			CurrentTime(DateTime, utc);
 			break;
 	}
 
@@ -818,11 +825,13 @@ ADateTime& ADateTime::StrToDate(const AString& String, uint_t relative, uint_t *
 			// no value supplied -> look at string
 			if		(str == "+") {pos = true;  neg = false;}	// additive mode
 			else if	(str == "-") {pos = false; neg = true;}		// subtractive mode
-			else if	((str == "now") || (str == "utc")) {
+			else if (str == "utc")   utc = true;				// utc mode
+			else if (str == "local") utc = false;				// local mode
+			else if	(str == "now") {
 				// now in local or UTC
 				DATETIME dt;
 
-				CurrentTime(dt, (str == "utc"));
+				CurrentTime(dt, utc);
 
 				if		(pos) AddDateTime(DateTime, dt.Days, dt.MilliSeconds);
 				else if (neg) SubDateTime(DateTime, dt.Days, dt.MilliSeconds);
@@ -850,11 +859,11 @@ ADateTime& ADateTime::StrToDate(const AString& String, uint_t relative, uint_t *
 
 				_specified |= Specified_Date | Specified_Time;
 			}
-			else if	((str == "today") || (str == "todayutc")) {
+			else if	(str == "today") {
 				// UTC or local today (midnight)
 				DATETIME dt;
 
-				CurrentTime(dt, (str == "todayutc"));
+				CurrentTime(dt, utc);
 
 				if		(pos) AddDateTime(DateTime, dt.Days, 0);
 				else if (neg) SubDateTime(DateTime, dt.Days, 0);
@@ -862,11 +871,11 @@ ADateTime& ADateTime::StrToDate(const AString& String, uint_t relative, uint_t *
 
 				_specified |= Specified_Date;
 			}
-			else if	((str == "tomorrow") || (str == "tomorrowutc")) {
+			else if	(str == "tomorrow") {
 				// UTC or local tomorrow (midnight)
 				DATETIME dt;
 
-				CurrentTime(dt, (str == "tomorrowutc"));
+				CurrentTime(dt, utc);
 
 				dt.Days++;
 
@@ -876,13 +885,77 @@ ADateTime& ADateTime::StrToDate(const AString& String, uint_t relative, uint_t *
 
 				_specified |= Specified_Date;
 			}
-			else if	((str == "yesterday") || (str == "yesterdayutc")) {
+			else if	(str == "yesterday") {
 				// UTC or local yesterday (midnight)
 				DATETIME dt;
 
-				CurrentTime(dt, (str == "yesterdayutc"));
+				CurrentTime(dt, utc);
 
 				dt.Days = SUBZ(dt.Days, 1);
+
+				if		(pos) AddDateTime(DateTime, dt.Days, 0);
+				else if (neg) SubDateTime(DateTime, dt.Days, 0);
+				else		  DateTime.Days = dt.Days;
+
+				_specified |= Specified_Date;
+			}
+			else if	(str == "firstdayofmonth") {
+				// UTC or local first day of this month
+				DATETIME dt;
+				DAYMONTHYEAR dmy;
+
+				CurrentTime(dt, utc);
+				DateTimeToDMY(dt, dmy);
+
+				dt.Days -= dmy.Day;
+
+				if		(pos) AddDateTime(DateTime, dt.Days, 0);
+				else if (neg) SubDateTime(DateTime, dt.Days, 0);
+				else		  DateTime.Days = dt.Days;
+
+				_specified |= Specified_Date;
+			}
+			else if	(str == "lastdayofmonth") {
+				// UTC or local last day of this month
+				DATETIME dt;
+				DAYMONTHYEAR dmy;
+
+				CurrentTime(dt, utc);
+				DateTimeToDMY(dt, dmy);
+
+				dt.Days += GetMonthLength(dmy) - 1 - dmy.Day;
+
+				if		(pos) AddDateTime(DateTime, dt.Days, 0);
+				else if (neg) SubDateTime(DateTime, dt.Days, 0);
+				else		  DateTime.Days = dt.Days;
+
+				_specified |= Specified_Date;
+			}
+			else if	(str == "firstdayofweek") {
+				// UTC or local first day of this week
+				DATETIME dt;
+				DAYMONTHYEAR dmy;
+
+				CurrentTime(dt, utc);
+				DateTimeToDMY(dt, dmy);
+
+				dt.Days -= dmy.WeekDay;
+
+				if		(pos) AddDateTime(DateTime, dt.Days, 0);
+				else if (neg) SubDateTime(DateTime, dt.Days, 0);
+				else		  DateTime.Days = dt.Days;
+
+				_specified |= Specified_Date;
+			}
+			else if	(str == "lastdayofweek") {
+				// UTC or local first day of this week
+				DATETIME dt;
+				DAYMONTHYEAR dmy;
+
+				CurrentTime(dt, utc);
+				DateTimeToDMY(dt, dmy);
+
+				dt.Days += 6 - dmy.WeekDay;
 
 				if		(pos) AddDateTime(DateTime, dt.Days, 0);
 				else if (neg) SubDateTime(DateTime, dt.Days, 0);
@@ -908,15 +981,17 @@ ADateTime& ADateTime::StrToDate(const AString& String, uint_t relative, uint_t *
 			else if	(str == "utctolocal") {
 				// convert current time, taken as UTC, to local
 				*this = UTCToLocal();
+				utc   = false;
 				_specified |= Specified_Time;
 			}
 			else if	(str == "localtoutc") {
 				// convert current time, taken as local, to UTC
 				// this is NOT 100% accurate at all times!
 				*this = LocalToUTC();
+				utc   = true;
 				_specified |= Specified_Time;
 			}
-			else if ((ind = FindDay(str)) >= 0) {
+			else if ((ind = FindDay(str, utc)) >= 0) {
 				// day name (long or short) used
 				DAYMONTHYEAR dmy;
 
@@ -926,7 +1001,7 @@ ADateTime& ADateTime::StrToDate(const AString& String, uint_t relative, uint_t *
 
 				_specified |= Specified_Day;
 			}
-			else if ((ind = FindMonth(str)) >= 0) {
+			else if ((ind = FindMonth(str, utc)) >= 0) {
 				// month name (long or short) used
 				DAYMONTHYEAR dmy;
 
@@ -966,7 +1041,7 @@ ADateTime& ADateTime::StrToDate(const AString& String, uint_t relative, uint_t *
 
 					_specified |= Specified_Date;
 				}
-				else if ((ind = FindDay(str2)) >= 0) {
+				else if ((ind = FindDay(str2, utc)) >= 0) {
 					DAYMONTHYEAR dmy;
 
 					if (str == "next") DateTime.Days += 7;
@@ -978,7 +1053,7 @@ ADateTime& ADateTime::StrToDate(const AString& String, uint_t relative, uint_t *
 
 					_specified |= Specified_Day;
 				}
-				else if ((ind = FindMonth(str2)) >= 0) {
+				else if ((ind = FindMonth(str2, utc)) >= 0) {
 					DAYMONTHYEAR dmy;
 
 					uint32_t ms = DateTime.MilliSeconds;
@@ -1263,7 +1338,7 @@ ADateTime& ADateTime::StrToDate(const AString& String, uint_t relative, uint_t *
 				_specified |= Specified_Date;
 			}
 			// else month name
-			else if ((ind = FindMonth(str2)) >= 0) {
+			else if ((ind = FindMonth(str2, utc)) >= 0) {
 				DAYMONTHYEAR dmy;
 
 				uint32_t ms = DateTime.MilliSeconds;

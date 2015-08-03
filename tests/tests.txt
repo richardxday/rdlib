@@ -40,3 +40,5 @@ midnight=midnight
 2010-01-03=2009-W53-7
 2005w521=2005-12-19
 2005-w52-1=2005-12-19
+utc now utctolocal=now
+

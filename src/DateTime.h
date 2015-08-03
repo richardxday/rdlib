@@ -67,8 +67,8 @@ public:
 	uint32_t GetAbsoluteWeek() 	 const {return DateTime.Days / 7;}
 	uint32_t GetAbsoluteMonth()  const {return (uint32_t)GetYear() * 12 + GetMonth();}
 
-	static int FindDay(const char *str);
-	static int FindMonth(const char *str);
+	static int FindDay(const char *str, bool utc = false);
+	static int FindMonth(const char *str, bool utc = false);
 
 	ADateTime& operator  = (uint64_t ms);
 	ADateTime& operator  = (const ADateTime& object) {DateTime = object.DateTime; return *this;}
