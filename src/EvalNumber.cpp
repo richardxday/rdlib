@@ -103,7 +103,6 @@ AValue::AValue(uint16_t val) : Type(VALUE_INVALID),
 	operator = (val);
 }
 
-#if !LONG_IS_64BITS
 AValue::AValue(sint_t val) : Type(VALUE_INVALID),
 							 bReadOnly(false)
 {
@@ -117,8 +116,8 @@ AValue::AValue(uint_t val) : Type(VALUE_INVALID),
 	memset(&Value, 0, sizeof(Value));
 	operator = (val);
 }
-#endif
 
+#if !INT32_IS_INT
 AValue::AValue(sint32_t val) : Type(VALUE_INVALID),
 							   bReadOnly(false)
 {
@@ -132,6 +131,7 @@ AValue::AValue(uint32_t val) : Type(VALUE_INVALID),
 	memset(&Value, 0, sizeof(Value));
 	operator = (val);
 }
+#endif
 
 AValue::AValue(sint64_t val) : Type(VALUE_INVALID),
 							   bReadOnly(false)
@@ -238,7 +238,6 @@ AValue& AValue::operator = (uint16_t val)
 	return *this;
 }
 
-#if !LONG_IS_64BITS
 AValue& AValue::operator = (sint_t val)
 {
 	Clear();
@@ -254,8 +253,8 @@ AValue& AValue::operator = (uint_t val)
 	Value.u = (uint64_t)val;
 	return *this;
 }
-#endif
 
+#if !INT32_IS_INT
 AValue& AValue::operator = (sint32_t val)
 {
 	Clear();
@@ -271,6 +270,7 @@ AValue& AValue::operator = (uint32_t val)
 	Value.u = (uint64_t)val;
 	return *this;
 }
+#endif
 
 AValue& AValue::operator = (sint64_t val)
 {

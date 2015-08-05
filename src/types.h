@@ -6,17 +6,19 @@
 #include <stdint.h>
 
 #if __WORDSIZE==64
-#define SYSTEM_64BIT	1
+#define SYSTEM_IS_64BITS	1
 #ifdef __APPLE__
-#define LONG_IS_64BITS  0
+#define LONG_IS_64BITS      0
 #else
-#define LONG_IS_64BITS  1
+#define LONG_IS_64BITS      1
 #endif
 #else
-#define SYSTEM_64BIT	0
-#define LONG_IS_64BITS  0
+#define SYSTEM_IS_64BITS	0
+#define LONG_IS_64BITS      0
 #endif
 
+#define INT32_IS_INT        (!LONG_IS_64BITS)
+     
 typedef int8_t		   sint8_t;
 typedef int16_t		   sint16_t;
 typedef int32_t		   sint32_t;
@@ -31,7 +33,7 @@ typedef unsigned long  ulong_t;
 typedef signed   long  long sllong_t;
 typedef unsigned long  long ullong_t;
 
-#if SYSTEM_64BIT
+#if SYSTEM_IS_64BITS
 typedef uint64_t       uptr_t;
 #else
 typedef uint32_t       uptr_t;

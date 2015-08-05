@@ -52,12 +52,12 @@ public:
 	AString(char   	 c);
 	AString(sint16_t val);
 	AString(uint16_t val);
-#if !LONG_IS_64BITS
 	AString(sint_t 	 val);
 	AString(uint_t 	 val);
-#endif
+#if !INT32_IS_INT
 	AString(sint32_t val);
 	AString(uint32_t val);
+#endif
 	AString(sint64_t val);
 	AString(uint64_t val);
 	AString(float  	 val);
@@ -88,12 +88,12 @@ public:
 
 	AString& operator = (sint16_t val);
 	AString& operator = (uint16_t val);
-#if !LONG_IS_64BITS
 	AString& operator = (uint_t   val);
 	AString& operator = (sint_t   val);
+#if !INT32_IS_INT
+	AString& operator = (sint32_t val);
+	AString& operator = (uint32_t val);
 #endif
-	AString& operator = (sint32_t  val);
-	AString& operator = (uint32_t  val);
 	AString& operator = (sint64_t val);
 	AString& operator = (uint64_t val);
 	AString& operator = (float    val);
@@ -142,8 +142,8 @@ public:
 	operator sint_t()         const {return (sint_t)operator sint64_t();}
 	operator uint_t()		  const {return (uint_t)operator uint64_t();}
 
-#if !LONG_IS_64BITS
-	operator sint32_t()        const {return (sint32_t)operator sint64_t();}
+#if !INT32_IS_INT
+	operator sint32_t()       const {return (sint32_t)operator sint64_t();}
 	operator uint32_t()		  const {return (uint32_t)operator uint64_t();}
 #endif
 
@@ -159,12 +159,12 @@ public:
 	AValue EvalNumber(uint_t i = 0, uint_t *endIndex = NULL, bool allowModifiers = true, const char *terminators = NULL, AString *error = NULL) const;
 
 	AString& ConvertToHex(double   val);
-#if !LONG_IS_64BITS
 	AString& ConvertToHex(uint_t   val, bool pad = false);
 	AString& ConvertToHex(sint_t   val, bool pad = false) {return ConvertToHex((uint_t)val, pad);}
-#endif
+#if !INT32_IS_INT
 	AString& ConvertToHex(uint32_t val, bool pad = false);
 	AString& ConvertToHex(sint32_t val, bool pad = false) {return ConvertToHex((uint32_t)val, pad);}
+#endif
 	AString& ConvertToHex(uint64_t val, bool pad = false);
 	AString& ConvertToHex(sint64_t val, bool pad = false) {return ConvertToHex((uint64_t)val, pad);}
 
@@ -187,12 +187,12 @@ public:
 	AString Arg(bool n) const {return Arg((uint32_t)n);}
 	AString Arg(sint16_t n) const;
 	AString Arg(uint16_t n) const;
-#if !LONG_IS_64BITS
 	AString Arg(sint_t   n) const;
 	AString Arg(uint_t   n) const;
-#endif
+#if !INT32_IS_INT
 	AString Arg(sint32_t n) const;
 	AString Arg(uint32_t n) const;
+#endif
 	AString Arg(sint64_t n) const;
 	AString Arg(uint64_t n) const;
 	AString Arg(float    n) const;

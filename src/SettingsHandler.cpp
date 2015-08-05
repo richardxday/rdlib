@@ -145,7 +145,7 @@ bool ASettingsHandler::HasFileChanged()
 	return changed;
 }
 
-const AString& ASettingsHandler::Get(const AString& name, const AString& defval) const
+AString ASettingsHandler::Get(const AString& name, const AString& defval) const
 {
 	const AStringPairWithInt *pair;
 

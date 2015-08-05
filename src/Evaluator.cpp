@@ -97,7 +97,7 @@ static uint_t SkipWhiteSpace(const AString& str, uint_t pos)
 
 static uint_t GetArg(const AString& str, uint_t pos, AString& arg, AHash *vars)
 {
-	static const char chars[] = "!£$%^&*(),./<>?#~@";
+	static const char chars[] = "!$%^&*(),./<>?#~@";
 
 	UNUSED(vars);
 
