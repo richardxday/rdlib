@@ -117,7 +117,7 @@ AValue::AValue(uint_t val) : Type(VALUE_INVALID),
 	operator = (val);
 }
 
-#if !INT32_IS_INT
+#if !SYSTEM_IS_64BITS
 AValue::AValue(sint32_t val) : Type(VALUE_INVALID),
 							   bReadOnly(false)
 {
@@ -254,7 +254,7 @@ AValue& AValue::operator = (uint_t val)
 	return *this;
 }
 
-#if !INT32_IS_INT
+#if !SYSTEM_IS_64BITS
 AValue& AValue::operator = (sint32_t val)
 {
 	Clear();
@@ -667,7 +667,7 @@ uint_t AValue::EvalNumber(const AString& str, uint_t p, bool allowModifiers, con
 const AValue& AValue::GenerateString(AString& str) const
 {
 	str.Delete();
-#if SYSTEM_64BIT
+#if SYSTEM_IS_64BITS
 	if      (IsInteger()) str.Format("%ld",   Value.i);
 	else if (IsFloat())   str.Format("#%lx",  Value.u);
 #else
@@ -705,7 +705,7 @@ const AValue& AValue::GenerateStringNice(AString& str, uint_t format, uint_t dec
 		else val = Value.u;
 
 		if (format == FORMAT_DEC) {
-#if SYSTEM_64BIT
+#if SYSTEM_IS_64BITS
 			numstr.Format("%lu", val);
 #else
 			numstr.Format("%llu", val);
@@ -713,7 +713,7 @@ const AValue& AValue::GenerateStringNice(AString& str, uint_t format, uint_t dec
 		}
 		else if ((format == FORMAT_HEX) || (format == FORMAT_HEX_C) || (format == FORMAT_HEX_NO_PREFIX)) {
 			prestr += Prefixes[format]; 
-#if SYSTEM_64BIT
+#if SYSTEM_IS_64BITS
 			numstr.Format("%lx", val);
 #else
 			numstr.Format("%llx", val);

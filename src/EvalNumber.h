@@ -60,7 +60,7 @@ public:
 	AValue(uint16_t val);
 	AValue(sint_t   val);
 	AValue(uint_t   val);
-#if !INT32_IS_INT
+#if !SYSTEM_IS_64BITS
 	AValue(sint32_t val);
 	AValue(uint32_t val);
 #endif
@@ -81,7 +81,7 @@ public:
 	AValue& operator = (uint16_t val);
 	AValue& operator = (sint_t   val);
 	AValue& operator = (uint_t   val);
-#if !INT32_IS_INT
+#if !SYSTEM_IS_64BITS
 	AValue& operator = (sint32_t val);
 	AValue& operator = (uint32_t val);
 #endif
@@ -119,7 +119,7 @@ public:
 	operator uint16_t() const {return (uint16_t)operator uint64_t();}
 	operator sint_t() 	const {return (sint_t)operator sint64_t();}
 	operator uint_t() 	const {return (uint_t)operator uint64_t();}
-#if !INT32_IS_INT
+#if !SYSTEM_IS_64BITS
 	operator sint32_t() const {return (sint32_t)operator sint64_t();}
 	operator uint32_t() const {return (uint32_t)operator uint64_t();}
 #endif
@@ -132,14 +132,14 @@ public:
 	static uint_t TypeOf(sint8_t  val) 		{UNUSED(val); return VALUE_SIGNED_INT8;}
 	static uint_t TypeOf(sint16_t val) 		{UNUSED(val); return VALUE_SIGNED_INT16;}
 	static uint_t TypeOf(sint_t   val) 		{UNUSED(val); return VALUE_SIGNED_INT;}
-#if !INT32_IS_INT
+#if !SYSTEM_IS_64BITS
 	static uint_t TypeOf(sint32_t val) 		{UNUSED(val); return VALUE_SIGNED_INT32;}
 #endif
 	static uint_t TypeOf(sint64_t val) 		{UNUSED(val); return VALUE_SIGNED_INT64;}
 	static uint_t TypeOf(uint8_t  val) 		{UNUSED(val); return VALUE_UNSIGNED_INT8;}
 	static uint_t TypeOf(uint16_t val) 		{UNUSED(val); return VALUE_UNSIGNED_INT16;}
 	static uint_t TypeOf(uint_t   val) 		{UNUSED(val); return VALUE_UNSIGNED_INT;}
-#if !INT32_IS_INT
+#if !SYSTEM_IS_64BITS
 	static uint_t TypeOf(uint32_t val) 		{UNUSED(val); return VALUE_UNSIGNED_INT32;}
 #endif
 	static uint_t TypeOf(uint64_t val) 		{UNUSED(val); return VALUE_UNSIGNED_INT64;}
@@ -148,14 +148,14 @@ public:
 	static uint_t TypeOf(const sint8_t  *p) {UNUSED(p);   return VALUE_SIGNED_INT8;}
 	static uint_t TypeOf(const sint16_t *p) {UNUSED(p);   return VALUE_SIGNED_INT16;}
 	static uint_t TypeOf(const sint_t   *p) {UNUSED(p);   return VALUE_SIGNED_INT;}
-#if !INT32_IS_INT
+#if !SYSTEM_IS_64BITS
 	static uint_t TypeOf(const sint32_t *p) {UNUSED(p);   return VALUE_SIGNED_INT32;}
 #endif
 	static uint_t TypeOf(const sint64_t *p) {UNUSED(p);   return VALUE_SIGNED_INT64;}
 	static uint_t TypeOf(const uint8_t  *p) {UNUSED(p);   return VALUE_UNSIGNED_INT8;}
 	static uint_t TypeOf(const uint16_t *p) {UNUSED(p);   return VALUE_UNSIGNED_INT16;}
 	static uint_t TypeOf(const uint_t   *p) {UNUSED(p);   return VALUE_UNSIGNED_INT;}
-#if !INT32_IS_INT
+#if !SYSTEM_IS_64BITS
 	static uint_t TypeOf(const uint32_t *p) {UNUSED(p);   return VALUE_UNSIGNED_INT32;}
 #endif
 	static uint_t TypeOf(const uint64_t *p) {UNUSED(p);   return VALUE_UNSIGNED_INT64;}
