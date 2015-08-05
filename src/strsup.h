@@ -54,7 +54,7 @@ public:
 	AString(uint16_t val);
 	AString(sint_t 	 val);
 	AString(uint_t 	 val);
-#if !INT32_IS_INT
+#if !SYSTEM_IS_64BITS
 	AString(sint32_t val);
 	AString(uint32_t val);
 #endif
@@ -90,7 +90,7 @@ public:
 	AString& operator = (uint16_t val);
 	AString& operator = (uint_t   val);
 	AString& operator = (sint_t   val);
-#if !INT32_IS_INT
+#if !SYSTEM_IS_64BITS
 	AString& operator = (sint32_t val);
 	AString& operator = (uint32_t val);
 #endif
@@ -142,7 +142,7 @@ public:
 	operator sint_t()         const {return (sint_t)operator sint64_t();}
 	operator uint_t()		  const {return (uint_t)operator uint64_t();}
 
-#if !INT32_IS_INT
+#if !SYSTEM_IS_64BITS
 	operator sint32_t()       const {return (sint32_t)operator sint64_t();}
 	operator uint32_t()		  const {return (uint32_t)operator uint64_t();}
 #endif
@@ -161,7 +161,7 @@ public:
 	AString& ConvertToHex(double   val);
 	AString& ConvertToHex(uint_t   val, bool pad = false);
 	AString& ConvertToHex(sint_t   val, bool pad = false) {return ConvertToHex((uint_t)val, pad);}
-#if !INT32_IS_INT
+#if !SYSTEM_IS_64BITS
 	AString& ConvertToHex(uint32_t val, bool pad = false);
 	AString& ConvertToHex(sint32_t val, bool pad = false) {return ConvertToHex((uint32_t)val, pad);}
 #endif
@@ -189,7 +189,7 @@ public:
 	AString Arg(uint16_t n) const;
 	AString Arg(sint_t   n) const;
 	AString Arg(uint_t   n) const;
-#if !INT32_IS_INT
+#if !SYSTEM_IS_64BITS
 	AString Arg(sint32_t n) const;
 	AString Arg(uint32_t n) const;
 #endif

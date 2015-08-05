@@ -105,7 +105,7 @@ AString::AString(uint_t val) : AListNode(),
 	operator = (val);
 }
 
-#if !INT32_IS_INT
+#if !SYSTEM_IS_64BITS
 AString::AString(sint32_t val) : AListNode(),
 								 pText((char *)pDefaultText),
 								 Length(0)
@@ -563,7 +563,7 @@ AString& AString::operator = (uint_t val)
 	return *this;
 }
 
-#if !INT32_IS_INT
+#if !SYSTEM_IS_64BITS
 AString& AString::operator = (sint32_t val)
 {
 	Create(AValue(val).GenerateString());
@@ -815,7 +815,7 @@ AString& AString::ConvertToHex(uint_t val, bool pad)
 	return *this;
 }
 
-#if !INT32_IS_INT
+#if !SYSTEM_IS_64BITS
 AString& AString::ConvertToHex(uint32_t val, bool pad)
 {
 #if LONG_IS_64BITS
@@ -1016,7 +1016,7 @@ AString AString::Arg(uint_t n) const
 	return str;
 }
 
-#if !INT32_IS_INT
+#if !SYSTEM_IS_64BITS
 AString AString::Arg(sint32_t n) const
 {
 	AString str = *this;
