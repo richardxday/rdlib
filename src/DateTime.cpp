@@ -137,7 +137,7 @@ void ADateTime::InitData()
 	if (!bDataInit) {
 		bDataInit = true;
 
-		uint i, n = 0;
+		uint_t i, n = 0;
 		for (i = 0; i < NUMBEROF(MonthLengths); i++) {
 			MonthStartDay[i] = n;
 			n += MonthLengths[i];

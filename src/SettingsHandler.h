@@ -20,7 +20,7 @@ public:
 	void CheckWrite();
 	bool HasFileChanged();
 
-	const AString& Get(const AString& name, const AString& defval = "") const;
+	AString Get(const AString& name, const AString& defval = "") const;
 	void Set(const AString& name, const AString& value);
 	bool Exists(const AString& name) const {return (Find(name) != NULL);}
 	void Delete(const AString& name);

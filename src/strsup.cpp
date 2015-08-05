@@ -91,7 +91,6 @@ AString::AString(ushort_t val) : AListNode(),
 	operator = (val);
 }
 
-#if !LONG_IS_64BITS
 AString::AString(sint_t val) : AListNode(),
 							   pText((char *)pDefaultText),
 							   Length(0)
@@ -105,8 +104,8 @@ AString::AString(uint_t val) : AListNode(),
 {
 	operator = (val);
 }
-#endif
 
+#if !INT32_IS_INT
 AString::AString(sint32_t val) : AListNode(),
 								 pText((char *)pDefaultText),
 								 Length(0)
@@ -120,6 +119,7 @@ AString::AString(uint32_t val) : AListNode(),
 {
 	operator = (val);
 }
+#endif
 
 AString::AString(sint64_t val) : AListNode(),
 								 pText((char *)pDefaultText),
@@ -551,7 +551,6 @@ AString& AString::operator = (uint16_t val)
 	return *this;
 }
 
-#if !LONG_IS_64BITS
 AString& AString::operator = (sint_t val)
 {
 	Create(AValue(val).GenerateString());
@@ -563,8 +562,8 @@ AString& AString::operator = (uint_t val)
 	Create(AValue(val).GenerateString());
 	return *this;
 }
-#endif
 
+#if !INT32_IS_INT
 AString& AString::operator = (sint32_t val)
 {
 	Create(AValue(val).GenerateString());
@@ -576,6 +575,7 @@ AString& AString::operator = (uint32_t val)
 	Create(AValue(val).GenerateString());
 	return *this;
 }
+#endif
 
 AString& AString::operator = (sint64_t val)
 {
@@ -808,15 +808,14 @@ AString& AString::ConvertToHex(double val)
 	return *this;
 }
 
-#if !LONG_IS_64BITS
 AString& AString::ConvertToHex(uint_t val, bool pad)
 {
 	if (pad) Format("$%08x", val);
 	else	 Format("$%x", val);
 	return *this;
 }
-#endif
 
+#if !INT32_IS_INT
 AString& AString::ConvertToHex(uint32_t val, bool pad)
 {
 #if LONG_IS_64BITS
@@ -840,6 +839,7 @@ AString& AString::ConvertToHex(uint64_t val, bool pad)
 #endif
 	return *this;
 }
+#endif
 
 void AString::Format(const char *format, ...)
 {
@@ -986,7 +986,6 @@ AString AString::Arg(uint16_t n) const
 	return str;
 }
 
-#if !LONG_IS_64BITS
 AString AString::Arg(sint_t n) const
 {
 	AString str = *this;
@@ -1016,8 +1015,8 @@ AString AString::Arg(uint_t n) const
 
 	return str;
 }
-#endif
 
+#if !INT32_IS_INT
 AString AString::Arg(sint32_t n) const
 {
 	AString str = *this;
@@ -1047,6 +1046,7 @@ AString AString::Arg(uint32_t n) const
 
 	return str;
 }
+#endif
 
 AString AString::Arg(sint64_t n) const
 {

@@ -321,7 +321,7 @@ slong_t AStdSerial::readdata(void *buf, size_t bytes)
 	slong_t n = -1;
 
 	if (isopen() && ((avail = bytesavailable()) >= 0)) {
-        bytes = MIN(bytes, avail);
+		bytes = MIN(avail, (slong_t)bytes);
 
 		if (bytes == 0) n = 0;
 		else			n = ::read(fd, buf, bytes);
