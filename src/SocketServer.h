@@ -22,7 +22,7 @@ public:
 	};
 
 	static bool Resolve(const char *host, uint_t port, struct sockaddr_in *sockaddr);
-
+		
 	int CreateHandler(uint_t type,
 					  const char *host,
 					  uint_t port,
@@ -75,6 +75,53 @@ public:
 
 	static AString GetClientAddr(const struct sockaddr_in *sockaddr);
 
+	class Handler {
+	public:
+		Handler(ASocketServer *_server = NULL) : server(_server),
+												 socket(-1) {}
+		Handler(ASocketServer *_server, const char *host, uint_t port) : server(_server),
+																		 socket(-1) {Open(host, port);}
+		virtual ~Handler() {Close();}
+
+		void SetSocketServer(ASocketServer *_server) {server = _server;}
+		
+		virtual bool Open(const char *host, uint_t port);
+		bool IsOpen() const {return (server && (socket >= 0));}
+		virtual void Close();
+
+	protected:
+		virtual void OnConnect() {}
+		virtual void OnRead() {}
+		virtual void OnWrite() {}
+		virtual bool NeedWrite() {return false;}
+		virtual void Cleanup() {socket = -1;}
+
+		static void __connectcallback(ASocketServer *server, int socket, void *context) {
+			UNUSED(server); UNUSED(socket);
+			((Handler *)context)->OnConnect();
+		}
+		static void __readcallback(ASocketServer *server, int socket, void *context) {
+			UNUSED(server); UNUSED(socket);
+			((Handler *)context)->OnRead();
+		}
+		static void __writecallback(ASocketServer *server, int socket, void *context) {
+			UNUSED(server); UNUSED(socket);
+			((Handler *)context)->OnWrite();
+		}
+		static void __destructor(ASocketServer *server, int socket, void *context) {
+			UNUSED(server); UNUSED(socket);
+			((Handler *)context)->Cleanup();
+		}
+		static bool __needwritecallback(ASocketServer *server, int socket, void *context) {
+			UNUSED(server); UNUSED(socket);
+			return ((Handler *)context)->NeedWrite();
+		}
+
+	protected:
+		ASocketServer *server;
+		int socket;
+	};
+	
 protected:
 	static void SetupSockets();
 

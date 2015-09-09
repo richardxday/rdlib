@@ -766,3 +766,30 @@ AString ASocketServer::GetClientAddr(const struct sockaddr_in *sockaddr)
 	
 	return client;
 }
+
+bool ASocketServer::Handler::Open(const char *host, uint_t port)
+{
+	bool success = false;
+
+	if (!IsOpen()) {
+		if ((socket = server->CreateHandler(Type_Client,
+											host, port,
+											&__connectcallback,
+											&__readcallback,
+											&__writecallback,
+											&__destructor,
+											&__needwritecallback,
+											this)) >= 0) {
+			success = true;
+		}
+	}
+
+	return success;
+}
+
+void ASocketServer::Handler::Close()
+{
+	if (IsOpen()) {
+		server->DeleteHandler(socket);
+	}
+}
