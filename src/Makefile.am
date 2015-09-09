@@ -35,6 +35,7 @@ librdlib_@RDLIB_MAJORMINOR@_la_SOURCES =		\
 	fastfft.cpp									\
 	Hash.cpp									\
 	HTMLTags.cpp								\
+	HTTPRequest.cpp								\
 	jpeginfo.cpp								\
 	JSONParser.cpp								\
 	ListNode.cpp								\
@@ -91,6 +92,7 @@ pkginclude_HEADERS = 							\
 	FileHash.h									\
 	Hash.h										\
 	HTMLTags.h									\
+	HTTPRequest.h								\
 	Interpolation.h								\
 	jpegfix.h									\
 	jpeginfo.h									\
