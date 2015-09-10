@@ -149,8 +149,7 @@ protected:
 class APixelWriter : public APixelHandler {
 public:
 	APixelWriter(AImage *image = NULL) : APixelHandler(image),
-										 pChild(NULL) {
-	}
+										 pChild(NULL) {}
 	virtual ~APixelWriter() {}
 
 	virtual void Attach(AImage *image) {APixelHandler::Attach(image); if (pChild) pChild->Attach(image);}
@@ -177,8 +176,7 @@ protected:
 class APixelReader : public APixelHandler {
 public:
 	APixelReader(AImage *image = NULL) : APixelHandler(image),
-										 pChild(NULL) {
-	}
+										 pChild(NULL) {}
 	virtual ~APixelReader() {}
 
 	virtual void Attach(AImage *image) {APixelHandler::Attach(image); if (pChild) pChild->Attach(image);}
@@ -395,8 +393,13 @@ protected:
 class AImage {
 public:
 	AImage();
+	AImage(const AImage& img);
 	virtual ~AImage();
 
+	virtual AImage& operator = (const AImage& img);
+	virtual bool    operator == (const AImage& img) const;
+	virtual bool    operator != (const AImage& img) const {return !operator == (img);}
+	
 	virtual bool Create(int Width, int Height);
 	virtual void Delete();
 
@@ -596,7 +599,6 @@ protected:
 	
 	int  TransformOptimization;
 	bool TransformInterpolation;
-
 };
 
 #endif

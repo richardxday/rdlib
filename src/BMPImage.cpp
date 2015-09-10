@@ -1,4 +1,4 @@
- 
+
 #include <stdio.h>
 
 #include "StdFile.h"
@@ -238,29 +238,80 @@ AImage::AImage() : pData(NULL),
 	BlankColour = AColour("$000000");
 }
 
+AImage::AImage(const AImage& img) : pData(NULL),
+									pWriter(&DefaultWriter),
+									pReader(&DefaultReader),
+									TransformOptimization(1),
+									TransformInterpolation(false)
+{
+	memset(&Header, 0, sizeof(Header));
+	memset(&Info,   0, sizeof(Info));
+
+	Colour      = AColour("$000000");
+	BlankColour = AColour("$000000");
+
+	operator = (img);
+}
+
 AImage::~AImage()
 {
 	Delete();
+}
+
+AImage& AImage::operator = (const AImage& img)
+{
+	if ((img.Rect.w * img.Rect.h) != (Rect.w * Rect.h)) {
+		Delete();
+		Rect = img.Rect;
+		CreateData();
+	}
+	else {
+		pReader->Detach();
+		pWriter->Detach();
+		Rect = img.Rect;
+		pWriter->Attach(this);
+		pReader->Attach(this);
+	}
+
+	if (pData) {
+		memcpy(pData, img.pData, Rect.w * Rect.h * sizeof(*pData));
+
+		Header 		= img.Header;
+		Info   		= img.Info;
+		Colour      = img.Colour;
+		BlankColour = img.BlankColour;
+
+		TransformOptimization  = img.TransformOptimization;
+		TransformInterpolation = img.TransformInterpolation;
+	}
+	else Delete();
+
+	return *this;
+}
+
+bool AImage::operator == (const AImage& img) const
+{
+	return ((Rect == img.Rect) && (memcmp(pData, img.pData, Rect.w * Rect.h * sizeof(*pData)) == 0));
 }
 
 bool AImage::CreateData()
 {
 	bool success = false;
 
-	if (pData) return false;
+	if (pData || !(Rect.w * Rect.h)) return false;
 
 	if ((pData = new PIXEL[Rect.w * Rect.h]) != NULL) {
 		memset(pData, 0, Rect.w * Rect.h * sizeof(*pData));
-		
+
 		// Create .bmp headers for display and saving
 		memset(&Header, 0, sizeof(Header));
 		memset(&Info, 0, sizeof(Info));
-		
+
 		/* generate header information */
 		Header.bfType    = 'B' | ('M' << 8);
 		Header.bfSize    = sizeof(Header) + sizeof(Info) + Rect.w * Rect.h * sizeof(*pData);
 		Header.bfOffBits = sizeof(Header) + sizeof(Info);
-		
+
 		/* fill in members according to MS documentation */
 		Info.bmiHeader.bV4Size        	= sizeof(Info.bmiHeader);
 		Info.bmiHeader.bV4BitCount    	= sizeof(*pData) * 8;
@@ -274,7 +325,7 @@ bool AImage::CreateData()
 
 		success = true;
 	}
-	
+
 	return success;
 }
 
@@ -295,7 +346,7 @@ bool AImage::Create(int Width, int Height)
 
 	if ((pData == NULL) && (Width > 0) && (Height > 0)) {
 		Rect.SetRect(0, 0, Width, Height);
-		
+
 		success = CreateData();
 	}
 
@@ -319,7 +370,7 @@ void AImage::Clear(const AColour& col)
 		else {
 			PIXEL *p  = pData;
 			uint_t  n   = Rect.w * Rect.h;
-			
+
 			while (n & 7) {
 				p[0] = pix;
 				p++; n--;
@@ -389,7 +440,7 @@ bool AImage::Save(AStdData& fp, const TAG *tags)
 		default:
 			break;
 	}
-	
+
 	return success;
 }
 
@@ -454,12 +505,12 @@ bool AImage::LoadJPEG(AStdData& fp)
 				size_t n;
 
 				if ((n = fp.readbytes(mem.GetCurrentData(), inc)) == 0) break;
-				
+
 				mem.AddBytes(n);
 				if (inc < (1024 * 1024)) inc <<= 1;
 			}
 		}
-		
+
 		/* Specify data source for decompression */
 		jpeg_mem_src(&cinfo, mem.GetData(), mem.GetLength());
 	}
@@ -481,7 +532,7 @@ bool AImage::LoadJPEG(AStdData& fp)
 			/* Process data */
 			while (cinfo.output_scanline < cinfo.output_height) {
 				num_scanlines = jpeg_read_scanlines(&cinfo, &buffer, 1);
-					
+
 				if (cinfo.output_components == 1) {
 					for (l = 0; l < num_scanlines; l++, y++) {
 						for (x = 0; x < cinfo.output_width; x++) {
@@ -554,7 +605,7 @@ bool AImage::SaveJPEG(AStdData& fp, const TAG *tags)
 	 * In particular, we don't yet know the input file's color space,
 	 * but we need to provide some value for jpeg_set_defaults() to work.
 	 */
-	
+
 	cinfo.in_color_space = JCS_RGB; /* arbitrary guess */
 	jpeg_set_defaults(&cinfo);
 
@@ -568,9 +619,9 @@ bool AImage::SaveJPEG(AStdData& fp, const TAG *tags)
 	cinfo.image_height 	   = Rect.h;
 	cinfo.input_components = 3;				/* # of color components per pixel */
 	cinfo.in_color_space   = JCS_RGB;		/* colorspace of input image */
-		
+
 	jpeg_set_defaults(&cinfo);
-		
+
 	jpeg_set_quality(&cinfo, TagValue(tags, TAG_JPEG_QUALITY, 75), true /* limit to baseline-JPEG values */);
 
 	/* Start compressor */
@@ -583,7 +634,7 @@ bool AImage::SaveJPEG(AStdData& fp, const TAG *tags)
 		uint_t p;
 
 		success = true;
-			
+
 		/* Process data */
 		while (cinfo.next_scanline < cinfo.image_height) {
 			for (x = p = 0; x < cinfo.image_width; x++) {
@@ -680,7 +731,7 @@ bool AImage::GenLineInfo(int x1, int y1, int x2, int y2, LINE_INFO& info) const
 			info.gt_count = MIN(info.greater, x1);
 			info.xadd_gt  = -1;
 		}
-		
+
 		if (y2 > y1) {
 			info.smaller  = y2 - y1;
 			info.sm_count = MIN(info.smaller, Rect.h - 1 - y1);
@@ -690,7 +741,7 @@ bool AImage::GenLineInfo(int x1, int y1, int x2, int y2, LINE_INFO& info) const
 			info.sm_count = MIN(info.smaller, y1);
 			info.yadd_sm  = -1;
 		}
-		
+
 		if (info.smaller > info.greater) {
 			SWAP(info.smaller,  info.greater);
 			SWAP(info.sm_count, info.gt_count);
@@ -733,7 +784,7 @@ void AImage::Box(int x1, int y1, int x2, int y2)
 
 	if ((x2 > x1) && (y2 > y1)) {
 		int x, y;
-		
+
 		BeginPlot();
 		for (y = y1; y < y2; y++) {
 			for (x = x1; x < x2; x++) pWriter->PlotEx(x, y, Colour);
@@ -753,7 +804,7 @@ bool AImage::CopyPixelData(PIXEL *dst, const APoint& dstpt, const ASize& dstsz, 
 		x1 = dstpt.x; y1 = dstpt.y; x2 = x1 + w; y2 = y1 + h;
 		x1 = MAX(x1, 0); x2 = MIN(x2, dstsz.w);
 		y1 = MAX(y1, 0); y2 = MIN(y2, dstsz.h);
-		
+
 		dst += x1 + (dstsz.h - 1 - y1) * dstsz.w;
 		w = MIN(w, x2 - x1);
 		h = MIN(h, y2 - y1);
@@ -820,14 +871,14 @@ void AImage::MatrixBlit(const ARect& rect, APixelReader& reader, const APoint& o
 		const int 	 y2 = y1 + rect.h;
 		double xf, yf, xi, yi;
 		int    x, y;
-		
+
 		BeginPlot();
 		for (y = y1; y < y2; y++) {
 			for (x = x1; x < x2; x++) {
 				xf = (double)x; yf = (double)y;
 				xi = xf * mat[0][0] + yf * mat[1][0];
 				yi = xf * mat[0][1] + yf * mat[1][1];
-				
+
 				Plot(x + xc, y + yc, reader.ReadPixel(xi + xo, yi + yo));
 			}
 		}
@@ -840,7 +891,7 @@ bool AImage::TransformConfig(const ARect& rect, APixelReader& reader, const ARec
 	data.reader = NULL;
 	data.x1  = data.y1  = data.x2  = data.y2  = data.xc = data.yc = 0;
 	data.xs1 = data.ys1 = data.xs2 = data.ys2 = 0;
-	
+
 	data.dist = data.perspective = data.cp = data.dcp = data.scale = 0.0;
 	data.offsetx = data.offsety = 0.0;
 	memset(data.border, 0, sizeof(data.border));
@@ -922,7 +973,7 @@ bool AImage::TransformConfig(const ARect& rect, APixelReader& reader, const ARec
 	data.y1 = (int)MIN(floor(y1f), ceil(y1f));
 	data.x2 = (int)MAX(floor(x2f), ceil(x2f));
 	data.y2 = (int)MAX(floor(y2f), ceil(y2f));
-	
+
 	ARect rect2 = reader.GetRect();
 
 	data.xs1 = rect1.x;             data.ys1 = rect1.y;
@@ -990,20 +1041,20 @@ void AImage::TransformBlit(TRANSFORM_DATA& data, bool drawborder, const AColour&
 				while (x2 >= x1) {
 					double x1f, y1f, x2f, y2f;
 					int xn = MIN(x2 - x1 + 1, TransformOptimization);
-					
+
 					if (Transform(data, x1, y, x1f, y1f) && Transform(data, x1 + xn, y, x2f, y2f)) {
 						double t1 = 1.0, t2 = 0.0, inc = ((xn > 1) ? 1.0 / (double)(xn - 1) : 0.0);
-						
+
 						if (TransformInterpolation) {
 							for (x = 0; x < xn; x++) {
 								xi = t1 * x1f + t2 * x2f;
 								yi = t1 * y1f + t2 * y2f;
-								
+
 								if ((xi >= data.xs1) && (yi >= data.ys1) && (xi <= data.xs2) && (yi <= data.ys2)) {
 									assert((x >= 0) && (x < Rect.w) && (y >= 0) && (y < Rect.h));
 									pWriter->PlotEx(x1 + x, y, reader->ReadPixelLimited(xi, yi));
 								}
-								
+
 								t1 -= inc; t2 += inc;
 							}
 						}
@@ -1011,17 +1062,17 @@ void AImage::TransformBlit(TRANSFORM_DATA& data, bool drawborder, const AColour&
 							for (x = 0; x < xn; x++) {
 								xi = t1 * x1f + t2 * x2f + .5;
 								yi = t1 * y1f + t2 * y2f + .5;
-								
+
 								if ((xi >= data.xs1) && (yi >= data.ys1) && (xi <= data.xs2) && (yi <= data.ys2)) {
 									assert((x >= 0) && (x < Rect.w) && (y >= 0) && (y < Rect.h));
 									pWriter->PlotEx(x1 + x, y, reader->ReadPixelEx((int)xi, (int)yi));
 								}
-								
+
 								t1 -= inc; t2 += inc;
 							}
 						}
 					}
-					
+
 					x1 += xn;
 				}
 			}
@@ -1050,15 +1101,15 @@ void AImage::TransformBlit(TRANSFORM_DATA& data, bool drawborder, const AColour&
 
 		if (drawborder) {
 			uint_t i;
-			
+
 			AColour oldColour = SetColour(borderColour);
-			
+
 			for (i = 0; i < NUMBEROF(data.corner); i++) {
 				uint_t j = (i + 1) % NUMBEROF(data.corner);
 
 				Line(data.corner[i].x, data.corner[i].y, data.corner[j].x, data.corner[j].y);
 			}
- 
+
 			SetColour(oldColour);
 		}
 	}
