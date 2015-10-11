@@ -73,6 +73,8 @@ public:
 
 	AString GetClientAddr(int socket) const;
 
+	virtual bool SetReceiveBufferSize(int socket, uint_t bytes);
+
 	static AString GetClientAddr(const struct sockaddr_in *sockaddr);
 
 	class Handler {
@@ -96,6 +98,8 @@ public:
 		virtual bool NeedWrite() {return false;}
 		virtual void Cleanup() {socket = -1;}
 
+		virtual bool SetReceiveBufferSize(uint_t bytes);
+		
 		static void __connectcallback(ASocketServer *server, int socket, void *context) {
 			UNUSED(server); UNUSED(socket);
 			((Handler *)context)->OnConnect();
@@ -168,8 +172,6 @@ protected:
 	uint_t	  MaxSendBuffer;
 	uint_t	  ProcessingDepth;
 	void      *readfds, *writefds;
-
-	static uint8_t staticbuf[4096];
 };
 
 #endif
