@@ -44,7 +44,7 @@ protected:
 };
 #endif
 
-uint8_t ASocketServer::staticbuf[4096];
+static uint8_t staticbuf[65536];
 
 ASocketServer::ASocketServer() : MaxSendBuffer(512 * 1024),
 								 ProcessingDepth(0),
@@ -767,6 +767,21 @@ AString ASocketServer::GetClientAddr(const struct sockaddr_in *sockaddr)
 	return client;
 }
 
+bool ASocketServer::SetReceiveBufferSize(int socket, uint_t bytes)
+{
+	bool success = false;
+
+	if (socket >= 0) {
+		int arg = bytes;
+		
+		success = (setsockopt(socket, SOL_SOCKET, SO_RCVBUF, &arg, sizeof(arg)) == 0);
+		if (!success) debug("Failed to set receive buffer size of socket %d to %d: %s\n", socket, arg, strerror(errno));
+	}
+	else debug("No socket when trying to set receiver buffer size!\n");
+
+	return success;
+}
+
 bool ASocketServer::Handler::Open(const char *host, uint_t port)
 {
 	bool success = false;
@@ -792,4 +807,9 @@ void ASocketServer::Handler::Close()
 	if (IsOpen()) {
 		server->DeleteHandler(socket);
 	}
+}
+
+bool ASocketServer::Handler::SetReceiveBufferSize(uint_t bytes)
+{
+	return server && server->SetReceiveBufferSize(socket, bytes);
 }
