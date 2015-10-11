@@ -4,16 +4,18 @@
 AHTTPRequest::AHTTPRequest(ASocketServer *_server) : ASocketServer::Handler(_server),
 													 port(80),
 													 sendrequest(false),
-													 complete(false)
+													 complete(false),
+													 pos(0)
 {
 }
 
 AHTTPRequest::AHTTPRequest(ASocketServer *_server, const AString& _url) : ASocketServer::Handler(_server),
 																		  port(80),
 																		  sendrequest(false),
-																		  complete(false)
+																		  complete(false),
+																		  pos(0)
 {
-	Open(_url);
+	OpenURL(_url);
 }
 
 AHTTPRequest::~AHTTPRequest()
@@ -21,7 +23,7 @@ AHTTPRequest::~AHTTPRequest()
 	Close();
 }
 
-bool AHTTPRequest::Open(const AString& _url)
+bool AHTTPRequest::OpenURL(const AString& _url)
 {
 	int p;
 	
@@ -46,29 +48,23 @@ void AHTTPRequest::OnConnect()
 	debug("Connected to %s:%u, sending request...\n", host.str(), port);
 	sendrequest = true;
 	complete = false;
+	pos = 0;
 }
 
 void AHTTPRequest::OnRead()
 {
+	uint_t maxlen = pos + 65536;
 	sint_t bytes;
 
-	if ((bytes = server->BytesAvailable(socket)) > 0) {
-		uint_t len = data.size();
-		sint_t bytes1;
-		
-		data.resize(len + bytes);
-		if ((bytes1 = server->ReadSocket(socket, &data[len], bytes)) > 0) {
-			data.resize(len + bytes1);
+	if (data.size() < maxlen) data.resize(maxlen);
 
-			ProcessData();
-		}
-		else {
-			debug("Failed to read %d bytes from socket %d\n", bytes, socket);
-			Close();
-		}
+	if ((bytes = server->ReadSocket(socket, &data[pos], data.size() - pos)) > 0) {
+		pos += bytes;
+
+		ProcessData();
 	}
 	else {
-		//debug("Connection to %s:%u closed%s\n", host.str(), port, sendrequest ? " (BEFORE request sent)" : "");
+		debug("Failed to read %u bytes from socket %d\n", (uint_t)(data.size() - pos), socket);
 		Close();
 	}
 }
@@ -102,21 +98,28 @@ void AHTTPRequest::Cleanup()
 	}
 
 	data.resize(0);
+	pos = 0;
 	sendrequest = false;
 }
 
+void AHTTPRequest::RemoveBytes(uint_t n)
+{
+	n = MIN(n, pos);
+	pos -= n;
+	if (pos) memmove(&data[0], &data[n], pos);
+}
+  
 bool AHTTPRequest::GetHeader(AString& header, uint_t maxlen)
 {
-	AString str((const char *)&data[0], MIN(data.size(), maxlen));
+	AString str((const char *)&data[0], MIN(pos, maxlen));
 	bool success = false;
 	int  p;
 		
 	if ((p = str.Pos("\r\n")) >= 0) {
 		header = str.Left(p); p += 2;
-			
-		memmove(&data[0], &data[p], data.size() - p);
-		data.resize(data.size() - p);
 
+		RemoveBytes(p);
+		
 		success = true;
 	}
 
