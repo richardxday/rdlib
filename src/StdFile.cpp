@@ -224,15 +224,6 @@ sint_t AStdFile::setbinarymode(bool binary)
 
 bool AStdFile::exists(const char *filename)
 {
-#ifdef __LINUX__
-	struct stat stat;
-	bool success = false;
-
-	if (lstat(filename, &stat) == 0) {
-		success = true;
-	}
-#endif
-#ifdef _WIN32
 	FILE *fp;
 	bool success = false;
 
@@ -241,7 +232,6 @@ bool AStdFile::exists(const char *filename)
 
 		success = true;
 	}
-#endif
 
 	return success;
 }
