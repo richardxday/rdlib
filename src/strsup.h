@@ -254,14 +254,14 @@ public:
 		return PasteLine(n, String, ",", flags);
 	}
 
-	sint_t Pos(const char *iText, sint_t pos = 0) const;
-	sint_t Pos(const AString& String, sint_t pos = 0) const;
-	sint_t LastPos(const char *iText, sint_t pos = MAXPOS) const;
-	sint_t LastPos(const AString& String, sint_t pos = MAXPOS) const;
-	sint_t PosNoCase(const char *iText, sint_t pos = 0) const;
-	sint_t PosNoCase(const AString& String, sint_t pos = 0) const;
-	sint_t LastPosNoCase(const char *iText, sint_t pos = MAXPOS) const;
-	sint_t LastPosNoCase(const AString& String, sint_t pos = MAXPOS) const;
+	sint_t Pos(const char *iText, sint_t startpos = 0, sint_t endpos = MAXPOS) const;
+	sint_t Pos(const AString& String, sint_t startpos = 0, sint_t endpos = MAXPOS) const;
+	sint_t LastPos(const char *iText, sint_t endpos = 0, sint_t startpos = MAXPOS) const {return Pos(iText, startpos, endpos);}
+	sint_t LastPos(const AString& String, sint_t endpos = 0, sint_t startpos = MAXPOS) const {return Pos(String, startpos, endpos);}
+	sint_t PosNoCase(const char *iText, sint_t startpos = 0, sint_t endpos = MAXPOS) const;
+	sint_t PosNoCase(const AString& String, sint_t startpos = 0, sint_t endpos = MAXPOS) const;
+	sint_t LastPosNoCase(const char *iText, sint_t endpos = 0, sint_t startpos = MAXPOS) const {return PosNoCase(iText, startpos, endpos);}
+	sint_t LastPosNoCase(const AString& String, sint_t endpos = 0, sint_t startpos = MAXPOS) const {return PosNoCase(String, startpos, endpos);}
 
 	bool StartsWith(const AString& String)       const {return (CompareCaseN(String, String.len()) == 0);}
 	bool StartsWithNoCase(const AString& String) const {return (CompareNoCaseN(String, String.len()) == 0);}

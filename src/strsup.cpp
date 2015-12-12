@@ -1500,44 +1500,24 @@ sint_t AString::PosEx(const char *text, sint_t len, sint_t startpos, sint_t endp
 	return found ? i : -1;
 }
 
-sint_t AString::Pos(const char *iText, sint_t pos) const
+sint_t AString::Pos(const char *iText, sint_t startpos, sint_t endpos) const
 {
-	return PosEx(iText, -1, pos, MAXPOS);
+	return PosEx(iText, -1, startpos, endpos);
 }
 
-sint_t AString::Pos(const AString& String, sint_t pos) const
+sint_t AString::Pos(const AString& String, sint_t startpos, sint_t endpos) const
 {
-	return PosEx(String, String.len(), pos, MAXPOS);
+	return PosEx(String, String.len(), startpos, endpos);
 }
 
-sint_t AString::LastPos(const char *iText, sint_t pos) const
+sint_t AString::PosNoCase(const char *iText, sint_t startpos, sint_t endpos) const
 {
-	return PosEx(iText, -1, pos, 0);
+	return PosEx(iText, -1, startpos, endpos, false);
 }
 
-sint_t AString::LastPos(const AString& String, sint_t pos) const
+sint_t AString::PosNoCase(const AString& String, sint_t startpos, sint_t endpos) const
 {
-	return PosEx(String, String.len(), pos, 0);
-}
-
-sint_t AString::PosNoCase(const char *iText, sint_t pos) const
-{
-	return PosEx(iText, -1, pos, MAXPOS, false);
-}
-
-sint_t AString::PosNoCase(const AString& String, sint_t pos) const
-{
-	return PosEx(String, String.len(), pos, MAXPOS, false);
-}
-
-sint_t AString::LastPosNoCase(const char *iText, sint_t pos) const
-{
-	return PosEx(iText, -1, pos, 0, false);
-}
-
-sint_t AString::LastPosNoCase(const AString& String, sint_t pos) const
-{
-	return PosEx(String, String.len(), pos, 0, false);
+	return PosEx(String, String.len(), startpos, endpos, false);
 }
 
 sint_t AString::CharPos(char c, sint_t pos) const
