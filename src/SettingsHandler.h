@@ -16,6 +16,7 @@ public:
 	static void SetHomeDirectory(const char *dir) {homedir = dir;}
 
 	void Read();
+	bool CheckRead();
 	void Write();
 	void CheckWrite();
 	bool HasFileChanged();
@@ -45,7 +46,7 @@ protected:
 	ADateTime timestamp;
 	AList 	  list;
 	AHash     hash;
-	uint32_t  changed_tick, write_tick;
+	uint32_t  readcheck_tick, changed_tick, write_tick;
 	uint32_t  writedelay;
 	bool  	  changed;
 	bool	  autowrite;
