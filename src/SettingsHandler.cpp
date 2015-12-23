@@ -8,7 +8,10 @@
 
 AString ASettingsHandler::homedir;
 
-ASettingsHandler::ASettingsHandler(const AString& name, bool inhomedir, uint32_t iwritedelay) : writedelay(iwritedelay),
+ASettingsHandler::ASettingsHandler(const AString& name, bool inhomedir, uint32_t iwritedelay) : readcheck_tick(0),
+																								changed_tick(0),
+																								write_tick(0),
+																								writedelay(iwritedelay),
 																								changed(false)
 {
 	if (inhomedir) {
@@ -28,6 +31,9 @@ ASettingsHandler::ASettingsHandler(const AString& name, bool inhomedir, uint32_t
 }
 
 ASettingsHandler::ASettingsHandler(const AString& path, const AString& name, uint32_t iwritedelay) : filename(path.CatPath(name + ".conf")),
+																									 readcheck_tick(0),
+																									 changed_tick(0),
+																									 write_tick(0),
 																									 writedelay(iwritedelay),
 																									 changed(false)
 {
@@ -88,6 +94,20 @@ void ASettingsHandler::Read()
 
 	changed = false;
 	write_tick = GetTickCount();
+}
+
+bool ASettingsHandler::CheckRead()
+{
+	bool changedondisk = false;
+	
+	if ((GetTickCount() - readcheck_tick) >= 2000)
+	{
+		readcheck_tick = GetTickCount();
+		
+		changedondisk = HasFileChanged();
+	}
+
+	return changedondisk;
 }
 
 void ASettingsHandler::Write()
