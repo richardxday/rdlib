@@ -583,7 +583,7 @@ void ADateTime::ModifyYear(DATETIME& dt, double n, bool pos, bool neg, bool rel)
 	if (bDebugStrToDate) debug("ModifyYear(%0.3lf, %u, %u) result (%u, %u: %s)\n", n, (uint_t)pos, (uint_t)neg, (uint_t)dt.Days, (uint_t)dt.MilliSeconds, ADateTime(dt.Days, dt.MilliSeconds).DateToStr().str());
 }
 
-void ADateTime::ModifyMonth(DATETIME& dt, double n, bool pos, bool neg) const
+void ADateTime::ModifyMonth(DATETIME& dt, double n, bool pos, bool neg, bool rel) const
 {
 	DAYMONTHYEAR dmy;
 	uint32_t ms = dt.MilliSeconds;
@@ -601,7 +601,7 @@ void ADateTime::ModifyMonth(DATETIME& dt, double n, bool pos, bool neg) const
 	if		(pos) AddDMY(dmy, 0, _n, 0);
 	else if (neg) SubDMY(dmy, 0, _n, 0);
 	else {
-		_n = SUBZ(_n, 1);
+		if (!rel) _n = SUBZ(_n, 1);
 		dmy.Month  = _n % NUMBEROF(MonthLengths);
 		dmy.Year  += _n / NUMBEROF(MonthLengths);
 	}
@@ -615,7 +615,7 @@ void ADateTime::ModifyMonth(DATETIME& dt, double n, bool pos, bool neg) const
 	if (bDebugStrToDate) debug("ModifyMonth(%0.3lf, %u, %u) result (%u, %u: %s)\n", n, (uint_t)pos, (uint_t)neg, (uint_t)dt.Days, (uint_t)dt.MilliSeconds, ADateTime(dt.Days, dt.MilliSeconds).DateToStr().str());
 }
 
-void ADateTime::ModifyWeeks(DATETIME& dt, double n, bool pos, bool neg) const
+void ADateTime::ModifyWeeks(DATETIME& dt, double n, bool pos, bool neg, bool rel) const
 {
 	if (!pos && !neg) {
 		DAYMONTHYEAR dmy;
@@ -627,7 +627,7 @@ void ADateTime::ModifyWeeks(DATETIME& dt, double n, bool pos, bool neg) const
 		dt.MilliSeconds = 0;
 
 		pos = true;
-		if (n >= 1.0) n--;
+		if (!rel && (n >= 1.0)) n--;
 	}
 
 	ModifyDays(dt, 7.0 * n, pos, neg);
@@ -635,14 +635,14 @@ void ADateTime::ModifyWeeks(DATETIME& dt, double n, bool pos, bool neg) const
 	if (bDebugStrToDate) debug("ModifyWeeks(%0.3lf, %u, %u) result (%u, %u: %s)\n", n, (uint_t)pos, (uint_t)neg, (uint_t)dt.Days, (uint_t)dt.MilliSeconds, ADateTime(dt.Days, dt.MilliSeconds).DateToStr().str());
 }
 
-void ADateTime::ModifyDay(DATETIME& dt, double n, bool pos, bool neg) const
+void ADateTime::ModifyDay(DATETIME& dt, double n, bool pos, bool neg, bool rel) const
 {
 	if (!pos && !neg) {
 		DAYMONTHYEAR dmy;
 	
 		DateTimeToDMY(dt, dmy);
 
-		n  -= (double)(dmy.Day + 1);
+		n  -= (double)(dmy.Day + (rel ? 0 : 1));
 		pos = true;
 	}
 	
@@ -1096,13 +1096,13 @@ ADateTime& ADateTime::StrToDate(const AString& String, uint_t relative, uint_t *
 		}
 		// M (only, m is used for minutes) suffix specifies month
 		else if (str == "M") {
-			ModifyMonth(DateTime, (double)val, pos, neg);
+			ModifyMonth(DateTime, (double)val, pos, neg, true);
 
 			_specified |= Specified_Date;
 		}
 		// d or D suffix specifies day
 		else if ((str == "d") || (str == "D")) {
-			ModifyDay(DateTime, (double)val, pos, neg);
+			ModifyDay(DateTime, (double)val, pos, neg, true);
 
 			_specified |= Specified_Date;
 		}
@@ -1127,7 +1127,7 @@ ADateTime& ADateTime::StrToDate(const AString& String, uint_t relative, uint_t *
 				else ModifyWeeks(DateTime, w, pos, neg);
 			}
 			// W is suffix so just modify weeks
-			else ModifyWeeks(DateTime, (double)val, pos, neg);
+			else ModifyWeeks(DateTime, (double)val, pos, neg, true);
 
 			_specified |= Specified_Date;
 		}
