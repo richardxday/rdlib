@@ -179,7 +179,7 @@ protected:
 	void AddDMY(DAYMONTHYEAR& dmy, uint_t years, uint_t months, uint_t days) const;
 	void SubDMY(DAYMONTHYEAR& dmy, uint_t years, uint_t months, uint_t days) const;
 
-	void ModifyYear(DATETIME& dt, double n, bool pos, bool neg) const;
+	void ModifyYear(DATETIME& dt, double n, bool pos, bool neg, bool rel = false) const;
 	void ModifyMonth(DATETIME& dt, double n, bool pos, bool neg) const;
 	void ModifyWeeks(DATETIME& dt, double n, bool pos, bool neg) const;
 	void ModifyDay(DATETIME& dt, double n, bool pos, bool neg) const;

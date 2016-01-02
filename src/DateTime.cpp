@@ -550,7 +550,7 @@ void ADateTime::SubDMY(DAYMONTHYEAR& dmy, uint_t years, uint_t months, uint_t da
 	if (bDebugStrToDate) debug("SubDMY(%u, %u, %u) result (%u, %u, %u)\n", years, months, days, dmy.Year, dmy.Month, dmy.Day);
 }
 
-void ADateTime::ModifyYear(DATETIME& dt, double n, bool pos, bool neg) const
+void ADateTime::ModifyYear(DATETIME& dt, double n, bool pos, bool neg, bool rel) const
 {
 	DAYMONTHYEAR dmy;
 	uint32_t ms = dt.MilliSeconds;
@@ -566,9 +566,13 @@ void ADateTime::ModifyYear(DATETIME& dt, double n, bool pos, bool neg) const
 	
 	DateTimeToDMY(dt, dmy);
 
-	if		(pos) dmy.Year += _n;
-	else if (neg) dmy.Year 	= SUBZ(dmy.Year, _n);
-	else          dmy.Year 	= MAX(_n, DATUM_YEAR);
+	if		(pos) 			   dmy.Year += _n;
+	else if (neg) 			   dmy.Year 	= SUBZ(dmy.Year, _n);
+	else if (_n >= DATUM_YEAR) dmy.Year  = _n;
+	else if (rel)			   dmy.Year  = DATUM_YEAR + _n;
+	else if (_n < 80)		   dmy.Year  = 2000 + _n;
+	else if (_n < 100)		   dmy.Year  = 1900 + _n;
+	else                       dmy.Year  = DATUM_YEAR + _n;
 
 	DMYToDateTime(dmy, dt);
 	dt.MilliSeconds = ms;
@@ -823,8 +827,8 @@ ADateTime& ADateTime::StrToDate(const AString& String, uint_t relative, uint_t *
 		
 		if (!val.IsValid()) {
 			// no value supplied -> look at string
-			if		(str == "+") {pos = true;  neg = false;}	// additive mode
-			else if	(str == "-") {pos = false; neg = true;}		// subtractive mode
+			if		(str == "+")	{pos = true;  neg = false;}	// additive mode
+			else if	(str == "-")	{pos = false; neg = true;}	// subtractive mode
 			else if (str == "utc")   utc = true;				// utc mode
 			else if (str == "local") utc = false;				// local mode
 			else if	(str == "now") {
@@ -1086,7 +1090,7 @@ ADateTime& ADateTime::StrToDate(const AString& String, uint_t relative, uint_t *
 		}
 		// y or Y suffix specifies year
 		else if ((str == "y") || (str == "Y")) {
-			ModifyYear(DateTime, (double)val, pos, neg);
+			ModifyYear(DateTime, (double)val, pos, neg, true);
 
 			_specified |= Specified_Date;
 		}
