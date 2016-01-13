@@ -118,6 +118,16 @@ AListNode *AListNode::Attach(AListNode *pNode, COMPARE_FUNC fn, void *pContext)
 	return pFirst;
 }
 
+AListNode *AListNode::Prepend(AListNode *pNode)
+{
+	return pNode ? InsertAfter(pNode->First()) : this;
+}
+
+AListNode *AListNode::Append(AListNode *pNode)
+{
+	return pNode ? InsertAfter(pNode->Last()) : this;
+}
+
 AListNode *AListNode::AttachEx(AListNode *pFirst, AListNode *pNode)
 {
 	AListNode *pNode1, *pNode2;

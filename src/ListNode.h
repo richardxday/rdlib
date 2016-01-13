@@ -57,8 +57,10 @@ public:
 	AListNode *InsertAfter(AListNode *pNode);
 	AListNode *Attach(AListNode *pNode);
 	AListNode *Attach(AListNode *pNode, COMPARE_FUNC fn, void *pContext = NULL);
+	AListNode *Prepend(AListNode *pNode);
+	AListNode *Append(AListNode *pNode);
 	AListNode *Detach();
-
+	
 	AListNode *First() const;
 	AListNode *Last() const;
 
