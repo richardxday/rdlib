@@ -416,11 +416,6 @@ public:
 	sint_t	GetField(const char *pStartMarker, const char *pEndMarker, AString& str, sint_t start = 0, sint_t *len = NULL) const;
 	bool    SetField(const char *pStartMarker, const char *pEndMarker, const char *pString, sint_t start = 0);
 
-	sint_t	GetXMLAttribute(const char *attr, AString& str, sint_t start = 0) const;
-
-	AString	GetXMLAttributes() const;
-	bool    SetXMLAttribute(const char *attr, const char *value, sint_t start = 0);
-
 	sint_t  GetFieldNumber(const char *pMarker, sint_t n, AString& str, sint_t start = 0) const;
 
 	AString AllUpperCase() const;

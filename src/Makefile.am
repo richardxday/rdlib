@@ -19,39 +19,26 @@ librdlib_@RDLIB_MAJORMINOR@_la_CPPFLAGS =		\
 
 librdlib_@RDLIB_MAJORMINOR@_la_SOURCES =		\
 	3DTrans.cpp									\
-	authorize.cpp								\
-	blowfish.cpp								\
-	blowfish_imp.c								\
 	BMPImage.cpp								\
-	cfft.cpp									\
-	crc32.cpp									\
 	DataList.cpp								\
 	DateObjectPair.cpp							\
 	DateTime.cpp								\
 	EvalNumber.cpp								\
 	Evaluator.cpp								\
-	exif.cpp									\
-	fastcomplex.cpp								\
-	fastfft.cpp									\
-	Hash.cpp									\
 	HTMLTags.cpp								\
 	HTTPRequest.cpp								\
-	jpeginfo.cpp								\
+	Hash.cpp									\
 	JSONParser.cpp								\
 	ListNode.cpp								\
 	Logger.cpp									\
 	Matrix.cpp									\
-	md5.c										\
 	MessageResponseHandler.cpp					\
-	misc.cpp									\
-	mt19937ar.c									\
 	NodeType.cpp								\
 	PointSizeRect.cpp							\
 	QuitHandler.cpp								\
 	Recurse.cpp									\
 	Regex.cpp									\
 	SettingsHandler.cpp							\
-	simpleeval.cpp								\
 	SocketServer.cpp							\
 	StdData.cpp									\
 	StdDev.cpp									\
@@ -61,56 +48,56 @@ librdlib_@RDLIB_MAJORMINOR@_la_SOURCES =		\
 	StdSocket.cpp								\
 	StdUri.cpp									\
 	StringList.cpp								\
-	strsup.cpp									\
 	StructList.cpp								\
-	tag.cpp										\
 	TextServer.cpp								\
 	Thread.cpp									\
 	ThreadLock.cpp								\
-	UDPServer.cpp
+	UDPServer.cpp								\
+	XMLDecode.cpp								\
+	authorize.cpp								\
+	blowfish.cpp								\
+	blowfish_imp.c								\
+	cfft.cpp									\
+	crc32.cpp									\
+	exif.cpp									\
+	fastcomplex.cpp								\
+	fastfft.cpp									\
+	jpeginfo.cpp								\
+	md5.c										\
+	misc.cpp									\
+	mt19937ar.c									\
+	simpleeval.cpp								\
+	strsup.cpp									\
+	tag.cpp
 
 pkginclude_HEADERS = 							\
 	3DTrans.h									\
 	3DWorld.h									\
 	Allocator.h									\
-	authorize.h									\
-	blowfish.h									\
-	blowfish_imp.h								\
 	BMPImage.h									\
-	cfft.h										\
 	Complex.h									\
-	crc32.h										\
 	DataList.h									\
 	DateObjectPair.h							\
 	DateTime.h									\
 	ErrorHandler.h								\
 	EvalNumber.h								\
 	Evaluator.h									\
-	exif.h										\
-	fastcomplex.h								\
-	fastfft.h									\
 	FileHash.h									\
-	Hash.h										\
 	HTMLTags.h									\
 	HTTPRequest.h								\
+	Hash.h										\
 	Interpolation.h								\
-	jpegfix.h									\
-	jpeginfo.h									\
 	JSONParser.h								\
 	ListNode.h									\
 	Logger.h									\
 	Matrix.h									\
-	md5.h										\
 	MessageResponseHandler.h					\
-	misc.h										\
-	mt19937ar.h									\
 	NodeType.h									\
 	PointSizeRect.h								\
 	QuitHandler.h								\
 	Recurse.h									\
 	Regex.h										\
 	SettingsHandler.h							\
-	simpleeval.h								\
 	SocketServer.h								\
 	StdData.h									\
 	StdDev.h									\
@@ -120,14 +107,30 @@ pkginclude_HEADERS = 							\
 	StdSocket.h									\
 	StdUri.h									\
 	StringList.h								\
-	strsup.h									\
 	StructList.h								\
-	tag.h										\
+	StructuredNode.h							\
 	TextServer.h								\
 	Thread.h									\
 	ThreadLock.h								\
-	types.h										\
 	UDPServer.h									\
+	XMLDecode.h									\
+	authorize.h									\
+	blowfish.h									\
+	blowfish_imp.h								\
+	cfft.h										\
+	crc32.h										\
+	exif.h										\
+	fastcomplex.h								\
+	fastfft.h									\
+	jpegfix.h									\
+	jpeginfo.h									\
+	md5.h										\
+	misc.h										\
+	mt19937ar.h									\
+	simpleeval.h								\
+	strsup.h									\
+	tag.h										\
+	types.h										\
 	wxsup.h
 
 noinst_HEADERS =
