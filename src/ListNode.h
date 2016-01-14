@@ -14,23 +14,25 @@ typedef int (*COMPARE_FUNC)(const AListNode *pNode1, const AListNode *pNode2, vo
         list = NULL;							\
     }
 
-#define LIST_ATTACH_EX(type,parent)																										\
-	type *InsertBefore(type *pNode) {return (type *)parent::InsertBefore(pNode);}														\
-	type *InsertAfter(type *pNode)  {return (type *)parent::InsertAfter(pNode);}														\
-	type *Attach(type *pNode) {return (type *)parent::Attach(pNode);}																	\
-	type *Attach(type *pNode, COMPARE_FUNC fn, void *pContext = NULL) {return (type *)parent::Attach(pNode, fn, pContext);}
-#define LIST_DETACH_EX(type,parent) type *Detach() {return (type *)parent::Detach();}
-#define LIST_NEXT_EX(type,parent)   type *Next(int n = 1) const {return (type *)parent::Next(n);}
-#define LIST_PREV_EX(type,parent)   type *Prev(int n = 1) const {return (type *)parent::Prev(n);}
-#define LIST_FIRST_EX(type,parent)  type *First() const {return (type *)parent::First();}
-#define LIST_LAST_EX(type,parent)   type *Last() const {return (type *)parent::Last();}
+#define LIST_ATTACH_EX(type,parent)										\
+	virtual type *InsertBefore(type *pNode) {return (type *)parent::InsertBefore(pNode);} \
+	virtual type *InsertAfter(type *pNode)  {return (type *)parent::InsertAfter(pNode);} \
+	virtual type *Attach(type *pNode) {return (type *)parent::Attach(pNode);} \
+	virtual type *Attach(type *pNode, COMPARE_FUNC fn, void *pContext = NULL) {return (type *)parent::Attach(pNode, fn, pContext);}	\
+	virtual type *Prepend(type *pNode) {return (type *)parent::Prepend(pNode);} \
+	virtual type *Append(type *pNode)  {return (type *)parent::Append(pNode);}
+#define LIST_DETACH_EX(type,parent) virtual type *Detach() {return (type *)parent::Detach();}
+#define LIST_NEXT_EX(type,parent)   virtual type *Next(int n = 1) const {return (type *)parent::Next(n);}
+#define LIST_PREV_EX(type,parent)   virtual type *Prev(int n = 1) const {return (type *)parent::Prev(n);}
+#define LIST_FIRST_EX(type,parent)  virtual type *First() const {return (type *)parent::First();}
+#define LIST_LAST_EX(type,parent)   virtual type *Last() const {return (type *)parent::Last();}
 #define LIST_MEMBER_EX(type,parent) static type *Member(type *pFirst, int n) {return (type *)parent::Member(pFirst, n);}
-#define LIST_SORT_EX(type,parent)																										\
-	type *Sort() {return (type *)parent::Sort();}																						\
-    type *Sort(COMPARE_FUNC fn, void *pContext = NULL) {return (type *)parent::Sort(fn, pContext);}
-#define LIST_MERGE_EX(type,parent)																										\
-	type *MergeList(AListNode *pNode) {return (type *)parent::MergeList(pNode);}														\
-	type *MergeList(AListNode *pNode, COMPARE_FUNC fn, void *pContext = NULL) {return (type *)parent::MergeList(pNode, fn, pContext);}
+#define LIST_SORT_EX(type,parent)										\
+	virtual type *Sort() {return (type *)parent::Sort();}				\
+    virtual type *Sort(COMPARE_FUNC fn, void *pContext = NULL) {return (type *)parent::Sort(fn, pContext);}
+#define LIST_MERGE_EX(type,parent)										\
+	virtual type *MergeList(AListNode *pNode) {return (type *)parent::MergeList(pNode);} \
+	virtual type *MergeList(AListNode *pNode, COMPARE_FUNC fn, void *pContext = NULL) {return (type *)parent::MergeList(pNode, fn, pContext);}
 
 #define LIST_FUNCTIONS_EX(type,parent)			\
 LIST_ATTACH_EX(type,parent);					\
@@ -53,31 +55,33 @@ public:
 	AListNode();
 	virtual ~AListNode();
 
-	AListNode *InsertBefore(AListNode *pNode);
-	AListNode *InsertAfter(AListNode *pNode);
-	AListNode *Attach(AListNode *pNode);
-	AListNode *Attach(AListNode *pNode, COMPARE_FUNC fn, void *pContext = NULL);
-	AListNode *Prepend(AListNode *pNode);
-	AListNode *Append(AListNode *pNode);
-	AListNode *Detach();
+	void Insert(AListNode *pNode1, AListNode *pNode2);
 	
-	AListNode *First() const;
-	AListNode *Last() const;
+	virtual AListNode *InsertBefore(AListNode *pNode);
+	virtual AListNode *InsertAfter(AListNode *pNode);
+	virtual AListNode *Attach(AListNode *pNode);
+	virtual AListNode *Attach(AListNode *pNode, COMPARE_FUNC fn, void *pContext = NULL);
+	virtual AListNode *Prepend(AListNode *pNode);
+	virtual AListNode *Append(AListNode *pNode);
+	virtual AListNode *Detach();
+	
+	virtual AListNode *First() const;
+	virtual AListNode *Last() const;
 
 	bool IsAttached() const {return (pPrev || pNext);}
 	bool IsFirst()    const {return (pPrev == NULL);}
 	bool IsLast()     const {return (pNext == NULL);}
 
-	AListNode *Next(int n = 1) const;
-	AListNode *Prev(int n = 1) const;
+	virtual AListNode *Next(int n = 1) const;
+	virtual AListNode *Prev(int n = 1) const;
 
-	AListNode *Sort();
-	AListNode *Sort(COMPARE_FUNC fn, void *pContext = NULL);
+	virtual AListNode *Sort();
+	virtual AListNode *Sort(COMPARE_FUNC fn, void *pContext = NULL);
 
-	AListNode *MergeList(AListNode *pNode);
-	AListNode *MergeList(AListNode *pNode, COMPARE_FUNC fn, void *pContext = NULL);
+	virtual AListNode *MergeList(AListNode *pNode);
+	virtual AListNode *MergeList(AListNode *pNode, COMPARE_FUNC fn, void *pContext = NULL);
 
-	AListNode *Traverse(bool (*fn)(AListNode *pNode, void *pContext), void *pContext = NULL);
+	virtual AListNode *Traverse(bool (*fn)(AListNode *pNode, void *pContext), void *pContext = NULL);
 
 	int Count(bool bTotal = true);
 
@@ -96,7 +100,6 @@ protected:
 	virtual AListNode *AttachEx(AListNode *pFirst, AListNode *pNode);
 	virtual AListNode *AttachEx(AListNode *pFirst, AListNode *pNode, COMPARE_FUNC fn, void *pContext = NULL);
 	virtual void DetachEx();
-	virtual void Insert(AListNode *pNode1, AListNode *pNode2);
 
 	virtual int Compare(const AListNode *pNode1, const AListNode *pNode2) {(void)pNode1; (void)pNode2; return 0;}
 	
