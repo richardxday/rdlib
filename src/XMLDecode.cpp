@@ -6,6 +6,7 @@
 #include "XMLDecode.h"
 #include "DataList.h"
 
+#define IsXMLStartChar(x) (IsSymbolStart(x) || ((x) == '?') || ((x) == '!'))
 #define IsXMLNameChar(x) (IsSymbolChar(x) || ((x) == ':') || ((x) == '-'))
 #define IsXMLWhiteSpace(x) (IsWhiteSpace(x) || ((x) == '\n') || ((x) == '\r'))
 
@@ -44,11 +45,22 @@ bool DecodeXML(AStructuredNode& root, const AString& str)
 		p1++;
 		if (str[p1] == '/') {
 			p1++;
-			if ((pNode != &root) && ((p2 = FindXMLMarker(str, p1)) > p1) && (str.Mid(p1, p2 - p1).Word(0).ToLower() == pNode->Key.ToLower())) {
-				if (debug_decode) debug("Closing node '%s'\n", pNode->Key.str());
-				popnode = true;
+			if ((pNode != &root) && ((p2 = FindXMLMarker(str, p1)) > p1)) {
+				uint_t p3 = p1;
 				
-				p1 = p2 + 1;
+				if (IsSymbolStart(str[p1])) p1++;
+				while (IsXMLNameChar(str[p1])) p1++;
+
+				AString name = str.Mid(p3, p1 - p3);
+				if (name == pNode->Key) {
+					if (debug_decode) debug("Closing node '%s'\n", pNode->Key.str());
+					popnode = true;
+					p1 = p2 + 1;
+				}
+				else {
+					debug("Unknown close object '%s' at %u\n", name.str(), p1);
+					break;
+				}
 			}
 			else {
 				debug("Unknown close marker at %u\n", p1);
@@ -73,7 +85,7 @@ bool DecodeXML(AStructuredNode& root, const AString& str)
 
 				complete |= (str[p1] == '!');
 
-				if ((str[p1] == '?') || (str[p1] == '!')) p1++;
+				if ((str[p1] == '?') || (str[p1] == '!')) pNode->SetType(str[p1++]);
 				
 				while (IsXMLWhiteSpace(str[p1])) p1++;
 
@@ -122,10 +134,13 @@ bool DecodeXML(AStructuredNode& root, const AString& str)
 				p2++;
 				while (IsXMLWhiteSpace(str[p2])) p2++;
 
-				p1 = p2;
-				while (str[p2] && (str[p2] != '<')) p2++;
-				if (p2 > p1) {
-					pNode->Value = str.Mid(p1, p2 - p1).Words(0);
+				p3 = p1 = p2;
+				while (str[p2] && (str[p2] != '<')) {
+					p2++;
+					if (!IsXMLWhiteSpace(str[p2 - 1])) p3 = p2;
+				}
+				if (p3 > p1) {
+					pNode->Value = str.Mid(p1, p3 - p1);
 					if (debug_decode) debug("Set value of '%s' to '%s'\n", pNode->Key.str(), pNode->Value.str());
 				}
 				p1 = p2;
