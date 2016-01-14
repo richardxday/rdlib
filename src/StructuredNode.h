@@ -6,22 +6,27 @@
 class AStructuredNode : public AKeyValuePair {
 public:
 	AStructuredNode() : AKeyValuePair(),
-						pFirstAttribute(NULL),
-						pFirstChild(NULL) {}
-	virtual ~AStructuredNode() {DELETE_LIST(pFirstAttribute); DELETE_LIST(pFirstChild);}
+						pAttributes(NULL),
+						pChildren(NULL),
+						Type(0) {}
+	virtual ~AStructuredNode() {DELETE_LIST(pAttributes); DELETE_LIST(pChildren);}
 	
-	LIST_FUNCTIONS(AStructuredNode);
+	LIST_FUNCTIONS_EX(AStructuredNode, AKeyValuePair);
 
-	const AListNode *GetFirstAttribute() 	 const {return pFirstAttribute;}
-	void			AddAttribute(AListNode *pNode) {pFirstAttribute = pNode->Append(pFirstAttribute);}
+	void    SetType(uint8_t type) {Type = type;}
+	uint8_t GetType()       const {return Type;}
+	
+	const AListNode *GetAttributes()		 const {return pAttributes;}
+	void			AddAttribute(AListNode *pNode) {pAttributes = pNode->Append(pAttributes);}
 		
-	const AListNode *GetFirstChild() 	   	 const {return pFirstChild;}
-	void			AddChild(AListNode *pNode)     {pFirstChild = pNode->Append(pFirstChild);}
+	const AListNode *GetChildren()			 const {return pChildren;}
+	void			AddChild(AListNode *pNode)     {pChildren = pNode->Append(pChildren);}
 
 protected:
-	AListNode *pFirstAttribute;
-	AListNode *pFirstChild;
-
+	AListNode *pAttributes;
+	AListNode *pChildren;
+	uint8_t	  Type;
+	
 protected:
 	NODETYPE_DEFINE(AStructuredNode);
 };
