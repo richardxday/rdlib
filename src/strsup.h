@@ -73,7 +73,7 @@ public:
 	void Delete();
 
 	char *Steal(sint_t *pLength = NULL);
-	void Take(const char *p);
+	void Take(const char *p, sint_t iLength = -1);
 
 	static AString ReadFile(const char *filename);
 	bool ReadFromFile(const char *filename, bool append = false);
@@ -471,16 +471,16 @@ protected:
 class AStringUpdate {
 public:
 	AStringUpdate(AString *iString = NULL, sint_t iBufferSize = 256);
-	virtual ~AStringUpdate();
+	~AStringUpdate();
 
-	virtual bool Attach(AString *iString, sint_t iBufferSize = 256);
+	bool Attach(AString *iString, sint_t iBufferSize = 256);
 
-	virtual void Update(char c);
-	virtual void Update(char *p) {Update((const char *)p);}
-	virtual void Update(const char *p);
-	virtual void Update(const AString& String);
+	void Update(char c);
+	void Update(char *p) {Update((const char *)p);}
+	void Update(const char *p);
+	void Update(const AString& String);
 
-	virtual void Flush();
+	void Flush();
 
 	AStringUpdate& operator += (char c)                {Update(c);      return *this;}
 	AStringUpdate& operator += (char *p)               {Update(p);      return *this;}
@@ -491,7 +491,7 @@ public:
 
 protected:
 	AString *pString;
-	char *pBuffer;
+	char    *pBuffer;
 	sint_t  BufferPos, BufferSize;
 };
 
