@@ -246,12 +246,13 @@ char *AString::Steal(sint_t *pLength)
 	return p;
 }
 
-void AString::Take(const char *p)
+void AString::Take(const char *p, sint_t iLength)
 {
 	Delete();
 
 	pText  = (char *)(p ? p : (char *)pDefaultText);
-	Length = strlen(pText);
+	if (iLength >= 0) Length = iLength;
+	else			  Length = strlen(pText);
 }
 
 AString AString::ReadFile(const char *filename)
