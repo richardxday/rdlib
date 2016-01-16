@@ -49,6 +49,7 @@ librdlib_@RDLIB_MAJORMINOR@_la_SOURCES =		\
 	StdUri.cpp									\
 	StringList.cpp								\
 	StructList.cpp								\
+	StructuredNode.cpp							\
 	TextServer.cpp								\
 	Thread.cpp									\
 	ThreadLock.cpp								\
