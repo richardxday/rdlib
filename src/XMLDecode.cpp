@@ -3,14 +3,13 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "QuitHandler.h"
 #include "XMLDecode.h"
 #include "DataList.h"
 
 #define IsXMLStartChar(x) (IsSymbolStart(x) || ((x) == '?') || ((x) == '!'))
 #define IsXMLNameChar(x) (IsSymbolChar(x) || ((x) == ':') || ((x) == '-'))
 #define IsXMLWhiteSpace(x) (IsWhiteSpace(x) || ((x) == '\n') || ((x) == '\r'))
-
-NODETYPE_IMPLEMENT(AStructuredNode);
 
 static bool debug_decode = false;
 
@@ -39,7 +38,7 @@ bool DecodeXML(AStructuredNode& root, const AString& str)
 	uint_t p1 = 0, p2;
 	
 	while (IsXMLWhiteSpace(str[p1])) p1++;
-	while (pNode && (str[p1] == '<')) {
+	while (!HasQuit() && pNode && (str[p1] == '<')) {
 		bool popnode = false;
 
 		p1++;
@@ -93,7 +92,7 @@ bool DecodeXML(AStructuredNode& root, const AString& str)
 				if (IsSymbolStart(str[p1])) p1++;
 				while (IsXMLNameChar(str[p1])) p1++;
 
-				pNode->Key = str.Mid(p4, p1 - p4);
+				pNode->Key = str.Mid(p4, p1 - p4).DeHTMLify();
 				if (debug_decode) debug("Created new node '%s' (%s)\n", pNode->Key.str(), complete ? "complete" : "open");
 
 				while (IsXMLWhiteSpace(str[p1])) p1++;
@@ -120,8 +119,8 @@ bool DecodeXML(AStructuredNode& root, const AString& str)
 					while (IsXMLWhiteSpace(str[p1])) p1++;
 
 					if ((p5 > p4) && ((pAttr = new AKeyValuePair) != NULL)) {
-						pAttr->Key   = str.Mid(p4, p5 - p4);
-						pAttr->Value = str.Mid(p6, p7 - p6);
+						pAttr->Key   = str.Mid(p4, p5 - p4).DeHTMLify();
+						pAttr->Value = str.Mid(p6, p7 - p6).DeHTMLify();
 						pNode->AddAttribute(pAttr);
 						if (debug_decode) debug("Added attribute '%s'='%s' to '%s'\n", pAttr->Key.str(), pAttr->Value.str(), pNode->Key.str());
 					}
@@ -140,7 +139,7 @@ bool DecodeXML(AStructuredNode& root, const AString& str)
 					if (!IsXMLWhiteSpace(str[p2 - 1])) p3 = p2;
 				}
 				if (p3 > p1) {
-					pNode->Value = str.Mid(p1, p3 - p1);
+					pNode->Value = str.Mid(p1, p3 - p1).DeHTMLify();
 					if (debug_decode) debug("Set value of '%s' to '%s'\n", pNode->Key.str(), pNode->Value.str());
 				}
 				p1 = p2;
@@ -168,3 +167,16 @@ bool DecodeXML(AStructuredNode& root, const AString& str)
 	
 	return (!str[p1] && (pNode == &root));
 }
+
+bool DecodeXMLFromFile(AStructuredNode& root, const AString& filename)
+{
+	AString str;
+	bool    success = false;
+	
+	if (str.ReadFromFile(filename)) {
+		success = DecodeXML(root, str);
+	}
+
+	return success;
+}
+
