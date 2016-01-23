@@ -2207,6 +2207,22 @@ AString AString::Remove(const char *pChars) const
 	return String;
 }
 
+AString AString::StripUnprintable() const
+{
+	AString res;
+
+	{
+		AStringUpdate update(&res);
+		int i;
+
+		for (i = 0; i < Length; i++) {
+			if (isprint(pText[i])) update.Update(pText[i]);
+		}
+	}
+	
+	return res;
+}
+
 AString AString::Abbreviate(sint_t n) const
 {
 	AString String;

@@ -368,7 +368,8 @@ public:
 
 	AString RemoveWhiteSpace() const;
 	AString Remove(const char *pChars) const;
-
+	AString StripUnprintable() const;
+	
 	void ForwardSlashify() {Replace("\\","/");}
 	void BackSlashify() {Replace("/","\\");}
 
