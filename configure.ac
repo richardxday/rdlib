@@ -87,7 +87,7 @@ dnl libpq is required
 LIBPQ_VER="9.4.0"
 PKG_CHECK_MODULES(LIBPQ, libpq >= $LIBPQ_VER, HAVE_LIBPQ=yes, HAVE_LIBPQ=no)
 if test "x${HAVE_LIBPQ}" != xyes ; then
-  AC_MSG_ERROR([libpqxx >= $LIBPQ_VER_VER is required])
+  AC_MSG_ERROR([libpq >= $LIBPQ_VER_VER is required])
 fi
 
 RDLIB_GLOBAL_CFLAGS="$RDLIB_GLOBAL_CFLAGS $LIBPQ_CFLAGS"
