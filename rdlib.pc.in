@@ -9,7 +9,7 @@ Name: rdlib-@RDLIB_MAJORMINOR@
 Description: Utility Library
 Requires.private: @RDLIB_PKG_DEPS@
 Version: @VERSION@
-Libs: -L${libdir} -lrdlib-@RDLIB_MAJORMINOR@
-Cflags: -I${includedir} @RDLIB_DEFINES@
+Libs: -L${libdir} -lrdlib-@RDLIB_MAJORMINOR@ @RDLIB_GLOBAL_LIBS@
+Cflags: -I${includedir} @RDLIB_GLOBAL_CFLAGS@
 
 

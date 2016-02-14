@@ -10,12 +10,11 @@ librdlib_@RDLIB_MAJORMINOR@_la_LDFLAGS =		\
 
 librdlib_@RDLIB_MAJORMINOR@_la_LIBADD =			\
     $(PTHREAD_LIBS)								\
-	$(JPEG_LIBS)
+	$(JPEG_LIBS)								\
+	$(LIBPQ_LIBS)
 
 librdlib_@RDLIB_MAJORMINOR@_la_CPPFLAGS =		\
-	$(RDLIB_CFLAGS)								\
-	$(PTHREAD_CFLAGS)							\
-	$(JPEG_CGLAGS)
+	$(RDLIB_GLOBAL_CFLAGS)
 
 librdlib_@RDLIB_MAJORMINOR@_la_SOURCES =		\
 	3DTrans.cpp									\
@@ -35,6 +34,7 @@ librdlib_@RDLIB_MAJORMINOR@_la_SOURCES =		\
 	MessageResponseHandler.cpp					\
 	NodeType.cpp								\
 	PointSizeRect.cpp							\
+	PostgresDatabase.cpp						\
 	QuitHandler.cpp								\
 	Recurse.cpp									\
 	Regex.cpp									\
@@ -77,6 +77,7 @@ pkginclude_HEADERS = 							\
 	Allocator.h									\
 	BMPImage.h									\
 	Complex.h									\
+	Database.h									\
 	DataList.h									\
 	DateObjectPair.h							\
 	DateTime.h									\
@@ -94,12 +95,15 @@ pkginclude_HEADERS = 							\
 	Matrix.h									\
 	MessageResponseHandler.h					\
 	NodeType.h									\
+	pg_types.h									\
 	PointSizeRect.h								\
+	PostgresDatabase.h							\
 	QuitHandler.h								\
 	Recurse.h									\
 	Regex.h										\
 	SettingsHandler.h							\
 	SocketServer.h								\
+	SQLQuery.h									\
 	StdData.h									\
 	StdDev.h									\
 	StdFile.h									\
