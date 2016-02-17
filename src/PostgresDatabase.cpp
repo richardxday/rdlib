@@ -323,7 +323,7 @@ bool PostgresDatabase::PostgresQuery::Fetch(AString& results)
 				case TIMESTAMPOID: {
 					ADateTime dt;
 					dt.FromTimeStamp(p, true);
-					results.printf("%lu", (uint64_t)dt);
+					results += AString((uint64_t)dt);
 					//debug("%s->%llu->%s (%s)\n", p, (uint64)dt, dt.DateFormat("%Y-%M-%D %h:%m:%s.%S").str(), dt.UTCToLocal().DateFormat("%Y-%M-%D %h:%m:%s.%S").str());
 					break;
 				}
