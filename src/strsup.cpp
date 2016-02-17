@@ -105,30 +105,28 @@ AString::AString(uint_t val) : AListNode(),
 	operator = (val);
 }
 
-#if !SYSTEM_IS_64BITS
-AString::AString(sint32_t val) : AListNode(),
+AString::AString(slong_t val) : AListNode(),
+								pText((char *)pDefaultText),
+								Length(0)
+{
+	operator = (val);
+}
+
+AString::AString(ulong_t val) : AListNode(),
+								pText((char *)pDefaultText),
+								Length(0)
+{
+	operator = (val);
+}
+
+AString::AString(sllong_t val) : AListNode(),
 								 pText((char *)pDefaultText),
 								 Length(0)
 {
 	operator = (val);
 }
 
-AString::AString(uint32_t val) : AListNode(),
-								 pText((char *)pDefaultText),
-								 Length(0)
-{
-	operator = (val);
-}
-#endif
-
-AString::AString(sint64_t val) : AListNode(),
-								 pText((char *)pDefaultText),
-								 Length(0)
-{
-	operator = (val);
-}
-
-AString::AString(uint64_t val) : AListNode(),
+AString::AString(ullong_t val) : AListNode(),
 								 pText((char *)pDefaultText),
 								 Length(0)
 {
@@ -540,13 +538,13 @@ AString& AString::operator = (const AString& String)
 	return *this;
 }
 
-AString& AString::operator = (sint16_t val)
+AString& AString::operator = (sshort_t val)
 {
 	Create(AValue(val).GenerateString());
 	return *this;
 }
 
-AString& AString::operator = (uint16_t val)
+AString& AString::operator = (ushort_t val)
 {
 	Create(AValue(val).GenerateString());
 	return *this;
@@ -564,27 +562,25 @@ AString& AString::operator = (uint_t val)
 	return *this;
 }
 
-#if !SYSTEM_IS_64BITS
-AString& AString::operator = (sint32_t val)
+AString& AString::operator = (slong_t val)
 {
 	Create(AValue(val).GenerateString());
 	return *this;
 }
 
-AString& AString::operator = (uint32_t val)
-{
-	Create(AValue(val).GenerateString());
-	return *this;
-}
-#endif
-
-AString& AString::operator = (sint64_t val)
+AString& AString::operator = (ulong_t val)
 {
 	Create(AValue(val).GenerateString());
 	return *this;
 }
 
-AString& AString::operator = (uint64_t val)
+AString& AString::operator = (sllong_t val)
+{
+	Create(AValue(val).GenerateString());
+	return *this;
+}
+
+AString& AString::operator = (ullong_t val)
 {
 	Create(AValue(val).GenerateString());
 	return *this;
@@ -771,7 +767,7 @@ sint_t AString::FindEndQuote(char q, sint_t length, const char *p, uint_t flags)
 
 AString::operator bool() const
 {
-	return (operator sint64_t() != 0);
+	return (operator sllong_t() != 0);
 }
 
 AString::operator float() const
@@ -784,9 +780,9 @@ AString::operator double() const
 	return (double)EvalNumber(0, NULL, true);
 }
 
-AString::operator sint64_t() const
+AString::operator sllong_t() const
 {
-	return (sint64_t)EvalNumber(0, NULL, true);
+	return (sllong_t)EvalNumber(0, NULL, true);
 }
 
 AValue AString::EvalNumber(uint_t i, uint_t *endIndex, bool allowModifiers, const char *terminators, AString *error) const
@@ -816,31 +812,19 @@ AString& AString::ConvertToHex(uint_t val, bool pad)
 	return *this;
 }
 
-#if !SYSTEM_IS_64BITS
-AString& AString::ConvertToHex(uint32_t val, bool pad)
+AString& AString::ConvertToHex(ulong_t val, bool pad)
 {
-#if LONG_IS_64BITS
-	if (pad) Format("$%08x", val);
-	else	 Format("$%x", val);
-#else
 	if (pad) Format("$%08lx", val);
 	else	 Format("$%lx", val);
-#endif
 	return *this;
 }
 
-AString& AString::ConvertToHex(uint64_t val, bool pad)
+AString& AString::ConvertToHex(ullong_t val, bool pad)
 {
-#if LONG_IS_64BITS
-	if (pad) Format("$%08lx", val);
-	else	 Format("$%lx", val);
-#else
 	if (pad) Format("$%08llx", val);
 	else	 Format("$%llx", val);
-#endif
 	return *this;
 }
-#endif
 
 void AString::Format(const char *format, ...)
 {
@@ -957,7 +941,7 @@ AString AString::Arg(const AString& String) const
 	return str;
 }
 
-AString AString::Arg(sint16_t n) const
+AString AString::Arg(sshort_t n) const
 {
 	AString str = *this;
 	sint_t pos, len;
@@ -972,7 +956,7 @@ AString AString::Arg(sint16_t n) const
 	return str;
 }
 
-AString AString::Arg(uint16_t n) const
+AString AString::Arg(ushort_t n) const
 {
 	AString str = *this;
 	sint_t pos, len;
@@ -1017,8 +1001,7 @@ AString AString::Arg(uint_t n) const
 	return str;
 }
 
-#if !SYSTEM_IS_64BITS
-AString AString::Arg(sint32_t n) const
+AString AString::Arg(slong_t n) const
 {
 	AString str = *this;
 	sint_t pos, len;
@@ -1033,23 +1016,7 @@ AString AString::Arg(sint32_t n) const
 	return str;
 }
 
-AString AString::Arg(uint32_t n) const
-{
-	AString str = *this;
-	sint_t pos, len;
-
-	if ((pos = str.FindFormatSpecifier(len)) >= 0) {
-		AString str2;
-
-		str2.Format(str.Mid(pos, len), n);
-		str = str.Left(pos) + str2 + str.Mid(pos + len);
-	}
-
-	return str;
-}
-#endif
-
-AString AString::Arg(sint64_t n) const
+AString AString::Arg(ulong_t n) const
 {
 	AString str = *this;
 	sint_t pos, len;
@@ -1064,7 +1031,22 @@ AString AString::Arg(sint64_t n) const
 	return str;
 }
 
-AString AString::Arg(uint64_t n) const
+AString AString::Arg(sllong_t n) const
+{
+	AString str = *this;
+	sint_t pos, len;
+
+	if ((pos = str.FindFormatSpecifier(len)) >= 0) {
+		AString str2;
+
+		str2.Format(str.Mid(pos, len), n);
+		str = str.Left(pos) + str2 + str.Mid(pos + len);
+	}
+
+	return str;
+}
+
+AString AString::Arg(ullong_t n) const
 {
 	AString str = *this;
 	sint_t pos, len;
@@ -2627,16 +2609,16 @@ sint_t AString::Base64Decode(uint8_t *buffer, uint_t maxbytes) const
 {
 	sint_t n = Base64DecodeLength();
 	if (n > 0) {
-		uint32_t data;
+		ulong_t data;
 		
 		n = MIN(n, (sint_t)maxbytes);
 
 		sint_t i, j = 0;
 		for (i = 0; ((j + 3) <= n); i += 4) {
-			data  = (uint32_t)Base64Lookup[(uint8_t)pText[i]]     << 18;
-			data |= (uint32_t)Base64Lookup[(uint8_t)pText[i + 1]] << 12;
-			data |= (uint32_t)Base64Lookup[(uint8_t)pText[i + 2]] << 6;
-			data |= (uint32_t)Base64Lookup[(uint8_t)pText[i + 3]];
+			data  = (ulong_t)Base64Lookup[(uint8_t)pText[i]]     << 18;
+			data |= (ulong_t)Base64Lookup[(uint8_t)pText[i + 1]] << 12;
+			data |= (ulong_t)Base64Lookup[(uint8_t)pText[i + 2]] << 6;
+			data |= (ulong_t)Base64Lookup[(uint8_t)pText[i + 3]];
 
 			buffer[j++] = (uint8_t)(data >> 16);
 			buffer[j++] = (uint8_t)(data >> 8);
@@ -2645,16 +2627,16 @@ sint_t AString::Base64Decode(uint8_t *buffer, uint_t maxbytes) const
 
 		switch (n - j) {
 			case 2:
-				data  = (uint32_t)Base64Lookup[(uint8_t)pText[i]]     << 18;
-				data |= (uint32_t)Base64Lookup[(uint8_t)pText[i + 1]] << 12;
-				data |= (uint32_t)Base64Lookup[(uint8_t)pText[i + 2]] << 6;
+				data  = (ulong_t)Base64Lookup[(uint8_t)pText[i]]     << 18;
+				data |= (ulong_t)Base64Lookup[(uint8_t)pText[i + 1]] << 12;
+				data |= (ulong_t)Base64Lookup[(uint8_t)pText[i + 2]] << 6;
 				buffer[j++] = (uint8_t)(data >> 16);
 				buffer[j++] = (uint8_t)(data >> 8);
 				break;
 
 			case 1:
-				data  = (uint32_t)Base64Lookup[(uint8_t)pText[i]]     << 18;
-				data |= (uint32_t)Base64Lookup[(uint8_t)pText[i + 1]] << 12;
+				data  = (ulong_t)Base64Lookup[(uint8_t)pText[i]]     << 18;
+				data |= (ulong_t)Base64Lookup[(uint8_t)pText[i + 1]] << 12;
 				buffer[j++] = (uint8_t)(data >> 16);
 				break;
 
@@ -2695,12 +2677,12 @@ AString Base64Encode(const uint8_t *ptr, uint_t bytes)
 	AString res;
 	AStringUpdate updater(&res);
 	uint_t i, n = bytes - (bytes % 3);
-	uint32_t data;
+	ulong_t data;
 
 	assert(Base64Count == 64);
 
 	for (i = 0; i < n; i += 3) {
-		data = ((uint32_t)ptr[i] << 16) | ((uint32_t)ptr[i + 1] << 8) | (uint32_t)ptr[i + 2];
+		data = ((ulong_t)ptr[i] << 16) | ((ulong_t)ptr[i + 1] << 8) | (ulong_t)ptr[i + 2];
 		updater.Update(Base64Chars[(data >> 18) & 0x3f]);
 		updater.Update(Base64Chars[(data >> 12) & 0x3f]);
 		updater.Update(Base64Chars[(data >> 6)  & 0x3f]);
@@ -2709,7 +2691,7 @@ AString Base64Encode(const uint8_t *ptr, uint_t bytes)
 	
 	switch (bytes - i) {
 		case 2:
-			data = ((uint32_t)ptr[i] << 16) | ((uint32_t)ptr[i + 1] << 8);
+			data = ((ulong_t)ptr[i] << 16) | ((ulong_t)ptr[i + 1] << 8);
 			updater.Update(Base64Chars[(data >> 18) & 0x3f]);
 			updater.Update(Base64Chars[(data >> 12) & 0x3f]);
 			updater.Update(Base64Chars[(data >> 6)  & 0x3f]);
@@ -2717,7 +2699,7 @@ AString Base64Encode(const uint8_t *ptr, uint_t bytes)
 			break;
 			
 		case 1:
-			data = (uint32_t)ptr[i] << 16;
+			data = (ulong_t)ptr[i] << 16;
 			updater.Update(Base64Chars[(data >> 18) & 0x3f]);
 			updater.Update(Base64Chars[(data >> 12) & 0x3f]);
 			updater.Update('=');
