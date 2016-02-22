@@ -1,5 +1,6 @@
 
 #include <stdio.h>
+#include <ctype.h>
 
 #include "EvalNumber.h"
 #include "strsup.h"
@@ -528,6 +529,12 @@ bool AValue::IsNumberString(const AString& str, uint_t p, bool allowModifiers)
 
 const char *AValue::EvalNumber(const char *p, bool allowModifiers, const char *terminators, AString *error)
 {
+	enum {
+		FORMAT_DEC = 0,
+		FORMAT_HEX,
+		FORMAT_OCT,
+		FORMAT_BIN,
+	};	
 	const char *modstart = NULL, *modend = NULL, *p0 = p;
 
 	Clear();
@@ -653,233 +660,67 @@ uint_t AValue::EvalNumber(const AString& str, uint_t p, bool allowModifiers, con
 	return EvalNumber(pstr + p, allowModifiers, terminators, error) - pstr;
 }
 
-const AValue& AValue::GenerateString(AString& str) const
-{
-	str.Delete();
-#if LONG_IS_64BITS
-	if      (IsInteger()) str.Format("%ld",   Value.i);
-	else if (IsFloat())   str.Format("#%lx",  Value.u);
-#else
-	if      (IsInteger()) str.Format("%lld",  Value.i);
-	else if (IsFloat())   str.Format("#%llx", Value.u);
-#endif
-	return *this;
-}
-
-AString AValue::GenerateString() const
+AString AValue::ToString(const char *format) const
 {
 	AString str;
-	
-	GenerateString(str);
 
-	return str;
-}
+	if (Type != VALUE_INVALID) {
+		char    field[16];
+		AString fmt;
+		uint_t  l;
+		char    formatchar = 0;
 
-const AValue& AValue::GenerateStringNice(AString& str, uint_t format, uint_t decPlaces, uint_t fieldSize, char prefix) const
-{
-	static const char *Prefixes[] = {"", "$", "@", "%", "0x", "0o", "0b", "", "", ""};
-	AString prestr, numstr;
- 
-	str.Delete();
-
-	if (format >= FORMAT_ITEMS) format = FORMAT_DEC;
-
-	if (IsInteger()) {
-		uint64_t val;
+		field[0] = '%';
+		strcpy(field + 1, format);
+		l = strlen(field);
 		
-		if (IsSigned() && (Value.i < 0)) {
-			val = -Value.i;
-			prestr = "-";
+		if (l && IsAlphaChar(field[l - 1]) && (field[l - 1] != 'l')) {
+			formatchar = field[l - 1];
+			field[l - 1] = 0;
 		}
-		else val = Value.u;
 
-		if (format == FORMAT_DEC) {
-#if SYSTEM_IS_64BITS
-			numstr.Format("%lu", val);
-#else
-			numstr.Format("%llu", val);
-#endif
-		}
-		else if ((format == FORMAT_HEX) || (format == FORMAT_HEX_C) || (format == FORMAT_HEX_NO_PREFIX)) {
-			prestr += Prefixes[format]; 
-#if SYSTEM_IS_64BITS
-			numstr.Format("%lx", val);
-#else
-			numstr.Format("%llx", val);
-#endif
-		}
-		else {
-			AStringUpdate updater(&numstr);
-			sint_t shift = (sizeof(val) * 8) - 1, inc = 0;
-			uint_t mask;
+		if (formatchar) {
+			static const char legalintegerformatchars[] = "udxzp";
+			static const char legalfloatformatchars[]   = "feg";
 
-			prestr += Prefixes[format];
-			if      ((format == FORMAT_OCT) || (format == FORMAT_OCT_C) || (format == FORMAT_OCT_NO_PREFIX)) inc = 3;
-			else if ((format == FORMAT_BIN) || (format == FORMAT_BIN_C) || (format == FORMAT_BIN_NO_PREFIX)) inc = 1;
-			else assert(false);
-
-			shift = (shift / inc - 1) * inc;
-			mask  = (1 << inc) - 1;
-			while ((shift > 0) && !(val >> shift)) shift -= inc;
-
-			while (shift >= 0) {
-				updater.Update('0' + ((uint_t)(val >> shift) & mask));
-				shift -= inc;
+			if (IsInteger()) {
+				if (!strchr(legalintegerformatchars, tolower(formatchar))) formatchar = 0;
 			}
+			else if (!strchr(legalfloatformatchars, tolower(formatchar))) formatchar = 0;
 		}
-	}
-	else if (IsFloat()) {
-		static const char   radixes[] = {10, 16, 8, 2, 16, 8, 2, 16, 8, 2};
-		static const double fullrange = 54.0 * log(2.0);
-		const double radix    = (double)radixes[format];
-		const double logradix = log(radix);
-		uint_t maxdigits = (uint_t)ceil(fullrange / logradix);
-		double val = Value.f;
-
-		decPlaces = MIN(decPlaces, maxdigits);
-
-		if (val == 0.0) {
-			AStringUpdate updater(&numstr);
-
-			prestr += Prefixes[format];
-
-			updater.Update('0');
-			if (decPlaces > 0) {
-				uint_t i;
-
-				updater.Update('.');
-				for (i = 0; i < decPlaces; i++) updater.Update('0');
-			}
+		
+		if (!formatchar) {
+			if (IsInteger()) formatchar = IsSigned() ? 'd' : 'u';
+			else			 formatchar = 'f';
 		}
-		else {
-			if (val < 0.0) {
-				val    = -val;
-				prestr = "-";
-			}
-
-			AStringUpdate updater(&numstr);
-			static const char chars[] = "0123456789abcdef";
-			const char   fulldig  = radixes[format], halfdig = fulldig / 2;
-			char numbuf[64];
-			uint_t i, index = 0;
-
-			assert(maxdigits < NUMBEROF(numbuf));
-
-			prestr += Prefixes[format];
-
-			double fexpo = floor(log(val) / logradix);
-
-			if ((val * pow(radix, -fexpo)) <  1.0)   fexpo -= 1.0;
-			if ((val * pow(radix, -fexpo)) >= radix) fexpo += 1.0;
-
-			//debug("val = %0.18lf, expo = %d\n", val, expo);
-
-			double val1 = val * pow(radix, -fexpo);
-			for (index = 0; index < maxdigits; index++) {
-				int dig = (int)fmod(val1, radix);
-				numbuf[index] = dig;
-				//debug("dig @ %d = %d\n", index, dig);
-				val1 *= radix;
-			}
-			numbuf[index] = 0;
-
-			{
-				int dig = (int)fmod(val1, radix);
-				if (dig >= halfdig) {
-					for (i = index; i > 0;) {
-						i--;
-						if ((++numbuf[i]) >= fulldig) numbuf[i] = 0;
-						else break;
-					}
+		
+		if (IsInteger()) {
+			if (IsSigned()) {
+				if (Type == VALUE_SIGNED_LLONG) {
+					fmt.printf("%sll%c", field, formatchar);
+					str.printf(fmt, (sllong_t)Value.i);
+				}
+				else {
+					fmt.printf("%sl%c", field, formatchar);
+					str.printf(fmt, (slong_t)Value.i);
 				}
 			}
-			for (i = 0; i < index; i++) numbuf[i] = chars[(uint_t)numbuf[i]];
-
-			//debug("numbuf = %s\n", numbuf);
-
-			int expo = (int)fexpo;
-
-			if (!RANGE(expo, -10, 10)) {
-				updater.Update(numbuf[0]);
-				updater.Update('.');
-				updater.Update(AString(numbuf + 1, decPlaces + 1));
-				updater.Flush();
-				if (radix > 10.0) numstr.printf("x%d", expo);
-				else			  numstr.printf("e%d", expo);
-			}
-			else if (expo < 0) {
-				uint_t n = MIN(-expo - 1, (int)decPlaces);
-				updater.Update("0.");
-				for (i = 0; i < n; i++) updater.Update('0');
-				for (; i < decPlaces; i++) updater.Update(numbuf[i - n]);
+			else if (Type == VALUE_UNSIGNED_LLONG) {
+				fmt.printf("%sll%c", field, formatchar);
+				str.printf(fmt, (ullong_t)Value.u);
 			}
 			else {
-				uint_t n = MIN(expo, (int)index);
-				for (i = 0; i <= n; i++) updater.Update(numbuf[i]);
-				updater.Update('.');
-				for (i = 0; (i < (index - 1 - n)) && (i < decPlaces); i++) updater.Update(numbuf[n + 1 + i]);
-				for (; i < decPlaces; i++) updater.Update('0');
+				fmt.printf("%sl%c", field, formatchar);
+				str.printf(fmt, (ulong_t)Value.u);
 			}
 		}
+		else {
+			fmt.printf("%sl%c", field, formatchar);
+			str.printf(fmt, Value.f);
+		}
 	}
-
-	uint_t l = prestr.len() + numstr.len();
-
-	if (l < fieldSize) {
-		const char prefixstr[] = {prefix, 0};
-
-		if (IsNumeralChar(prefix)) numstr = AString(prefixstr).Copies(fieldSize - l) + numstr;
-		else					   prestr = AString(prefixstr).Copies(fieldSize - l) + prestr;
-	}
-
-	str = prestr + numstr;
-
-	return *this;
-}
-
-AString AValue::GenerateStringNice(uint_t format, uint_t decPlaces, uint_t fieldSize, char prefix) const
-{
-	AString str;
-
-	GenerateStringNice(str, format, decPlaces, fieldSize, prefix);
-
+	
 	return str;
-}
-
-AString AValue::ToString(const char *fmt) const
-{
-	uint_t format;
-	uint_t decPlaces = 3;
-	uint_t fieldSize = 0;
-	uint_t i = 0;
-	char   prefix = ' ', _format = 'd';
-
-	if (IsAlphaChar(fmt[i])) _format = fmt[i++];
-	if (fmt[i] == '0')		  prefix = fmt[i++];
-
-	sscanf(fmt + i, "%u.%u", &fieldSize, &decPlaces);
-
-	switch (_format) {
-		default:
-		case 'n':
-		case 'd':
-			format = FORMAT_DEC;
-			break;
-
-		case 'x':
-			format = FORMAT_HEX;
-			break;
-
-		case 'o':
-			format = FORMAT_OCT;
-			break;
-
-		case 'b':
-			format = FORMAT_BIN;
-			break;
-	}
-
-	return GenerateStringNice(format, decPlaces, fieldSize, prefix);
 }
 
 AValue::operator AString() const
