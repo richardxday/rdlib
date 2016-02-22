@@ -803,7 +803,7 @@ ADateTime& ADateTime::StrToDate(const AString& String, uint_t relative, uint_t *
 
 			debug("%u/%u: '%s' ('%s') / '%s'\n",
 				  i, n,
-				  val.IsValid() ? val.GenerateStringNice().str() : "<invalid>", valstr.str(),
+				  val.IsValid() ? val.ToString().str() : "<invalid>", valstr.str(),
 				  str.str());
 		}
 		debug("Terms as they are decoded:\n");
@@ -819,7 +819,7 @@ ADateTime& ADateTime::StrToDate(const AString& String, uint_t relative, uint_t *
 			// debug: output terms as they are decoded
 			debug("%u/%u: '%s' ('%s') / '%s' (%s, pos=%u, neg=%u)\n",
 				  i, n,
-				  val.IsValid() ? val.GenerateStringNice().str() : "<invalid>", valstr.str(),
+				  val.IsValid() ? val.ToString().str() : "<invalid>", valstr.str(),
 				  str.str(),
 				  DateToStr().str(),
 				  (uint_t)pos, (uint_t)neg);

@@ -77,74 +77,74 @@ AString::AString(char c) : AListNode(),
 	operator = (c);
 }
 
-AString::AString(sshort_t val) : AListNode(),
-								 pText((char *)pDefaultText),
-								 Length(0)
+AString::AString(sshort_t val, const char *format) : AListNode(),
+													 pText((char *)pDefaultText),
+													 Length(0)
 {
-	operator = (val);
+	operator = (AValue(val).ToString(format));
 }
 
-AString::AString(ushort_t val) : AListNode(),
-								 pText((char *)pDefaultText),
-								 Length(0)
+AString::AString(ushort_t val, const char *format) : AListNode(),
+													 pText((char *)pDefaultText),
+													 Length(0)
 {
-	operator = (val);
+	operator = (AValue(val).ToString(format));
 }
 
-AString::AString(sint_t val) : AListNode(),
-							   pText((char *)pDefaultText),
-							   Length(0)
+AString::AString(sint_t val, const char *format) : AListNode(),
+												   pText((char *)pDefaultText),
+												   Length(0)
 {
-	operator = (val);
+	operator = (AValue(val).ToString(format));
 }
 
-AString::AString(uint_t val) : AListNode(),
-							   pText((char *)pDefaultText),
-							   Length(0)
+AString::AString(uint_t val, const char *format) : AListNode(),
+												   pText((char *)pDefaultText),
+												   Length(0)
 {
-	operator = (val);
+	operator = (AValue(val).ToString(format));
 }
 
-AString::AString(slong_t val) : AListNode(),
-								pText((char *)pDefaultText),
-								Length(0)
+AString::AString(slong_t val, const char *format) : AListNode(),
+													pText((char *)pDefaultText),
+													Length(0)
 {
-	operator = (val);
+	operator = (AValue(val).ToString(format));
 }
 
-AString::AString(ulong_t val) : AListNode(),
-								pText((char *)pDefaultText),
-								Length(0)
+AString::AString(ulong_t val, const char *format) : AListNode(),
+													pText((char *)pDefaultText),
+													Length(0)
 {
-	operator = (val);
+	operator = (AValue(val).ToString(format));
 }
 
-AString::AString(sllong_t val) : AListNode(),
-								 pText((char *)pDefaultText),
-								 Length(0)
+AString::AString(sllong_t val, const char *format) : AListNode(),
+													 pText((char *)pDefaultText),
+													 Length(0)
 {
-	operator = (val);
+	operator = (AValue(val).ToString(format));
 }
 
-AString::AString(ullong_t val) : AListNode(),
-								 pText((char *)pDefaultText),
-								 Length(0)
+AString::AString(ullong_t val, const char *format) : AListNode(),
+													 pText((char *)pDefaultText),
+													 Length(0)
 {
-	operator = (val);
+	operator = (AValue(val).ToString(format));
 }
 
-AString::AString(float val) : AListNode(),
-							  pText((char *)pDefaultText),
-							  Length(0)
+AString::AString(float val, const char *format) : AListNode(),
+												  pText((char *)pDefaultText),
+												  Length(0)
 {
-	operator = (val);
+	operator = (AValue(val).ToString(format));
 }
 
-AString::AString(double val) : AListNode(),
-							   pText((char *)pDefaultText),
-							   Length(0)
+AString::AString(double val, const char *format) : AListNode(),
+												   pText((char *)pDefaultText),
+												   Length(0)
 {
-	operator = (val);
+	operator = (AValue(val).ToString(format));
 }
 
 AString::~AString()
@@ -540,61 +540,61 @@ AString& AString::operator = (const AString& String)
 
 AString& AString::operator = (sshort_t val)
 {
-	Create(AValue(val).GenerateString());
+	Create(AValue(val).ToString());
 	return *this;
 }
 
 AString& AString::operator = (ushort_t val)
 {
-	Create(AValue(val).GenerateString());
+	Create(AValue(val).ToString());
 	return *this;
 }
 
 AString& AString::operator = (sint_t val)
 {
-	Create(AValue(val).GenerateString());
+	Create(AValue(val).ToString());
 	return *this;
 }
 
 AString& AString::operator = (uint_t val)
 {
-	Create(AValue(val).GenerateString());
+	Create(AValue(val).ToString());
 	return *this;
 }
 
 AString& AString::operator = (slong_t val)
 {
-	Create(AValue(val).GenerateString());
+	Create(AValue(val).ToString());
 	return *this;
 }
 
 AString& AString::operator = (ulong_t val)
 {
-	Create(AValue(val).GenerateString());
+	Create(AValue(val).ToString());
 	return *this;
 }
 
 AString& AString::operator = (sllong_t val)
 {
-	Create(AValue(val).GenerateString());
+	Create(AValue(val).ToString());
 	return *this;
 }
 
 AString& AString::operator = (ullong_t val)
 {
-	Create(AValue(val).GenerateString());
+	Create(AValue(val).ToString());
 	return *this;
 }
 
 AString& AString::operator = (float val)
 {
-	Create(AValue(val).GenerateString());
+	Create(AValue(val).ToString());
 	return *this;
 }
 
 AString& AString::operator = (double val)
 {
-	Create(AValue(val).GenerateString());
+	Create(AValue(val).ToString());
 	return *this;
 }
 
@@ -797,35 +797,6 @@ AValue AString::EvalNumber(uint_t i, uint_t *endIndex, bool allowModifiers, cons
 	return value;
 }
 
-AString& AString::ConvertToHex(double val)
-{
-	uint64_t uval;
-	memcpy(&uval, &val, sizeof(val));
-	Format("#%016" FMT64 "x", uval);
-	return *this;
-}
-
-AString& AString::ConvertToHex(uint_t val, bool pad)
-{
-	if (pad) Format("$%08x", val);
-	else	 Format("$%x", val);
-	return *this;
-}
-
-AString& AString::ConvertToHex(ulong_t val, bool pad)
-{
-	if (pad) Format("$%08lx", val);
-	else	 Format("$%lx", val);
-	return *this;
-}
-
-AString& AString::ConvertToHex(ullong_t val, bool pad)
-{
-	if (pad) Format("$%08llx", val);
-	else	 Format("$%llx", val);
-	return *this;
-}
-
 void AString::Format(const char *format, ...)
 {
 	va_list ap;
@@ -889,221 +860,118 @@ void AString::vprintf(const char *format, va_list ap)
 	if (buffer) free(buffer);
 }
 
-sint_t AString::FindFormatSpecifier(sint_t& len) const
+AString AString::FindFormatSpecifier(AString& left, AString& right) const
 {
-	len = 0;
+	AString fmt;
+	sint_t p = 0;
 
-	sint_t i, j;
-	for (i = 0; i < Length; i++) {
-		if ((pText[i] == '%') && (pText[i + 1] != '%')) {
-			for (j = 1; (i + j) < Length; j++) {
-				static const char *Specifiers = "uidxefpsc";
-				if (strchr(Specifiers, tolower(pText[i + j]))) {
-					len = j + 1;
-					break;
-				}
-				else if (pText[i + j] == '%') break;
-			}
-			break;
-		}
+	while (((p = Pos("%", p)) >= 0) && (pText[p + 1] == '%')) p += 2;
+
+	if (p >= 0) {
+		sint_t p0 = p;
+
+		p++;
+
+		sint_t p1 = p;
+		while (IsNumeralChar(pText[p]) || (pText[p] == '.')) p++;
+		sint_t p2 = p;
+		
+		if (IsAlphaChar(pText[p])) p2 = ++p;
+		else if (pText[p] == ';')  p++;
+
+		fmt   = Mid(p1, p2 - p1);
+		left  = Left(p0);
+		right = Mid(p);
 	}
+	else {
+		left = *this;
+		right.Delete();
+	}
+	
+	return fmt;
+}
 
-	return ((i < Length) && (len > 0)) ? i : -1;
+AString AString::InsertValue(const AValue& val) const
+{
+	AString left, right;
+	AString fmt = FindFormatSpecifier(left, right);
+
+	return left + val.ToString(fmt) + right;
 }
 
 AString AString::Arg(const char *iText) const
 {
-	AString str = *this;
-	sint_t pos, len;
+	AString left, right;
+	AString fmt = "%" + FindFormatSpecifier(left, right) + "s";
+	AString str;
 
-	if ((pos = str.FindFormatSpecifier(len)) >= 0) {
-		AString str2;
-
-		str2.Format(str.Mid(pos, len), iText);
-		str = str.Left(pos) + str2 + str.Mid(pos + len);
-	}
-
-	return str;
+	str.printf(fmt, iText);
+	return left + str + right;
 }
 
 AString AString::Arg(const AString& String) const
 {
-	AString str = *this;
-	sint_t pos, len;
+	AString left, right;
+	AString fmt = "%" + FindFormatSpecifier(left, right) + "s";
+	AString str;
 
-	if ((pos = str.FindFormatSpecifier(len)) >= 0) {
-		AString str2;
-
-		str2.Format(str.Mid(pos, len), String.str());
-		str = str.Left(pos) + str2 + str.Mid(pos + len);
-	}
-
-	return str;
+	str.printf(fmt, String.str());
+	return left + str + right;
 }
 
 AString AString::Arg(sshort_t n) const
 {
-	AString str = *this;
-	sint_t pos, len;
-
-	if ((pos = str.FindFormatSpecifier(len)) >= 0) {
-		AString str2;
-
-		str2.Format(str.Mid(pos, len), n);
-		str = str.Left(pos) + str2 + str.Mid(pos + len);
-	}
-
-	return str;
+	return InsertValue(n);
 }
 
 AString AString::Arg(ushort_t n) const
 {
-	AString str = *this;
-	sint_t pos, len;
-
-	if ((pos = str.FindFormatSpecifier(len)) >= 0) {
-		AString str2;
-
-		str2.Format(str.Mid(pos, len), n);
-		str = str.Left(pos) + str2 + str.Mid(pos + len);
-	}
-
-	return str;
+	return InsertValue(n);
 }
 
 AString AString::Arg(sint_t n) const
 {
-	AString str = *this;
-	sint_t pos, len;
-
-	if ((pos = str.FindFormatSpecifier(len)) >= 0) {
-		AString str2;
-
-		str2.Format(str.Mid(pos, len), n);
-		str = str.Left(pos) + str2 + str.Mid(pos + len);
-	}
-
-	return str;
+	return InsertValue(n);
 }
 
 AString AString::Arg(uint_t n) const
 {
-	AString str = *this;
-	sint_t pos, len;
-
-	if ((pos = str.FindFormatSpecifier(len)) >= 0) {
-		AString str2;
-
-		str2.Format(str.Mid(pos, len), n);
-		str = str.Left(pos) + str2 + str.Mid(pos + len);
-	}
-
-	return str;
+	return InsertValue(n);
 }
 
 AString AString::Arg(slong_t n) const
 {
-	AString str = *this;
-	sint_t pos, len;
-
-	if ((pos = str.FindFormatSpecifier(len)) >= 0) {
-		AString str2;
-
-		str2.Format(str.Mid(pos, len), n);
-		str = str.Left(pos) + str2 + str.Mid(pos + len);
-	}
-
-	return str;
+	return InsertValue(n);
 }
 
 AString AString::Arg(ulong_t n) const
 {
-	AString str = *this;
-	sint_t pos, len;
-
-	if ((pos = str.FindFormatSpecifier(len)) >= 0) {
-		AString str2;
-
-		str2.Format(str.Mid(pos, len), n);
-		str = str.Left(pos) + str2 + str.Mid(pos + len);
-	}
-
-	return str;
+	return InsertValue(n);
 }
 
 AString AString::Arg(sllong_t n) const
 {
-	AString str = *this;
-	sint_t pos, len;
-
-	if ((pos = str.FindFormatSpecifier(len)) >= 0) {
-		AString str2;
-
-		str2.Format(str.Mid(pos, len), n);
-		str = str.Left(pos) + str2 + str.Mid(pos + len);
-	}
-
-	return str;
+	return InsertValue(n);
 }
 
 AString AString::Arg(ullong_t n) const
 {
-	AString str = *this;
-	sint_t pos, len;
-
-	if ((pos = str.FindFormatSpecifier(len)) >= 0) {
-		AString str2;
-
-		str2.Format(str.Mid(pos, len), n);
-		str = str.Left(pos) + str2 + str.Mid(pos + len);
-	}
-
-	return str;
+	return InsertValue(n);
 }
 
 AString AString::Arg(float n) const
 {
-	AString str = *this;
-	sint_t pos, len;
-
-	if ((pos = str.FindFormatSpecifier(len)) >= 0) {
-		AString str2;
-
-		str2.Format(str.Mid(pos, len), n);
-		str = str.Left(pos) + str2 + str.Mid(pos + len);
-	}
-
-	return str;
+	return InsertValue(n);
 }
 
 AString AString::Arg(double n) const
 {
-	AString str = *this;
-	sint_t pos, len;
-
-	if ((pos = str.FindFormatSpecifier(len)) >= 0) {
-		AString str2;
-
-		str2.Format(str.Mid(pos, len), n);
-		str = str.Left(pos) + str2 + str.Mid(pos + len);
-	}
-
-	return str;
+	return InsertValue(n);
 }
 
-AString AString::Arg(const void *p) const
+AString AString::EndArgs() const
 {
-	AString str = *this;
-	sint_t pos, len;
-
-	if ((pos = str.FindFormatSpecifier(len)) >= 0) {
-		AString str2;
-
-		str2.Format(str.Mid(pos, len), p);
-		str = str.Left(pos) + str2 + str.Mid(pos + len);
-	}
-
-	return str;
+	return SearchAndReplace("%%", "%");
 }
 
 AString AString::Left(sint_t length) const

@@ -816,9 +816,7 @@ public:
 
 #ifdef __STRING_SUPPORT__
 	AString ToText() const {
-		AString String;
-		String.ConvertToHex(operator uint32_t());
-		return String;
+		return AValue(operator uint32_t()).ToString("$08x");
 	}
 	void FromText(const AString& text) {operator = ((uint32_t)text);}
 #endif

@@ -6,21 +6,6 @@
 
 #define NUMSTR(fmt,val) AValue(val).ToString(fmt).str()
 
-enum {
-	FORMAT_DEC = 0,
-	FORMAT_HEX,
-	FORMAT_OCT,
-	FORMAT_BIN,
-	FORMAT_HEX_C,
-	FORMAT_OCT_C,
-	FORMAT_BIN_C,
-	FORMAT_HEX_NO_PREFIX,
-	FORMAT_OCT_NO_PREFIX,
-	FORMAT_BIN_NO_PREFIX,
-
-	FORMAT_ITEMS,
-};
-
 class AString;
 class AValue {
 public:
@@ -171,13 +156,7 @@ public:
 	const char *EvalNumber(const char *p, bool allowModifiers = true, const char *terminators = NULL, AString *error = NULL);
 	uint_t EvalNumber(const AString& str, uint_t p, bool allowModifiers = true, const char *terminators = NULL, AString *error = NULL);
 
-	const AValue& GenerateString(AString& str) const;
-	const AValue& GenerateStringNice(AString& str, uint_t format = FORMAT_DEC, uint_t decPlaces = 3, uint_t fieldSize = 0, char prefix = ' ') const;
-
-	AString GenerateString() const;
-	AString GenerateStringNice(uint_t format = FORMAT_DEC, uint_t decPlaces = 3, uint_t fieldSize = 0, char prefix = ' ') const;
-
-	AString ToString(const char *fmt = "n") const;
+	AString ToString(const char *format = "") const;
 	
 	operator AString() const;
 

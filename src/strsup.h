@@ -50,16 +50,16 @@ public:
 	AString(const AString& String, sint_t iLength = -1);
 	AString(bool   	 v);
 	AString(char   	 c);
-	AString(sshort_t val);
-	AString(ushort_t val);
-	AString(sint_t 	 val);
-	AString(uint_t 	 val);
-	AString(slong_t  val);
-	AString(ulong_t  val);
-	AString(sllong_t val);
-	AString(ullong_t val);
-	AString(float  	 val);
-	AString(double 	 val);
+	AString(sshort_t val, const char *format = "");
+	AString(ushort_t val, const char *format = "");
+	AString(sint_t 	 val, const char *format = "");
+	AString(uint_t 	 val, const char *format = "");
+	AString(slong_t  val, const char *format = "");
+	AString(ulong_t  val, const char *format = "");
+	AString(sllong_t val, const char *format = "");
+	AString(ullong_t val, const char *format = "");
+	AString(float  	 val, const char *format = "");
+	AString(double 	 val, const char *format = "");
 	virtual ~AString();
 
 	LIST_FUNCTIONS(AString);
@@ -150,14 +150,6 @@ public:
 	AValue EvalNumber(bool allowModifiers, const char *terminators, AString *error = NULL) const {return EvalNumber(0, NULL, allowModifiers, terminators, error);}
 	AValue EvalNumber(uint_t i = 0, uint_t *endIndex = NULL, bool allowModifiers = true, const char *terminators = NULL, AString *error = NULL) const;
 
-	AString& ConvertToHex(double   val);
-	AString& ConvertToHex(uint_t   val, bool pad = false);
-	AString& ConvertToHex(sint_t   val, bool pad = false) {return ConvertToHex((uint_t)val, pad);}
-	AString& ConvertToHex(ulong_t  val, bool pad = false);
-	AString& ConvertToHex(slong_t  val, bool pad = false) {return ConvertToHex((ulong_t)val, pad);}
-	AString& ConvertToHex(ullong_t val, bool pad = false);
-	AString& ConvertToHex(sllong_t val, bool pad = false) {return ConvertToHex((ullong_t)val, pad);}
-
 	sint_t      GetLength()  const {return Length;}
 	const char *GetBuffer() const {return pText;}
 
@@ -185,7 +177,7 @@ public:
 	AString Arg(ullong_t n) const;
 	AString Arg(float    n) const;
 	AString Arg(double   n) const;
-	AString Arg(const void *p) const;
+	AString EndArgs() const;
 
 	AString Left(sint_t length)                 const;
 	AString Mid(sint_t pos, sint_t length = -1) const;
@@ -429,8 +421,9 @@ public:
 protected:
 	static sint_t FindEndQuote(char q, sint_t length, const char *p, uint_t flags);
 
-	sint_t FindFormatSpecifier(sint_t& len) const;
-
+	AString FindFormatSpecifier(AString& left, AString& right) const;
+	AString InsertValue(const AValue& val) const;
+	
 	sint_t PosEx(const char *text, sint_t len, sint_t startpos, sint_t endpos, bool bCase = true) const;
 
 	enum {

@@ -246,7 +246,7 @@ bool PostgresDatabase::TableExists(const AString& name)
 {
 	SQLQuery *query = NULL;
 
-	if ((query = RunQuery(AString("select count(*) from %s").Arg(name))) != NULL) {
+	if ((query = RunQuery(AString("select count(*) from %").Arg(name))) != NULL) {
 		bool success = query->GetResult();
 		delete query;
 		return success;
