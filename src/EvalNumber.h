@@ -4,8 +4,6 @@
 
 #include "types.h"
 
-#define NUMSTR(fmt,val) AValue(val).ToString(fmt).str()
-
 class AString;
 class AValue {
 public:
@@ -100,7 +98,7 @@ public:
 	operator ushort_t() const {return (ushort_t)operator uint64_t();}
 	operator sint_t() 	const {return (sint_t)operator sint64_t();}
 	operator uint_t() 	const {return (uint_t)operator uint64_t();}
-#if SYSTEM_IS_64BITS
+#if LONG_IS_64BITS
 	operator slong_t() 	const;
 	operator ulong_t() 	const;
 	operator sllong_t() const {return (sllong_t)operator sint64_t();}

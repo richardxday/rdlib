@@ -296,7 +296,7 @@ void PostgresDatabase::PostgresQuery::ClearResult()
 /** Return row about to be fetch and optionally number of rows in total
  */
 /*--------------------------------------------------------------------------------*/
-uint PostgresDatabase::PostgresQuery::CurrentRow(uint *rows) const
+uint_t PostgresDatabase::PostgresQuery::CurrentRow(uint_t *rows) const
 {
 	if (rows) rows[0] = nrows;
 	return row;
@@ -311,7 +311,7 @@ bool PostgresDatabase::PostgresQuery::Fetch(AString& results)
 	bool success = false;
 
 	if (res && nfields && (row < nrows)) {
-		uint i;
+		uint_t i;
 		
 		results.Delete();
 

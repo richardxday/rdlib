@@ -119,7 +119,7 @@ protected:
 		/** Return row about to be fetch and optionally number of rows in total
 		 */
 		/*--------------------------------------------------------------------------------*/
-		virtual uint CurrentRow(uint *rows = NULL) const;
+		virtual uint_t CurrentRow(uint_t *rows = NULL) const;
 
 		/*--------------------------------------------------------------------------------*/
 		/** Fetch a row of results
@@ -138,9 +138,9 @@ protected:
 		PostgresDatabase *db;
 		PGconn   *conn;
 		PGresult *res;
-		uint     nfields;
-		uint     nrows;
-		uint     row;
+		uint_t   nfields;
+		uint_t   nrows;
+		uint_t   row;
 		bool     success;
 	};
 	friend class PostgresQuery;
