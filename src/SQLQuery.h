@@ -23,7 +23,7 @@ public:
 	/** Return row about to be fetch and optionally number of rows in total
 	 */
 	/*--------------------------------------------------------------------------------*/
-	virtual uint CurrentRow(uint *rows = NULL) const = 0;
+	virtual uint_t CurrentRow(uint_t *rows = NULL) const = 0;
 
 	/*--------------------------------------------------------------------------------*/
 	/** Fetch a row of results
