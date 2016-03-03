@@ -15,11 +15,16 @@ typedef int (*COMPARE_FUNC)(const AListNode *pNode1, const AListNode *pNode2, vo
     }
 
 #define LIST_ATTACH_EX(type,parent)										\
+	using parent::InsertBefore;											\
 	virtual type *InsertBefore(type *pNode) {return (type *)parent::InsertBefore(pNode);} \
+	using parent::InsertAfter;											\
 	virtual type *InsertAfter(type *pNode)  {return (type *)parent::InsertAfter(pNode);} \
+	using parent::Attach;												\
 	virtual type *Attach(type *pNode) {return (type *)parent::Attach(pNode);} \
 	virtual type *Attach(type *pNode, COMPARE_FUNC fn, void *pContext = NULL) {return (type *)parent::Attach(pNode, fn, pContext);}	\
+	using parent::Prepend;												\
 	virtual type *Prepend(type *pNode) {return (type *)parent::Prepend(pNode);} \
+	using parent::Append;												\
 	virtual type *Append(type *pNode)  {return (type *)parent::Append(pNode);}
 #define LIST_DETACH_EX(type,parent) virtual type *Detach() {return (type *)parent::Detach();}
 #define LIST_NEXT_EX(type,parent)   virtual type *Next(int n = 1) const {return (type *)parent::Next(n);}
