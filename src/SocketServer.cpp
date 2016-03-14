@@ -624,13 +624,17 @@ const struct sockaddr_in *ASocketServer::GetDatagramSource(int socket) const
 	return from;
 }
 
-void ASocketServer::SetDatagramDestination(int socket, const struct sockaddr_in *to)
+bool ASocketServer::SetDatagramDestination(int socket, const struct sockaddr_in *to)
 {
 	HANDLER *handler;
-
+	bool    success = false;
+	
 	if ((handler = (HANDLER *)FindSocket(socket)) != NULL) {
 		handler->to = *(struct sockaddr *)to;
+		success = true;
 	}
+
+	return success;
 }
 
 sint_t ASocketServer::BytesAvailable(int socket)

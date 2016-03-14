@@ -23,8 +23,8 @@ public:
 	virtual sint_t  flush();
 
 	virtual const sockaddr_in *getdatagramsource() const;
-	virtual void setdatagramdestination(const char *host, uint_t port);
-	virtual void setdatagramdestination(const sockaddr_in *to);
+	virtual bool setdatagramdestination(const char *host, uint_t port);
+	virtual bool setdatagramdestination(const sockaddr_in *to);
 
 	NODETYPE(AStdSocket, AStdData);
 
