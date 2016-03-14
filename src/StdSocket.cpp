@@ -284,19 +284,26 @@ const sockaddr_in *AStdSocket::getdatagramsource() const
 	return from;
 }
 
-void AStdSocket::setdatagramdestination(const char *host, uint_t port)
+bool AStdSocket::setdatagramdestination(const char *host, uint_t port)
 {
 	struct sockaddr_in to;
-
+	bool success = false;
+	
 	if (isopen()) {
-		ASocketServer::Resolve(host, port, &to);
-
-		setdatagramdestination(&to);
+		if (ASocketServer::Resolve(host, port, &to)) {
+			success = setdatagramdestination(&to);
+		}
 	}
 }
 
-void AStdSocket::setdatagramdestination(const sockaddr_in *to)
+bool AStdSocket::setdatagramdestination(const sockaddr_in *to)
 {
-	if (isopen()) server.SetDatagramDestination(socket, to);
+	bool success = false;
+	
+	if (isopen()) {
+		success = server.SetDatagramDestination(socket, to);
+	}
+
+	return success;
 }
 

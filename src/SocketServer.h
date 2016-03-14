@@ -43,7 +43,7 @@ public:
 	void SetNeedWriteHandler(int socket, bool (*needwritecallback)(ASocketServer *server, int socket, void *context));
 	void SetContext(int socket, void *context);
 	const struct sockaddr_in *GetDatagramSource(int socket) const;
-	void SetDatagramDestination(int socket, const struct sockaddr_in *to);
+	bool SetDatagramDestination(int socket, const struct sockaddr_in *to);
 
 	void DeleteHandler(int socket);
 
