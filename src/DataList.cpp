@@ -125,6 +125,44 @@ sint_t ADataList::Add(uptr_t Item, sint_t Index)
 	return index;
 }
 
+sint_t ADataList::Insert(uptr_t Item, int (*fn)(uptr_t Item1, uptr_t Item2, void *context), void *context)
+{
+	const uint_t n = Count();
+	uint_t i = (n + 1) >> 1 , inc = (i + 1) >> 1;
+
+	if (n) {
+		int res;
+		
+		while (((res = (*fn)(Item, pData[i], context)) < 0) ||
+			   (((i + 1) < n) && ((*fn)(Item, pData[i + 1], context) >= 0))) {
+			if (res < 0) i = SUBZ(i, inc);
+			else		 i = MIN(i + inc, n - 1);
+			inc = (inc + 1) >> 1;
+		}
+	}
+
+	return Add(Item, i);
+}
+
+sint_t ADataList::Insert(void *ptr, int (*fn)(void *ptr1, void *ptr2, void *context), void *context)
+{
+	const uint_t n = Count();
+	uint_t i = (n + 1) >> 1 , inc = (i + 1) >> 1;
+
+	if (n) {
+		int res;
+		
+		while (((res = (*fn)(ptr, (void *)pData[i], context)) < 0) ||
+			   (((i + 1) < n) && ((*fn)(ptr, (void *)pData[i + 1], context) >= 0))) {
+			if (res < 0) i = SUBZ(i, inc);
+			else		 i = MIN(i + inc, n - 1);
+			inc = (inc + 1) >> 1;
+		}
+	}
+
+	return Add(ptr, i);
+}
+
 sint_t ADataList::Remove(uptr_t Item)
 {
 	sint_t index = -1;

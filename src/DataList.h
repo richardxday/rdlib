@@ -62,7 +62,9 @@ public:
 	sint_t Add(void *ptr, sint_t Index = MAX_SIGNED(sint_t)) {return Add((uptr_t)ptr, Index);}
 	sint_t Remove(uptr_t Item);
 	sint_t Remove(void *ptr) {return Remove((uptr_t)ptr);}
-
+	sint_t Insert(uptr_t Item, int (*fn)(uptr_t Item1, uptr_t Item2, void *context), void *context = NULL);
+	sint_t Insert(void *ptr, int (*fn)(void *ptr1, void *ptr2, void *context), void *context = NULL);
+	
 	// Remove a specific index
 	uptr_t RemoveIndex(uint_t Index);
 
