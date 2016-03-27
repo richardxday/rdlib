@@ -127,39 +127,45 @@ sint_t ADataList::Add(uptr_t Item, sint_t Index)
 
 sint_t ADataList::Insert(uptr_t Item, int (*fn)(uptr_t Item1, uptr_t Item2, void *context), void *context)
 {
-	const uint_t n = Count();
+	const uint_t n = Count() - 1;
 	uint_t i = (n + 1) >> 1 , inc = (i + 1) >> 1;
 
-	if (n) {
-		int res;
-		
-		while (((res = (*fn)(Item, pData[i], context)) < 0) ||
-			   (((i + 1) < n) && ((*fn)(Item, pData[i + 1], context) >= 0))) {
-			if (res < 0) i = SUBZ(i, inc);
-			else		 i = MIN(i + inc, n - 1);
-			inc = (inc + 1) >> 1;
+	if (Count()) {
+		while (true) {
+			if (i && ((*fn)(Item, pData[MIN(i, n)], context) < 0)) {
+				i   = SUBZ(i, inc);
+				inc = (inc + 1) >> 1;
+			}
+			else if ((i < n) && ((*fn)(Item, pData[MIN(i + 1, n)], context) >= 0)) {
+				i  += inc;
+				inc = (inc + 1) >> 1;
+			}
+			else break;
 		}
 	}
-
+	
 	return Add(Item, i);
 }
 
 sint_t ADataList::Insert(void *ptr, int (*fn)(void *ptr1, void *ptr2, void *context), void *context)
 {
-	const uint_t n = Count();
+	const uint_t n = Count() - 1;
 	uint_t i = (n + 1) >> 1 , inc = (i + 1) >> 1;
 
-	if (n) {
-		int res;
-		
-		while (((res = (*fn)(ptr, (void *)pData[i], context)) < 0) ||
-			   (((i + 1) < n) && ((*fn)(ptr, (void *)pData[i + 1], context) >= 0))) {
-			if (res < 0) i = SUBZ(i, inc);
-			else		 i = MIN(i + inc, n - 1);
-			inc = (inc + 1) >> 1;
+	if (Count()) {
+		while (true) {
+			if (i && ((*fn)(ptr, (void *)pData[MIN(i, n)], context) < 0)) {
+				i   = SUBZ(i, inc);
+				inc = (inc + 1) >> 1;
+			}
+			else if ((i < n) && ((*fn)(ptr, (void *)pData[MIN(i + 1, n)], context) >= 0)) {
+				i  += inc;
+				inc = (inc + 1) >> 1;
+			}
+			else break;
 		}
 	}
-
+	
 	return Add(ptr, i);
 }
 
