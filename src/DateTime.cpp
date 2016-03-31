@@ -604,6 +604,9 @@ void ADateTime::ModifyMonth(DATETIME& dt, double n, bool pos, bool neg, bool rel
 		if (!rel) _n = SUBZ(_n, 1);
 		dmy.Month  = _n % NUMBEROF(MonthLengths);
 		dmy.Year  += _n / NUMBEROF(MonthLengths);
+
+		uint_t lastday = SUBZ(GetMonthDays(dmy.Month + 1, dmy.Year), 1);
+		dmy.Day    = MIN(dmy.Day, lastday);
 	}
 
 	DMYToDateTime(dmy, dt);
@@ -1606,14 +1609,14 @@ const char *ADateTime::GetShortMonthName(uint_t m) const
 	return RANGE(m, 1, NUMBEROF(ShortMonthNames)) ? ShortMonthNames[m - 1] : NULL;
 }
 
-uint_t ADateTime::GetMonthDays(uint_t m) const
+uint_t ADateTime::GetMonthDays(uint_t m, uint_t y) const
 {
-	return RANGE(m, 1, NUMBEROF(MonthLengths)) ? MonthLengths[m - 1] : 0;
+	return RANGE(m, 1, NUMBEROF(MonthLengths)) ? MonthLengths[m - 1] + ((m == 2) && ISLEAP(y)) : 0;
 }
 
-uint_t ADateTime::GetMonthStartDay(uint_t m) const
+uint_t ADateTime::GetMonthStartDay(uint_t m, uint_t y) const
 {
-	return RANGE(m, 1, NUMBEROF(MonthStartDay)) ? MonthStartDay[m - 1] : 0;
+	return RANGE(m, 1, NUMBEROF(MonthStartDay)) ? MonthStartDay[m - 1] + ((m > 2) && ISLEAP(y)) : 0;
 }
 
 int CompareDates(const ADateTime& object1, const ADateTime& object2)

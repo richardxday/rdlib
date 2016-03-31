@@ -113,8 +113,8 @@ public:
 	const char *GetShortDayName(uint_t d) const;
 	const char *GetMonthName(uint_t m) const;
 	const char *GetShortMonthName(uint_t m) const;
-	uint_t GetMonthDays(uint_t m) const;
-	uint_t GetMonthStartDay(uint_t m) const;
+	uint_t GetMonthDays(uint_t m, uint_t y) const;
+	uint_t GetMonthStartDay(uint_t m, uint_t y) const;
 
 	time_t     totime() const;
 	ADateTime& fromtime(time_t t);
