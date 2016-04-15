@@ -39,16 +39,6 @@ typedef uint64_t       uptr_t;
 typedef uint32_t       uptr_t;
 #endif
 
-#ifdef __LINUX__
-#if LONG_IS_64BITS
-#define FMT64 "l"
-#else
-#define FMT64 "ll"
-#endif
-#else
-#define FMT64 "I64"
-#endif
-
 #define MIN_SIGNED(type)   (-(type)(((ullong_t)1 << ((sizeof(type) << 3) - 1)) - 1) - (type)1)
 #define MAX_SIGNED(type)   ( (type)(((ullong_t)1 << ((sizeof(type) << 3) - 1)) - 1))
 
