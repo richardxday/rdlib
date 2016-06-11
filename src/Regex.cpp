@@ -71,7 +71,7 @@ static char deescape(const char *str, uint_t& pos)
 			if (IsNumeralChar(c)) {
 				// 3 or less numeral characters make up escaped character
 				c = 0;
-				for (i = 0; (i < 3) && ((val = vals[(uint_t)str[pos]]) != 0xff) && (val < 10); i++, pos++) {
+				for (i = 0; (i < 3) && ((val = vals[(uint_t)str[pos] & 0xff]) != 0xff) && (val < 10); i++, pos++) {
 					c = (c * 10) + val;
 				}
 			}
@@ -81,7 +81,7 @@ static char deescape(const char *str, uint_t& pos)
 
 				// 2 or less hex characters make up escaped character
 				c = 0;
-				for (i = 0; (i < 2) && ((val = vals[(uint_t)str[pos]]) != 0xff); i++, pos++) {
+				for (i = 0; (i < 2) && ((val = vals[(uint_t)str[pos] & 0xff]) != 0xff); i++, pos++) {
 					c = (c << 4) + val;
 				}
 			}
@@ -889,7 +889,7 @@ static bool match(const AString& str, const AString& pat, uint_t strpos, uint_t 
 
 			patpos++;
 			getclass(pat, patpos, *data.errors, flags, data.casesens);
-			if (data.errors->Empty() && flags[(uint_t)str[strpos]]) {
+			if (data.errors->Empty() && flags[(uint_t)str[strpos] & 0xff]) {
 				success = match(str, pat, strpos + 1, patpos, data, brackets1);
 			}
 			break;
