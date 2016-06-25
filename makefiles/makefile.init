@@ -16,29 +16,12 @@ SHARED_LDFLAGS:=-fPIC -shared -Wl,--no-undefined
 
 CPPDEPS:=-MT$@ -MF`echo $@ | sed -e 's,\.o$$,.d,'` -MMD
 
-ifndef DEBUG_CFLAGS
 DEBUG_CFLAGS:=-g
-endif
-
-ifndef DEBUG_CXXFLAGS
 DEBUG_CXXFLAGS:=
-endif
-
-ifndef DEBUG_LDFLAGS
 DEBUG_LDFLAGS:=-g
-endif
-
-ifndef RELEASE_CFLAGS
 RELEASE_CFLAGS:=-O3
-endif
-
-ifndef RELEASE_CXXFLAGS
 RELEASE_CXXFLAGS:=
-endif
-
-ifndef RELEASE_LDFLAGS
 RELEASE_LDFLAGS:=-s
-endif
 
 GLOBAL_CFLAGS:=
 EXTRA_CFLAGS:=

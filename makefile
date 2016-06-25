@@ -149,6 +149,6 @@ LOCAL_SHARE_FILES := $(shell find makefiles) makefiles/copyifnewer makefiles/lib
 INSTALLEDSHAREFILES += $(LOCAL_SHARE_FILES:%=$(INSTALLSHAREDST)/%)
 
 $(INSTALLSHAREDST)/makefiles/%: makefiles/%
-	@$(SUDO) $(MAKEFILEDIR)/copyifnewer "$(INSTALLSHAREDST)/makefiles" "$<" "$@"
+	@$(SUDO) $(MAKEFILEDIR)/copyifnewer "$<" "$@"
 
 include $(MAKEFILEDIR)/makefile.post

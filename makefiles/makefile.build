@@ -18,10 +18,10 @@ $(RELEASE_OBJDIR)/%.o: src/%.cpp
 	$(CXX) -c -o $@ $(CFLAGS) $(CXXFLAGS) $(GLOBAL_CFLAGS) $(EXTRA_CFLAGS) $(EXTRA_CXXFLAGS) $(RELEASE_CFLAGS) $(RELEASE_CXXFLAGS) $(CPPDEPS) $<
 
 $(INSTALLSHAREDST)/%: share/%
-	@$(SUDO) $(MAKEFILEDIR)/copyifnewer "$(INSTALLSHAREDST)" "$<" "$@"
+	@$(SUDO) $(MAKEFILEDIR)/copyifnewer "$<" "$@"
 
 $(INSTALLSHAREDST)/%: %
-	@$(SUDO) $(MAKEFILEDIR)/copyifnewer "$(INSTALLSHAREDST)" "$<" "$@"
+	@$(SUDO) $(MAKEFILEDIR)/copyifnewer "$<" "$@"
 
 -include $(DEBUG_OBJDIR)/*.d
 -include $(RELEASE_OBJDIR)/*.d
