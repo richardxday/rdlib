@@ -294,6 +294,8 @@ bool AStdSocket::setdatagramdestination(const char *host, uint_t port)
 			success = setdatagramdestination(&to);
 		}
 	}
+
+	return success;
 }
 
 bool AStdSocket::setdatagramdestination(const sockaddr_in *to)

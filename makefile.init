@@ -1,0 +1,76 @@
+
+# C 
+CC = gcc
+# C++ compiler 
+CXX = g++
+
+# Standard preprocessor flags (common for CC and CXX) 
+CFLAGS:=-Wall -Wextra -Werror -fPIC
+
+# Standard flags for C++ 
+CXXFLAGS:=
+
+# Standard linker flags
+LDFLAGS:=
+SHARED_LDFLAGS:=-fPIC -shared -Wl,--no-undefined
+
+CPPDEPS:=-MT$@ -MF`echo $@ | sed -e 's,\.o$$,.d,'` -MMD
+
+ifndef DEBUG_CFLAGS
+DEBUG_CFLAGS:=-g
+endif
+
+ifndef DEBUG_CXXFLAGS
+DEBUG_CXXFLAGS:=
+endif
+
+ifndef DEBUG_LDFLAGS
+DEBUG_LDFLAGS:=-g
+endif
+
+ifndef RELEASE_CFLAGS
+RELEASE_CFLAGS:=-O3
+endif
+
+ifndef RELEASE_CXXFLAGS
+RELEASE_CXXFLAGS:=
+endif
+
+ifndef RELEASE_LDFLAGS
+RELEASE_LDFLAGS:=-s
+endif
+
+GLOBAL_CFLAGS:=
+EXTRA_CFLAGS:=
+GLOBAL_CXXFLAGS:=
+EXTRA_CXXFLAGS:=
+GLOBAL_LIBS:=
+EXTRA_LIBS:=
+DEBUG_LIBS:=
+RELEASE_LIBS:=
+
+SUDO:=sudo
+PREFIX:=/usr/local
+
+OBJECTS:=
+HEADERS:=
+
+DEBUG_OBJDIR:=debug/objs
+DEBUG_LIBDIR:=debug/libs
+DEBUG_BINDIR:=debug/bin
+
+RELEASE_OBJDIR:=objs
+RELEASE_LIBDIR:=libs
+RELEASE_BINDIR:=bin
+
+CLEANFILES:=
+
+DEBUG_TARGETS:=
+RELEASE_TARGETS:=
+
+INSTALLEDLIBS:=
+INSTALLEDHEADERS:=
+INSTALLEDPKGCONFIG:=
+INSTALLEDSHAREFILES:=
+INSTALLEDBINARIES:=
+UNINSTALLFILES:=

@@ -32,12 +32,12 @@ public:
 
 protected:
 	AStdUri			 comms;
-	uint32_t			 timeout, maxgap;
-	uint32_t			 tick, rxtick;
-	uint_t   			 minbytes;
+	uint32_t		 timeout, maxgap;
+	uint32_t		 tick, rxtick;
+	uint_t   		 minbytes;
 	uint_t			 maxbytes;
-	uint8_t *buffer;
-	uint_t   			 pos, buflen;
+	uint8_t			 *buffer;
+	uint_t   		 pos, buflen;
 	RESPONSECALLBACK callback;
 	void             *context;
 	bool		     msgvalid;

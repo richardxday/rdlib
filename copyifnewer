@@ -1,0 +1,14 @@
+#!/bin/sh
+DSTDIR="$1"
+SRCFILE="$2"
+DSTFILE="$3"
+test -d "$DSTDIR" || mkdir -p "$DSTDIR"
+if [ -d "$SRCFILE" ] ; then
+	mkdir -p "$DSTFILE"
+else
+	if [ -f "$DSTFILE" ] ; then
+		diff >/dev/null "$DSTFILE" "$SRCFILE" || cp -pv "$SRCFILE" "$DSTFILE"
+	else
+		cp -pv "$SRCFILE" "$DSTFILE"
+	fi
+fi

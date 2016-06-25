@@ -1,0 +1,20 @@
+
+.PHONY: all default-build debug release install uninstall clean
+
+ifdef DEBUG
+default-build: debug
+else
+default-build: release
+endif
+
+clean:
+	-rm -f $(CLEANFILES)
+
+debug: $(DEBUG_TARGETS)
+
+release: $(RELEASE_TARGETS)
+
+install: $(INSTALLEDLIBS) $(INSTALLEDHEADERS) $(INSTALLEDPKGCONFIG) $(INSTALLEDSHAREFILES) $(INSTALLEDBINARIES)
+
+uninstall:
+	$(SUDO) rm -fR $(UNINSTALLFILES)

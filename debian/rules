@@ -1,8 +1,0 @@
-#!/usr/bin/make -f
-
-export DH_ALWAYS_EXCLUDE=*.la
-
-export DH_VERBOSE=1
-
-%:
-	dh $@ --parallel
