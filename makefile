@@ -1,7 +1,7 @@
 
 all: default-build
 
-MAKEFILEDIR=.
+MAKEFILEDIR=makefiles
 
 include $(MAKEFILEDIR)/makefile.init
 
@@ -145,10 +145,10 @@ GLOBAL_LIBS += $(shell pkg-config --libs libpq) -lpthread -ljpeg
 
 include $(MAKEFILEDIR)/makefile.lib
 
-LOCAL_SHARE_FILES := $(shell ls makefile.*) copyifnewer library.pc.in
-INSTALLEDSHAREFILES += $(LOCAL_SHARE_FILES:%=$(INSTALLSHAREDST)/makefiles/%)
+LOCAL_SHARE_FILES := $(shell find makefiles) makefiles/copyifnewer makefiles/library.pc.in
+INSTALLEDSHAREFILES += $(LOCAL_SHARE_FILES:%=$(INSTALLSHAREDST)/%)
 
-$(INSTALLSHAREDST)/makefiles/%: %
+$(INSTALLSHAREDST)/makefiles/%: makefiles/%
 	@$(SUDO) $(MAKEFILEDIR)/copyifnewer "$(INSTALLSHAREDST)/makefiles" "$<" "$@"
 
 include $(MAKEFILEDIR)/makefile.post
