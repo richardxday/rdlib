@@ -1,0 +1,18 @@
+
+include $(MAKEFILEDIR)/makefile.build
+
+$(DEBUG_BINDIR)/$(DEBUG_APPLICATION): $(DEBUG_OBJECTS)
+	@test -d "$(DEBUG_BINDIR)" || mkdir -p "$(DEBUG_BINDIR)"
+	$(CXX) $(LDFLAGS) $(DEBUG_LDFLAGS) -o $@ $^ $(EXTRA_LIBS) $(GLOBAL_LIBS) $(DEBUG_LIBS)
+
+$(RELEASE_BINDIR)/$(RELEASE_APPLICATION): $(RELEASE_OBJECTS)
+	@test -d "$(RELEASE_BINDIR)" || mkdir -p "$(RELEASE_BINDIR)"
+	$(CXX) $(LDFLAGS) $(RELEASE_LDFLAGS) -o $@ $^ $(EXTRA_LIBS) $(GLOBAL_LIBS) $(RELEASE_LIBS)
+
+ifdef DEBUG
+$(INSTALLBINDST)/%: $(DEBUG_BINDIR)/%
+	@$(SUDO) $(MAKEFILEDIR)/copyifnewer "$(INSTALLBINDST)" "$<" "$@"
+else
+$(INSTALLBINDST)/%: $(RELEASE_BINDIR)/%
+	@$(SUDO) $(MAKEFILEDIR)/copyifnewer "$(INSTALLBINDST)" "$<" "$@"
+endif

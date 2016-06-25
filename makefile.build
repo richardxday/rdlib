@@ -1,0 +1,29 @@
+
+CLEANFILES += $(DEBUG_OBJECTS) $(RELEASE_OBJECTS)
+
+$(DEBUG_OBJDIR)/%.o: src/%.c
+	@test -d "$(DEBUG_OBJDIR)" || mkdir -p "$(DEBUG_OBJDIR)"
+	$(CC) -c -o $@ $(CFLAGS) $(GLOBAL_CFLAGS) $(EXTRA_CFLAGS) $(DEBUG_CFLAGS) $(CPPDEPS) $<
+
+$(DEBUG_OBJDIR)/%.o: src/%.cpp
+	@test -d "$(DEBUG_OBJDIR)" || mkdir -p "$(DEBUG_OBJDIR)"
+	$(CXX) -c -o $@ $(CFLAGS) $(CXXFLAGS) $(GLOBAL_CFLAGS) $(EXTRA_CFLAGS) $(EXTRA_CXXFLAGS) $(DEBUG_CFLAGS) $(DEBUG_CXXFLAGS) $(CPPDEPS) $<
+
+$(RELEASE_OBJDIR)/%.o: src/%.c
+	@test -d "$(RELEASE_OBJDIR)" || mkdir -p "$(RELEASE_OBJDIR)"
+	$(CC) -c -o $@ $(CFLAGS) $(GLOBAL_CFLAGS) $(EXTRA_CFLAGS) $(RELEASE_CFLAGS) $(CPPDEPS) $<
+
+$(RELEASE_OBJDIR)/%.o: src/%.cpp
+	@test -d "$(RELEASE_OBJDIR)" || mkdir -p "$(RELEASE_OBJDIR)"
+	$(CXX) -c -o $@ $(CFLAGS) $(CXXFLAGS) $(GLOBAL_CFLAGS) $(EXTRA_CFLAGS) $(EXTRA_CXXFLAGS) $(RELEASE_CFLAGS) $(RELEASE_CXXFLAGS) $(CPPDEPS) $<
+
+$(INSTALLSHAREDST)/%: share/%
+	@$(SUDO) $(MAKEFILEDIR)/copyifnewer "$(INSTALLSHAREDST)" "$<" "$@"
+
+$(INSTALLSHAREDST)/%: %
+	@$(SUDO) $(MAKEFILEDIR)/copyifnewer "$(INSTALLSHAREDST)" "$<" "$@"
+
+-include $(DEBUG_OBJDIR)/*.d
+-include $(RELEASE_OBJDIR)/*.d
+
+CLEANFILES += $(DEBUG_OBJDIR)/*.d $(RELEASE_OBJDIR)/*.d
