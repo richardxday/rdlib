@@ -133,15 +133,15 @@ HEADERS:=										\
 	wxsup.h										\
 	XMLDecode.h
 
-GLOBAL_CFLAGS := -D__LINUX__ -D_FILE_OFFSET_BITS=64 -fsigned-char
-GLOBAL_CFLAGS += $(shell gcc -Wall -o arch src/arch.c && ./arch)
+GLOBAL_CFLAGS  += -D__LINUX__ -D_FILE_OFFSET_BITS=64 -fsigned-char
+GLOBAL_CFLAGS  += $(shell gcc -Wall -o arch src/arch.c && ./arch)
 
-EXTRA_CFLAGS += $(shell pkg-config --cflags libpq)
+EXTRA_CFLAGS   += $(shell pkg-config --cflags libpq)
 EXTRA_CXXFLAGS += -std=c++11
 
-GLOBAL_LIBS := -lm -lrt
-GLOBAL_LIBS += $(shell ./arch)
-GLOBAL_LIBS += $(shell pkg-config --libs libpq) -lpthread -ljpeg
+GLOBAL_LIBS    += -lm -lrt
+GLOBAL_LIBS    += $(shell ./arch)
+GLOBAL_LIBS    += $(shell pkg-config --libs libpq) -lpthread -ljpeg
 
 include $(MAKEFILEDIR)/makefile.lib
 

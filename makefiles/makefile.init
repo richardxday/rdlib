@@ -1,13 +1,13 @@
 
-# C 
+# C
 CC = gcc
-# C++ compiler 
+# C++ compiler
 CXX = g++
 
-# Standard preprocessor flags (common for CC and CXX) 
+# Standard preprocessor flags (common for CC and CXX)
 CFLAGS:=-Wall -Wextra -Werror -fPIC
 
-# Standard flags for C++ 
+# Standard flags for C++
 CXXFLAGS:=
 
 # Standard linker flags
@@ -34,6 +34,10 @@ RELEASE_LIBS:=
 
 SUDO:=sudo
 PREFIX:=/usr/local
+
+STATIC_LIBRARY_SUFFIX:=.a
+SHARED_LIBRARY_SUFFIX:=.so
+APPLICATION_SUFFIX:=
 
 OBJECTS:=
 HEADERS:=
