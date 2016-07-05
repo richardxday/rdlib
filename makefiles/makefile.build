@@ -25,5 +25,3 @@ $(INSTALLSHAREDST)/%: %
 
 -include $(DEBUG_OBJDIR)/*.d
 -include $(RELEASE_OBJDIR)/*.d
-
-CLEANFILES += $(DEBUG_OBJDIR)/*.d $(RELEASE_OBJDIR)/*.d
