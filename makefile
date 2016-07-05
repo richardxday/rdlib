@@ -134,7 +134,7 @@ HEADERS:=										\
 	XMLDecode.h
 
 GLOBAL_CFLAGS  += -D__LINUX__ -D_FILE_OFFSET_BITS=64 -fsigned-char
-GLOBAL_CFLAGS  += $(shell gcc -Wall -o arch src/arch.c && ./arch)
+GLOBAL_CFLAGS  += $(shell $(CC) -Wall -o arch src/arch.c && ./arch)
 
 EXTRA_CFLAGS   += $(shell pkg-config --cflags libpq)
 EXTRA_CXXFLAGS += -std=c++11
