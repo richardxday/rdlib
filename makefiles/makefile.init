@@ -62,3 +62,5 @@ INSTALLEDSHAREFILES:=
 INSTALLEDBINARIES:=
 UNINSTALLFILES:=
 NONINSTALLEDBINARIES:=
+
+makevar=$(subst /,_,$(subst .,_,$(subst -,_,$(1))))
