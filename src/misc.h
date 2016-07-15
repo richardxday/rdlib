@@ -44,6 +44,8 @@ extern uint32_t GetTickCount();
 extern void   Sleep(uint32_t ms);
 #endif
 
+extern uint64_t GetNanosecondTicks();
+	
 extern void debug(const char *fmt, ...) PRINTF_FORMAT_FUNCTION;
 extern void enabledebug(bool enabled = true);
 
@@ -61,6 +63,8 @@ extern sint32_t muldivsr(sint32_t a, sint32_t b, sint32_t c);
 extern uint32_t muldivur(uint32_t a, uint32_t b, uint32_t c);
 
 extern sint32_t fmuldivsr(double a, sint32_t b, sint32_t c);
+
+extern uint64_t muldivu(uint64_t val, uint32_t mul, uint32_t div);
 
 extern sint32_t addms(sint32_t a, sint32_t b, sint32_t l = MAX_SIGNED(sint32_t));
 extern uint32_t addmu(uint32_t a, uint32_t b, uint32_t l = MAX_UNSIGNED(uint32_t));
