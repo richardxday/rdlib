@@ -5,16 +5,16 @@ CC = gcc
 CXX = g++
 
 # Standard preprocessor flags (common for CC and CXX)
-CFLAGS:=-Wall -Wextra -Werror -fPIC
+CFLAGS=-Wall -Wextra -Werror -fPIC
 
 # Standard flags for C++
-CXXFLAGS:=
+CXXFLAGS=
 
 # Standard linker flags
-LDFLAGS:=
-SHARED_LDFLAGS:=-fPIC -shared -Wl,--no-undefined
+LDFLAGS=
+SHARED_LDFLAGS=-fPIC -shared -Wl,--no-undefined
 
-CPPDEPS:=-MT$@ -MF`echo $@ | sed -e 's,\.o$$,.d,'` -MMD
+CPPDEPS=-MT$@ -MF`echo $@ | sed -e 's,\.o$$,.d,'` -MMD
 
 DEBUG_CFLAGS:=-g
 DEBUG_CXXFLAGS:=
