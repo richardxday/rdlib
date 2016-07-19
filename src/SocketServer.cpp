@@ -171,9 +171,11 @@ void ASocketServer::AcceptSocket(int socket)
 			memset(handler, 0, sizeof(*handler));
 			
 			*handler = accepthandler->acceptedhandler;
-			handler->socket   = socket1;
-			handler->sockaddr = addr;
-
+			handler->socket    = socket1;
+			handler->sockaddr  = addr;
+			handler->starttick = GetTickCount();
+			handler->connected = true;
+			
 			SocketList.Add(handler);
 
 			if (handler->connectcallback) (*handler->connectcallback)(this, handler->socket, handler->context);
