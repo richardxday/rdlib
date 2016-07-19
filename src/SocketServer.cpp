@@ -825,7 +825,7 @@ bool ASocketServer::SetReceiveBufferSize(int socket, uint_t bytes)
 	if (socket >= 0) {
 		int arg = bytes;
 		
-		success = (setsockopt(socket, SOL_SOCKET, SO_RCVBUF, &arg, sizeof(arg)) == 0);
+		success = (setsockopt(socket, SOL_SOCKET, SO_RCVBUF, (const char *)&arg, sizeof(arg)) == 0);
 		if (!success) debug("Failed to set receive buffer size of socket %d to %d: %s\n", socket, arg, strerror(errno));
 	}
 	else debug("No socket when trying to set receiver buffer size!\n");
