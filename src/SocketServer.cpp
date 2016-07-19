@@ -98,7 +98,7 @@ void ASocketServer::__DeleteSocket(uptr_t item, void *context)
 		if ((wrsocket = server->WriteSocketList[handler->socket]) != 0) {
 			__DeleteWriteSocket(wrsocket, NULL);
 		}
-		server->WriteSocketList.Replace(handler->socket, 0ul);
+		server->WriteSocketList.Replace(handler->socket, (uptr_t)0);
 
 		CloseSocket(handler->socket);
 	}
@@ -518,7 +518,7 @@ int ASocketServer::Process(uint_t timeout)
 							free(wrbuf->buffer);
 							delete wrbuf;
 
-							WriteSocketList.Replace(socket, 0ul);
+							WriteSocketList.Replace(socket, (uptr_t)0);
 						}
 					}
 				}
@@ -616,7 +616,7 @@ void ASocketServer::DeleteWriteBuffer(int socket)
 		free(wrbuf->buffer);
 		delete wrbuf;
 
-		WriteSocketList.Replace(socket, 0ul);
+		WriteSocketList.Replace(socket, (uptr_t)0);
 	}
 }
 
