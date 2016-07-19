@@ -44,17 +44,19 @@ protected:
 };
 #endif
 
-static uint8_t staticbuf[65536];
+uint8_t ASocketServer::staticbuf[4096];
 
 ASocketServer::ASocketServer() : MaxSendBuffer(512 * 1024),
 								 ProcessingDepth(0),
 								 readfds(NULL),
-								 writefds(NULL)
+								 writefds(NULL),
+								 exceptfds(NULL)
 {
 	SetupSockets();
 
-	readfds  = new fd_set;
-	writefds = new fd_set;
+	readfds   = new fd_set;
+	writefds  = new fd_set;
+	exceptfds = new fd_set;
 
 	SocketList.SetDestructor(&__DeleteSocket, this);
 	WriteSocketList.SetDestructor(&__DeleteWriteSocket);
@@ -66,8 +68,9 @@ ASocketServer::~ASocketServer()
 	DeleteAllHandlers();
 	DeleteSockets(true);
 
-	if (writefds) delete (fd_set *)writefds;
-	if (readfds)  delete (fd_set *)readfds;
+	if (exceptfds) delete (fd_set *)exceptfds;
+	if (writefds)  delete (fd_set *)writefds;
+	if (readfds)   delete (fd_set *)readfds;
 }
 
 void ASocketServer::SetupSockets()
@@ -95,7 +98,7 @@ void ASocketServer::__DeleteSocket(uptr_t item, void *context)
 		if ((wrsocket = server->WriteSocketList[handler->socket]) != 0) {
 			__DeleteWriteSocket(wrsocket, NULL);
 		}
-		server->WriteSocketList.Replace(handler->socket, (uptr_t)0);
+		server->WriteSocketList.Replace(handler->socket, 0ul);
 
 		CloseSocket(handler->socket);
 	}
@@ -105,8 +108,8 @@ void ASocketServer::__DeleteSocket(uptr_t item, void *context)
 
 void ASocketServer::__AcceptSocket(ASocketServer *server, int socket, void *context)
 {
-	UNUSED(context);
-	server->AcceptSocket(socket);
+	UNUSED(server);
+	((ASocketServer *)context)->AcceptSocket(socket);
 }
 
 void ASocketServer::__DeleteWriteSocket(uptr_t item, void *context)
@@ -114,7 +117,7 @@ void ASocketServer::__DeleteWriteSocket(uptr_t item, void *context)
 	WRITEBUFFER *wrbuf = (WRITEBUFFER *)item;
 
 	UNUSED(context);
-
+	
 	if (wrbuf) {
 		if (wrbuf->buffer) free(wrbuf->buffer);
 
@@ -169,13 +172,13 @@ void ASocketServer::AcceptSocket(int socket)
 
 		if ((handler = new HANDLER) != NULL) {
 			memset(handler, 0, sizeof(*handler));
-			
+
 			*handler = accepthandler->acceptedhandler;
 			handler->socket    = socket1;
 			handler->sockaddr  = addr;
 			handler->starttick = GetTickCount();
 			handler->connected = true;
-			
+
 			SocketList.Add(handler);
 
 			if (handler->connectcallback) (*handler->connectcallback)(this, handler->socket, handler->context);
@@ -198,7 +201,7 @@ bool ASocketServer::Resolve(const char *host, uint_t port, struct sockaddr_in *s
 
 		if (sockaddr->sin_addr.s_addr == INADDR_NONE) {
 			struct hostent *hp = gethostbyname(host);
-		
+
 			if (hp) {
 				memcpy(&sockaddr->sin_addr, hp->h_addr, hp->h_length);
 				sockaddr->sin_family = hp->h_addrtype;
@@ -229,20 +232,27 @@ int ASocketServer::CreateHandler(uint_t type,
 {
 	struct sockaddr_in sockaddr;
 	int socket = -1;
-	
+
 	Resolve(host, port, &sockaddr);
 
 	if ((socket = ::socket(sockaddr.sin_family, (type == Type_Datagram) ? SOCK_DGRAM : SOCK_STREAM, 0)) >= 0) {
 		if (host && (type == Type_Client)) {
-			if (connect(socket, (struct sockaddr *)&sockaddr, sizeof(sockaddr)) >= 0) {
+			SetNonBlocking(socket);
+			SetNoDelay(socket);
+
+#ifdef __LINUX__
+#define ERROR_IN_PROGRESS (errno == EINPROGRESS)
+#else
+#define ERROR_IN_PROGRESS (WSAGetLastError() == WSAEWOULDBLOCK)
+#endif
+
+			if ((connect(socket, (struct sockaddr *)&sockaddr, sizeof(sockaddr)) >= 0) ||
+				ERROR_IN_PROGRESS) {
 				HANDLER *handler;
-				
-				SetNonBlocking(socket);
-				SetNoDelay(socket);
 
 				if ((handler = new HANDLER) != NULL) {
 					memset(handler, 0, sizeof(*handler));
-					
+
 					handler->socket        	   = socket;
 					handler->type          	   = type;
 					handler->connectcallback   = connectcallback;
@@ -252,6 +262,8 @@ int ASocketServer::CreateHandler(uint_t type,
 					handler->needwritecallback = needwritecallback;
 					handler->context       	   = context;
 					handler->sockaddr      	   = sockaddr;
+					handler->starttick         = GetTickCount();
+					handler->connected         = false;
 
 					SocketList.Add(handler);
 
@@ -264,7 +276,7 @@ int ASocketServer::CreateHandler(uint_t type,
 			}
 			else {
 				debug("connect on socket %d failed: %s\n", socket, strerror(errno));
-				
+
 				CloseSocket(socket);
 				socket = -1;
 			}
@@ -277,16 +289,18 @@ int ASocketServer::CreateHandler(uint_t type,
 			if (bind(socket, (struct sockaddr *)&sockaddr, sizeof(sockaddr)) >= 0) {
 				if (listen(socket, SOMAXCONN) >= 0) {
 					ACCEPTHANDLER *handler;
-					
+
 					if ((handler = new ACCEPTHANDLER) != NULL) {
 						memset(handler, 0, sizeof(*handler));
 
 						handler->handler.socket        		   	   = socket;
 						handler->handler.type         		   	   = type;
 						handler->handler.readcallback 		   	   = &__AcceptSocket;
-						handler->handler.context      		   	   = NULL;
+						handler->handler.context      		   	   = this;
 						handler->handler.sockaddr     		   	   = sockaddr;
-						
+						handler->handler.starttick         		   = GetTickCount();
+						handler->handler.connected         		   = true;
+
 						handler->acceptedhandler.type              = type;
 						handler->acceptedhandler.connectcallback   = connectcallback;
 						handler->acceptedhandler.readcallback  	   = readcallback;
@@ -311,7 +325,7 @@ int ASocketServer::CreateHandler(uint_t type,
 			}
 			else {
 				debug("bind on socket %d failed: %s\n", socket, strerror(errno));
-				
+
 				CloseSocket(socket);
 				socket = -1;
 			}
@@ -323,10 +337,10 @@ int ASocketServer::CreateHandler(uint_t type,
 
 			if (bind(socket, (struct sockaddr *)&sockaddr, sizeof(sockaddr)) >= 0) {
 				HANDLER *handler;
-				
+
 				if ((handler = new HANDLER) != NULL) {
 					memset(handler, 0, sizeof(*handler));
-					
+
 					handler->socket        	   = socket;
 					handler->type          	   = type;
 					handler->connectcallback   = connectcallback;
@@ -336,6 +350,8 @@ int ASocketServer::CreateHandler(uint_t type,
 					handler->needwritecallback = needwritecallback;
 					handler->context       	   = context;
 					handler->sockaddr      	   = sockaddr;
+					handler->starttick         = GetTickCount();
+					handler->connected         = true;
 
 					SocketList.Add(handler);
 
@@ -348,7 +364,7 @@ int ASocketServer::CreateHandler(uint_t type,
 			}
 			else {
 				debug("bind on socket %d failed: %s\n", socket, strerror(errno));
-				
+
 				CloseSocket(socket);
 				socket = -1;
 			}
@@ -420,8 +436,9 @@ int ASocketServer::Process(uint_t timeout)
 	// NOT thread safe!!!
 	struct timeval tv;
 	WRITEBUFFER *wrbuf;
-	fd_set& readfds  = *(fd_set *)this->readfds;
-	fd_set& writefds = *(fd_set *)this->writefds;
+	fd_set& readfds   = *(fd_set *)this->readfds;
+	fd_set& writefds  = *(fd_set *)this->writefds;
+	fd_set& exceptfds = *(fd_set *)this->exceptfds;
 	uint_t i;
 	int maxsocket = -1;
 	int res = 0;
@@ -438,6 +455,7 @@ int ASocketServer::Process(uint_t timeout)
 
 	FD_ZERO(&readfds);
 	FD_ZERO(&writefds);
+	FD_ZERO(&exceptfds);
 
 	tv.tv_sec = timeout / 1000;
 	tv.tv_usec = (timeout % 1000) * 1000;
@@ -445,6 +463,8 @@ int ASocketServer::Process(uint_t timeout)
 	for (i = 0; i < SocketList.Count(); i++) {
 		const HANDLER *handler = (const HANDLER *)SocketList[i];
 		int socket = handler->socket;
+
+		FD_SET(socket, &exceptfds);
 
 		if (handler->readcallback) {
 			FD_SET(socket, &readfds);
@@ -459,30 +479,36 @@ int ASocketServer::Process(uint_t timeout)
 	}
 
 	if (maxsocket >= 0) {
-		res = select(maxsocket + 1, &readfds, &writefds, NULL, &tv);
+		res = select(maxsocket + 1, &readfds, &writefds, &exceptfds, &tv);
 
 		for (i = 0; i < SocketList.Count(); i++) {
-			const HANDLER *handler = (const HANDLER *)SocketList[i];
-			int socket = handler->socket;
-			
+			HANDLER *handler = (HANDLER *)SocketList[i];
+			int  socket = handler->socket;
+
+			if (FD_ISSET(socket, &exceptfds)) {
+ 				DeleteWriteBuffer(socket);
+				DeleteHandler(socket);
+				continue;
+			}
+
 			if (FD_ISSET(socket, &readfds)) {
+				handler->connected = true;
 				(*handler->readcallback)(this, socket, handler->context);
 			}
 
 			if (FD_ISSET(socket, &writefds)) {
+				handler->connected = true;
 				if (((wrbuf = (WRITEBUFFER *)WriteSocketList[socket]) != NULL) && wrbuf->buffer && wrbuf->pos) {
-					sint_t bytes;
+					sint_t bytes = -1;
 
 					if (handler->type == Type_Datagram) {
 						bytes = sendto(socket, (const char *)wrbuf->buffer, wrbuf->pos, 0, &handler->to, sizeof(handler->to));
 					}
+					// this will fail if connection not made
 					else bytes = send(socket, (const char *)wrbuf->buffer, wrbuf->pos, 0);
 
 					if (bytes < 0) {
-						free(wrbuf->buffer);
-						delete wrbuf;
-						
-						WriteSocketList.Replace(socket, (uptr_t)0);
+						DeleteWriteBuffer(socket);
 						DeleteHandler(socket);
 					}
 					else {
@@ -491,14 +517,20 @@ int ASocketServer::Process(uint_t timeout)
 						else {
 							free(wrbuf->buffer);
 							delete wrbuf;
-							
-							WriteSocketList.Replace(socket, (uptr_t)0);
+
+							WriteSocketList.Replace(socket, 0ul);
 						}
 					}
 				}
 				else if (handler->writecallback) {
 					(*handler->writecallback)(this, socket, handler->context);
 				}
+			}
+
+			if (!handler->connected && ((GetTickCount() - handler->starttick) >= 10000)) {
+				debug("Closing socket %d because it has not become read or write enabled for 10s\n", socket);
+				DeleteWriteBuffer(socket);
+				DeleteHandler(socket);
 			}
 		}
 	}
@@ -521,7 +553,7 @@ int ASocketServer::Process(uint_t timeout)
 
 	return res;
 }
-	
+
 void *ASocketServer::FindSocket(int socket) const
 {
 	uint_t i, n = SocketList.Count();
@@ -573,6 +605,18 @@ void ASocketServer::SetWriteHandler(int socket, void (*writecallback)(ASocketSer
 
 	if ((handler = (HANDLER *)FindSocket(socket)) != NULL) {
 		handler->writecallback = writecallback;
+	}
+}
+
+void ASocketServer::DeleteWriteBuffer(int socket)
+{
+	WRITEBUFFER *wrbuf;
+
+	if ((wrbuf = (WRITEBUFFER *)WriteSocketList[socket]) != NULL) {
+		free(wrbuf->buffer);
+		delete wrbuf;
+
+		WriteSocketList.Replace(socket, 0ul);
 	}
 }
 
@@ -630,9 +674,10 @@ bool ASocketServer::SetDatagramDestination(int socket, const struct sockaddr_in 
 {
 	HANDLER *handler;
 	bool    success = false;
-	
+
 	if ((handler = (HANDLER *)FindSocket(socket)) != NULL) {
 		handler->to = *(struct sockaddr *)to;
+
 		success = true;
 	}
 
@@ -660,7 +705,7 @@ sint_t ASocketServer::BytesAvailable(int socket)
 sint_t ASocketServer::BytesLeftToWrite(int socket)
 {
 	if (DeleteSocketList.Find(socket) >= 0) return -1;
-	
+
 	int res = 0;
 	const WRITEBUFFER *wrbuf;
 	if ((wrbuf = (const WRITEBUFFER *)WriteSocketList[socket]) != NULL) {
@@ -725,7 +770,7 @@ sint_t ASocketServer::ReadLineData(int socket, SOCKETREADER& reader, struct sock
 
 	while ((bytes = ReadSocket(socket, reader.buffer, sizeof(reader.buffer), from)) > 0) {
 		AString str((const char *)reader.buffer, bytes);
-			
+
 		reader.lines += str.SearchAndReplace("\r", "");
 
 		totalbytes += bytes;
@@ -764,12 +809,12 @@ AString ASocketServer::GetClientAddr(const struct sockaddr_in *sockaddr)
 		uint32_t addr = sockaddr->sin_addr.s_addr;
 
 		client.printf("%u.%u.%u.%u",
-					  (uint_t)addr & 0xff,
-					  (uint_t)(addr >> 8) & 0xff,
-					  (uint_t)(addr >> 16) & 0xff,
-					  (uint_t)(addr >> 24));
+					  (uint)addr & 0xff,
+					  (uint)(addr >> 8) & 0xff,
+					  (uint)(addr >> 16) & 0xff,
+					  (uint)(addr >> 24));
 	}
-	
+
 	return client;
 }
 
