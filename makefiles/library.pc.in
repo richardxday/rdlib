@@ -7,7 +7,5 @@ toolsdir=${exec_prefix}/bin
 Name: @LIBRARY_WITH_VERSION_MAJOR_MINOR@
 Description: @LIBRARY_DESCRIPTION@
 Version: @LIBRARY_VERSION_FULL@
-Libs: -L${libdir} -l@LIBRARY_WITH_VERSION_MAJOR_MINOR@ @GLOBAL_LIBS@
+Libs: -L${libdir} -l@LIBRARY_WITH_LINKTYPE_VERSION_MAJOR_MINOR@ @GLOBAL_LIBS@
 Cflags: -I${includedir} @GLOBAL_CFLAGS@
-
-

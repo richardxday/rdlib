@@ -16,6 +16,8 @@ SHARED_LDFLAGS=-fPIC -shared -Wl,--no-undefined
 
 CPPDEPS=-MT$@ -MF`echo $@ | sed -e 's,\.o$$,.d,'` -MMD
 
+LINKTYPE=
+
 DEBUG_CFLAGS:=-g
 DEBUG_CXXFLAGS:=
 DEBUG_LDFLAGS:=-g
