@@ -26,6 +26,7 @@ static const struct {
 	{"signed-int",    AValue::VALUE_SIGNED_INT},
 	{"signed-long",   AValue::VALUE_SIGNED_LONG},
 	{"signed-llong",  AValue::VALUE_SIGNED_LLONG},
+	{"ptr", 		  AValue::VALUE_POINTER},
 	{"float",  		  AValue::VALUE_FLOAT},
 	{"double", 		  AValue::VALUE_DOUBLE},
 	{"ub",   		  AValue::VALUE_UNSIGNED_INT8},
@@ -44,6 +45,7 @@ static const struct {
 	{"s32",    		  AValue::VALUE_SIGNED_LONG},
 	{"sd",    		  AValue::VALUE_SIGNED_LLONG},
 	{"s64",    		  AValue::VALUE_SIGNED_LLONG},
+	{"p", 		  	  AValue::VALUE_POINTER},
 	{"f",  		  	  AValue::VALUE_FLOAT},
 	{"d", 		  	  AValue::VALUE_DOUBLE},
 };
@@ -60,6 +62,7 @@ uint_t AValue::TypeSizes[VALUE_ITEMS] = {
 	sizeof(uint_t),
 	sizeof(ulong_t),
 	sizeof(ullong_t),
+	sizeof(void *),
 	sizeof(float),
 	sizeof(double),
 };
@@ -135,6 +138,13 @@ AValue::AValue(sllong_t val) : Type(VALUE_INVALID),
 
 AValue::AValue(ullong_t val) : Type(VALUE_INVALID),
 							   bReadOnly(false)
+{
+	memset(&Value, 0, sizeof(Value));
+	operator = (val);
+}
+
+AValue::AValue(const void *val) : Type(VALUE_INVALID),
+								  bReadOnly(false)
 {
 	memset(&Value, 0, sizeof(Value));
 	operator = (val);
@@ -279,6 +289,14 @@ AValue& AValue::operator = (ullong_t val)
 	return *this;
 }
 
+AValue& AValue::operator = (const void *val)
+{
+	Clear();
+	Type    = VALUE_POINTER;
+	Value.u = (uint64_t)val;
+	return *this;
+}
+
 AValue& AValue::operator = (float val)
 {
 	Clear();
@@ -316,6 +334,12 @@ AValue::operator uint64_t() const
 	if      (IsInteger()) return Value.u;
 	else if (IsFloat())   return (uint64_t)Value.f;
 	return 0;
+}
+
+AValue::operator const void *() const
+{
+	if (IsInteger()) return (const void *)Value.u;
+	return NULL;
 }
 
 AValue::operator float() const
@@ -366,6 +390,9 @@ bool AValue::Set(const void *p, uint_t type)
 			break;
 		case VALUE_UNSIGNED_LLONG:
 			*this = *(ullong_t *)p;
+			break;
+		case VALUE_POINTER:
+			*this = (const void *)p;
 			break;
 		case VALUE_FLOAT:
 			*this = *(float *)p;
@@ -418,6 +445,9 @@ bool AValue::Get(void *p, uint_t type)
 				break;
 			case VALUE_UNSIGNED_LLONG:
 				*(ullong_t *)p = (ullong_t)*this;
+				break;
+			case VALUE_POINTER:
+				*(const void **)p = (const void *)*this;
 				break;
 			case VALUE_FLOAT:
 				*(float *)p = (float)*this;
@@ -690,8 +720,16 @@ AString AValue::ToString(const char *format) const
 		}
 		
 		if (!formatchar) {
-			if (IsInteger()) formatchar = IsSigned() ? 'd' : 'u';
+			if (IsInteger()) formatchar = IsSigned() ? 'd' : (IsPointer() ? 'x' : 'u');
 			else			 formatchar = 'f';
+		}
+
+		if ((strlen(field) == 1) && IsPointer()) {
+#if SYSTEM_IS_64BITS
+			strcpy(field, "0x%016");
+#else
+			strcpy(field, "0x%08");
+#endif
 		}
 		
 		if (IsInteger()) {
@@ -704,6 +742,15 @@ AString AValue::ToString(const char *format) const
 					fmt.printf("%sl%c", field, formatchar);
 					str.printf(fmt, (slong_t)Value.i);
 				}
+			}
+			else if (IsPointer()) {
+#if LONG_IS_64BITS
+				fmt.printf("%sl%c", field, formatchar);
+				str.printf(fmt, (ulong_t)Value.u);
+#else
+				fmt.printf("%sll%c", field, formatchar);
+				str.printf(fmt, (ullong_t)Value.u);
+#endif
 			}
 			else if (Type == VALUE_UNSIGNED_LLONG) {
 				fmt.printf("%sll%c", field, formatchar);
