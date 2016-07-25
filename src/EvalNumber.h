@@ -19,11 +19,12 @@ public:
 		VALUE_UNSIGNED_INT,
 		VALUE_UNSIGNED_LONG,
 		VALUE_UNSIGNED_LLONG,
+		VALUE_POINTER,
 		VALUE_FLOAT,
 		VALUE_DOUBLE,
 
 		_VALUE_INTEGER_START = VALUE_SIGNED_INT8,
-		_VALUE_INTEGER_END   = VALUE_UNSIGNED_LLONG,
+		_VALUE_INTEGER_END   = VALUE_POINTER,
 
 		_VALUE_SIGNED_START  = VALUE_SIGNED_INT8,
 		_VALUE_SIGNED_END    = VALUE_SIGNED_LLONG,
@@ -49,6 +50,7 @@ public:
 	AValue(ullong_t val);
 	AValue(float  	val);
 	AValue(double 	val);
+	AValue(const void *p);
 	AValue(const AValue& val);
 	AValue(const void *p, uint_t type);
 	~AValue();
@@ -68,6 +70,7 @@ public:
 	AValue& operator = (ullong_t val);
 	AValue& operator = (float  	 val);
 	AValue& operator = (double 	 val);
+	AValue& operator = (const void *val);
 	AValue& operator = (const AValue& val);
 
 	bool Set(const void *p, uint_t type);
@@ -81,6 +84,7 @@ public:
 
 	bool IsValid()   const {return (Type != VALUE_INVALID);}
 	bool IsInteger() const {return RANGE(Type, _VALUE_INTEGER_START, _VALUE_INTEGER_END);}
+	bool IsPointer() const {return (Type == VALUE_POINTER);}
 	bool IsSigned()  const {return RANGE(Type, _VALUE_SIGNED_START,  _VALUE_SIGNED_END);}
 	bool IsFloat()   const {return RANGE(Type, _VALUE_FLOAT_START,   _VALUE_FLOAT_END);}
 
@@ -109,6 +113,7 @@ public:
 	operator sllong_t() const;
 	operator ullong_t() const;
 #endif
+	operator const void *() const;
 	
 	operator float()  	const;
 	operator double() 	const;
@@ -125,6 +130,7 @@ public:
 	static uint_t TypeOf(ullong_t val) 		{UNUSED(val); return VALUE_UNSIGNED_LLONG;}
 	static uint_t TypeOf(float    val) 		{UNUSED(val); return VALUE_FLOAT;}
 	static uint_t TypeOf(double   val) 		{UNUSED(val); return VALUE_DOUBLE;}
+	static uint_t TypeOf(const void     *p) {UNUSED(p);   return VALUE_POINTER;}
 	static uint_t TypeOf(const sint8_t  *p) {UNUSED(p);   return VALUE_SIGNED_INT8;}
 	static uint_t TypeOf(const uint8_t  *p) {UNUSED(p);   return VALUE_UNSIGNED_INT8;}
 	static uint_t TypeOf(const sshort_t *p) {UNUSED(p);   return VALUE_SIGNED_SHORT;}
@@ -162,9 +168,9 @@ protected:
 	uint8_t Type;
 	uint8_t bReadOnly;
 	union {
-		sint64_t i;
-		uint64_t u;
-		double   f;
+		sint64_t   	i;
+		uint64_t   	u;
+		double      f;
 	} Value;
 
 	static uint_t TypeSizes[VALUE_ITEMS];
