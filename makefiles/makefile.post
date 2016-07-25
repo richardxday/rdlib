@@ -1,7 +1,7 @@
 
 CLEANFILES += $(DEBUG_OBJDIR)/*.d $(RELEASE_OBJDIR)/*.d
 
-.PHONY: all default-build debug release install uninstall clean
+.PHONY: all default-build debug release install uninstall clean cleanbins
 
 ifdef DEBUG
 default-build: debug
@@ -20,3 +20,6 @@ install: $(INSTALLEDLIBS) $(INSTALLEDHEADERS) $(INSTALLEDPKGCONFIG) $(INSTALLEDS
 
 uninstall:
 	$(SUDO) rm -fR $(UNINSTALLFILES)
+
+cleanbins:
+	-rm -fR $(DEBUG_BINDIR) $(DEBUG_LIBDIR) $(RELEASE_BINDIR) $(RELEASE_LIBDIR)
