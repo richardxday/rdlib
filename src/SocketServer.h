@@ -34,6 +34,9 @@ public:
 					  void *context = NULL);
 	void DeleteAllHandlers();
 
+	void EnableAutoCloseUnestablishedSockets(bool enable = true) {autocloseunestablishedsockets = enable;}
+	bool AutoCloseUnestablishedSocketsEnabled() const            {return autocloseunestablishedsockets;}
+	
 	int Process(uint_t timeout);
 
 	void SetConnectHandler(int socket, void (*connectcallback)(ASocketServer *server, int socket, void *context));
@@ -174,7 +177,8 @@ protected:
 	uint_t	  MaxSendBuffer;
 	uint_t	  ProcessingDepth;
 	void      *readfds, *writefds, *exceptfds;
-
+	bool	  autocloseunestablishedsockets;
+	
 	static uint8_t staticbuf[4096];
 };
 

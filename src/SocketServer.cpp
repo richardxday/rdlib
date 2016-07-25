@@ -44,13 +44,16 @@ protected:
 };
 #endif
 
+#define DEBUG_SOCKETS 0
+
 uint8_t ASocketServer::staticbuf[4096];
 
 ASocketServer::ASocketServer() : MaxSendBuffer(512 * 1024),
 								 ProcessingDepth(0),
 								 readfds(NULL),
 								 writefds(NULL),
-								 exceptfds(NULL)
+								 exceptfds(NULL),
+								 autocloseunestablishedsockets(false)
 {
 	SetupSockets();
 
@@ -181,6 +184,10 @@ void ASocketServer::AcceptSocket(int socket)
 
 			SocketList.Add(handler);
 
+#if DEBUG_SOCKETS
+			debug("Accepted socket %d from socket %d at %s (context %s)\n", socket1, socket, AValue(handler->starttick).ToString().str(), AValue(handler->context).ToString().str());
+#endif
+			
 			if (handler->connectcallback) (*handler->connectcallback)(this, handler->socket, handler->context);
 		}
 	}
@@ -231,12 +238,13 @@ int ASocketServer::CreateHandler(uint_t type,
 								 void *context)
 {
 	struct sockaddr_in sockaddr;
+	bool resolved;
 	int socket = -1;
 
-	Resolve(host, port, &sockaddr);
+	resolved = Resolve(host, port, &sockaddr);
 
 	if ((socket = ::socket(sockaddr.sin_family, (type == Type_Datagram) ? SOCK_DGRAM : SOCK_STREAM, 0)) >= 0) {
-		if (host && (type == Type_Client)) {
+		if (host && resolved && (type == Type_Client)) {
 			SetNonBlocking(socket);
 			SetNoDelay(socket);
 
@@ -263,9 +271,13 @@ int ASocketServer::CreateHandler(uint_t type,
 					handler->context       	   = context;
 					handler->sockaddr      	   = sockaddr;
 					handler->starttick         = GetTickCount();
-					handler->connected         = false;
+					handler->connected         = !autocloseunestablishedsockets;
 
 					SocketList.Add(handler);
+
+#if DEBUG_SOCKETS
+					debug("New client socket %d at %s (context %s) to %s:%u\n", socket, AValue(handler->starttick).ToString().str(), AValue(handler->context).ToString().str(), host, port);
+#endif
 
 					if (handler->connectcallback) (*handler->connectcallback)(this, handler->socket, handler->context);
 				}
@@ -308,6 +320,10 @@ int ASocketServer::CreateHandler(uint_t type,
 						handler->acceptedhandler.destructor    	   = destructor;
 						handler->acceptedhandler.needwritecallback = needwritecallback;
 						handler->acceptedhandler.context       	   = context;
+
+#if DEBUG_SOCKETS
+						debug("New server socket %d at %s (context %s) port %u\n", socket, AValue(handler->handler.starttick).ToString().str(), AValue(handler->acceptedhandler.context).ToString().str(), port);
+#endif
 
 						SocketList.Add(handler);
 					}
@@ -369,7 +385,11 @@ int ASocketServer::CreateHandler(uint_t type,
 				socket = -1;
 			}
 		}
-
+		else {
+			CloseSocket(socket);
+			socket = -1;
+		}
+		
 		if (socket >= 0) {
 			SetNonBlocking(socket);
 		}
@@ -396,6 +416,10 @@ void ASocketServer::DeleteSockets(bool force)
 		WRITEBUFFER *wrbuf;
 		HANDLER *handler = (HANDLER *)DeleteSocketList[i];
 		int socket = handler->socket;
+
+#if DEBUG_SOCKETS
+		debug("Deleting socket %d handler (context %s)\n", socket, AValue(handler->context).ToString().str());
+#endif
 
 		if (((wrbuf = (WRITEBUFFER *)WriteSocketList[socket]) == NULL) || (wrbuf->pos == 0) || force) {
 			__DeleteSocket((uptr_t)handler, this);
@@ -492,11 +516,23 @@ int ASocketServer::Process(uint_t timeout)
 			}
 
 			if (FD_ISSET(socket, &readfds)) {
+#if DEBUG_SOCKETS
+				if (!handler->connected) {
+					debug("Socket %d has become connected (context %s) via read\n", socket, AValue(handler->context).ToString().str());
+				}
+#endif
+
 				handler->connected = true;
 				(*handler->readcallback)(this, socket, handler->context);
 			}
 
 			if (FD_ISSET(socket, &writefds)) {
+#if DEBUG_SOCKETS
+				if (!handler->connected) {
+					debug("Socket %d has become connected (context %s) via write\n", socket, AValue(handler->context).ToString().str());
+				}
+#endif
+				
 				handler->connected = true;
 				if (((wrbuf = (WRITEBUFFER *)WriteSocketList[socket]) != NULL) && wrbuf->buffer && wrbuf->pos) {
 					sint_t bytes = -1;
@@ -528,7 +564,12 @@ int ASocketServer::Process(uint_t timeout)
 			}
 
 			if (!handler->connected && ((GetTickCount() - handler->starttick) >= 10000)) {
+#if DEBUG_SOCKETS
+				debug("Closing socket %d (context %s) because it has not become read or write enabled for 10s\n", socket, AValue(handler->context).ToString().str());
+#else
 				debug("Closing socket %d because it has not become read or write enabled for 10s\n", socket);
+#endif
+				
 				DeleteWriteBuffer(socket);
 				DeleteHandler(socket);
 			}
