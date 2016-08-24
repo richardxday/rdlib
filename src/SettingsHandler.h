@@ -6,6 +6,7 @@
 #include "StdFile.h"
 #include "Hash.h"
 #include "DateTime.h"
+#include "DataList.h"
 
 class ASettingsHandler {
 public:
@@ -38,6 +39,8 @@ public:
 
 	const AString& GetFilename() const {return filename;}
 
+	uint_t GetAllLike(ADataList& list, const AString& str, bool regex = false) const;
+	
 protected:
 	const AStringPairWithInt *Find(const AString& name) const;
 

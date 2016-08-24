@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "Recurse.h"
+#include "Regex.h"
 #include "SettingsHandler.h"
 
 AString ASettingsHandler::homedir;
@@ -242,10 +243,30 @@ void ASettingsHandler::AddLine(const AString& str)
 
 		// add to list
 		list.Add(pair);
-
+		// don't add to hash since line is not an actual setting
+		
 		// mark changed
 		changed_tick = GetTickCount();
 		changed      = true;
 	}
 }
 
+uint_t ASettingsHandler::GetAllLike(ADataList& list, const AString& str, bool regex) const
+{
+	const AStringPairWithInt *item = GetFirst();
+	AString pat;
+
+	if (regex) pat = ParseRegex(str);
+
+	while (item)
+	{
+		if (( regex && MatchRegex(item->String1, pat, true)) ||
+			(!regex && (CompareCaseN(item->String1, str, str.len()) == 0))) {
+			list.Add((uptr_t)item);
+		}
+		
+		item = item->Next();
+	}
+
+	return list.Count();
+}
