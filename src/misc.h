@@ -54,6 +54,13 @@ extern void enabledebug(bool enabled = true);
 #endif
 
 #ifdef __cplusplus
+template<typename T>
+const T& limit(const T& a, const T& b, const T& c) {
+	return (a >= b) ? ((a <= c) ? a : c) : b;
+}
+#endif
+
+#ifdef __cplusplus
 extern double dBToGain(double val);
 extern double GainTodB(double val, double mindB = -200.0);
 
