@@ -12,11 +12,11 @@
  * ThreadLockObject will be unlocked
  */
 /*--------------------------------------------------------------------------------*/
-class ThreadLockObject
+class AThreadLockObject
 {
 public:
-	ThreadLockObject();
-	virtual ~ThreadLockObject();
+	AThreadLockObject();
+	virtual ~AThreadLockObject();
 
 	/*--------------------------------------------------------------------------------*/
 	/** Explicit lock of mutex (AVOID: use a ThreadLock object)
@@ -38,39 +38,39 @@ protected:
 /** Locking object - use this when you want to lock a ThreadLockObject
  */
 /*--------------------------------------------------------------------------------*/
-class ThreadLock
+class AThreadLock
 {
 public:
 	/*--------------------------------------------------------------------------------*/
 	/** Constructor locks ThreadLockObject
 	 */
 	/*--------------------------------------------------------------------------------*/
-	ThreadLock(ThreadLockObject& lockobj) : obj(lockobj) {obj.Lock();}
+	AThreadLock(AThreadLockObject& lockobj) : obj(lockobj) {obj.Lock();}
 	/*--------------------------------------------------------------------------------*/
 	/** Const constructor to allow use in const methods
 	 */
 	/*--------------------------------------------------------------------------------*/
-	ThreadLock(const ThreadLockObject& lockobj) : obj(const_cast<ThreadLockObject&>(lockobj)) {obj.Lock();}
+	AThreadLock(const AThreadLockObject& lockobj) : obj(const_cast<AThreadLockObject&>(lockobj)) {obj.Lock();}
 	/*--------------------------------------------------------------------------------*/
 	/** Destructor unlocks ThreadLockObject
 	 */
 	/*--------------------------------------------------------------------------------*/
-	~ThreadLock() {obj.Unlock();}
+	~AThreadLock() {obj.Unlock();}
 
 protected:
-	ThreadLockObject& obj;
+	AThreadLockObject& obj;
 };
 
 /*--------------------------------------------------------------------------------*/
 /** Thread signalling base class - AVOID using as it doesn't handle initial conditions
- * Use ThreadBoolSignalObject for boolean conditions instead
+ * Use AThreadBoolSignalObject for boolean conditions instead
  */
 /*--------------------------------------------------------------------------------*/
-class ThreadSignalObject : public ThreadLockObject
+class AThreadSignalObject : public AThreadLockObject
 {
 public:
-	ThreadSignalObject();
-	virtual ~ThreadSignalObject();
+	AThreadSignalObject();
+	virtual ~AThreadSignalObject();
 
 	/*--------------------------------------------------------------------------------*/
 	/** Wait for condition to be triggered
@@ -100,11 +100,11 @@ protected:
 /** Improvement on the above which allows proper handling of the 'signalled before wait' situation
  */
 /*--------------------------------------------------------------------------------*/
-class ThreadBoolSignalObject : public ThreadSignalObject
+class AThreadBoolSignalObject : public AThreadSignalObject
 {
 public:
-	ThreadBoolSignalObject(bool initial_condition = false);
-	virtual ~ThreadBoolSignalObject();
+	AThreadBoolSignalObject(bool initial_condition = false);
+	virtual ~AThreadBoolSignalObject();
 
 	/*--------------------------------------------------------------------------------*/
 	/** Wait for condition to be true

@@ -10,12 +10,12 @@
 /** Simple thread implementation
  */
 /*--------------------------------------------------------------------------------*/
-Thread::Thread() : threadstarted(false),
-				   quitthread(false)
+AThread::AThread() : threadstarted(false),
+					 quitthread(false)
 {
 }
 
-Thread::~Thread()
+AThread::~AThread()
 {
 	Stop();
 }
@@ -24,7 +24,7 @@ Thread::~Thread()
 /** Start thread
  */
 /*--------------------------------------------------------------------------------*/
-bool Thread::Start()
+bool AThread::Start()
 {
 	bool success = false;
 
@@ -49,7 +49,7 @@ bool Thread::Start()
 /** Stop thread
  */
 /*--------------------------------------------------------------------------------*/
-void Thread::Stop()
+void AThread::Stop()
 {
 	if (threadstarted) {
 		// tell thread to quit
@@ -72,9 +72,9 @@ void Thread::Stop()
 /** Static thread entry point
  */
 /*--------------------------------------------------------------------------------*/
-void *Thread::__ThreadStart(void *arg)
+void *AThread::__ThreadStart(void *arg)
 {
-	Thread& thread = *(Thread *)arg;
+	AThread& thread = *(AThread *)arg;
 	return thread.Run();
 }
 

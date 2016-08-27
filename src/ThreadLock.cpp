@@ -6,7 +6,7 @@
 #include "misc.h"
 #include "ThreadLock.h"
 
-ThreadLockObject::ThreadLockObject()
+AThreadLockObject::AThreadLockObject()
 {
 	pthread_mutexattr_t mta;
 
@@ -20,12 +20,12 @@ ThreadLockObject::ThreadLockObject()
 	}
 }
 
-ThreadLockObject::~ThreadLockObject()
+AThreadLockObject::~AThreadLockObject()
 {
 	pthread_mutex_destroy(&mutex);
 }
 
-bool ThreadLockObject::Lock()
+bool AThreadLockObject::Lock()
 {
 	bool success = (pthread_mutex_lock(&mutex) == 0);
 
@@ -34,7 +34,7 @@ bool ThreadLockObject::Lock()
 	return success;
 }
 
-bool ThreadLockObject::Unlock()
+bool AThreadLockObject::Unlock()
 {
 	bool success = (pthread_mutex_unlock(&mutex) == 0);
 
@@ -45,7 +45,7 @@ bool ThreadLockObject::Unlock()
 
 /*----------------------------------------------------------------------------------------------------*/
 
-ThreadSignalObject::ThreadSignalObject() : ThreadLockObject()
+AThreadSignalObject::AThreadSignalObject() : AThreadLockObject()
 {
 	if (pthread_cond_init(&cond, NULL) != 0)
 	{
@@ -53,12 +53,12 @@ ThreadSignalObject::ThreadSignalObject() : ThreadLockObject()
 	}
 }
 
-ThreadSignalObject::~ThreadSignalObject()
+AThreadSignalObject::~AThreadSignalObject()
 {
 	pthread_cond_destroy(&cond);
 }
 
-bool ThreadSignalObject::Wait()
+bool AThreadSignalObject::Wait()
 {
 	// NOTE: mutex MUST be LOCKED at this point
 	bool success = (pthread_cond_wait(&cond, &mutex) == 0);
@@ -68,9 +68,9 @@ bool ThreadSignalObject::Wait()
 	return success;
 }
 
-bool ThreadSignalObject::Signal()
+bool AThreadSignalObject::Signal()
 {
-	ThreadLock lock(*this);
+	AThreadLock lock(*this);
 	bool success = (pthread_cond_signal(&cond) == 0);
 
 	if (!success) debug("Failed to signal cond<%016lx>: %s", (ulong_t)&cond, strerror(errno));
@@ -78,9 +78,9 @@ bool ThreadSignalObject::Signal()
 	return success;
 }
 
-bool ThreadSignalObject::Broadcast()
+bool AThreadSignalObject::Broadcast()
 {
-	ThreadLock lock(*this);
+	AThreadLock lock(*this);
 	bool success = (pthread_cond_broadcast(&cond) == 0);
 
 	if (!success) debug("Failed to broadcast to cond<%016lx>: %s", (ulong_t)&cond, strerror(errno));
@@ -90,36 +90,36 @@ bool ThreadSignalObject::Broadcast()
 
 /*----------------------------------------------------------------------------------------------------*/
 
-ThreadBoolSignalObject::ThreadBoolSignalObject(bool initial_condition) : ThreadSignalObject(),
-                                                                         condition(initial_condition)
+AThreadBoolSignalObject::AThreadBoolSignalObject(bool initial_condition) : AThreadSignalObject(),
+																		   condition(initial_condition)
 {
 }
 
-ThreadBoolSignalObject::~ThreadBoolSignalObject()
+AThreadBoolSignalObject::~AThreadBoolSignalObject()
 {
 }
 
-bool ThreadBoolSignalObject::Wait()
+bool AThreadBoolSignalObject::Wait()
 {
-	ThreadLock lock(*this);
+	AThreadLock lock(*this);
 	while (!condition)
 	{
-		if (!ThreadSignalObject::Wait()) return false;
+		if (!AThreadSignalObject::Wait()) return false;
 	}
 	condition = false;
 	return true;
 }
 
-bool ThreadBoolSignalObject::Signal()
+bool AThreadBoolSignalObject::Signal()
 {
-	ThreadLock lock(*this);
+	AThreadLock lock(*this);
 	condition = true;
-	return ThreadSignalObject::Signal();
+	return AThreadSignalObject::Signal();
 }
 
-bool ThreadBoolSignalObject::Broadcast()
+bool AThreadBoolSignalObject::Broadcast()
 {
-	ThreadLock lock(*this);
+	AThreadLock lock(*this);
 	condition = true;
-	return ThreadSignalObject::Broadcast();
+	return AThreadSignalObject::Broadcast();
 }

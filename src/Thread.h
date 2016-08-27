@@ -7,10 +7,10 @@
 /** Simple thread implementation
  */
 /*--------------------------------------------------------------------------------*/
-class Thread {
+class AThread {
 public:
-	Thread();
-	virtual ~Thread();
+	AThread();
+	virtual ~AThread();
 
 	/*--------------------------------------------------------------------------------*/
 	/** Start thread
@@ -44,10 +44,9 @@ protected:
 	virtual void *Run() = 0;
 
 protected:
-	ThreadLockObject tlock;
-	pthread_t 		 thread;
-	bool      		 threadstarted;
-	bool      		 quitthread;
+	pthread_t thread;
+	bool      threadstarted;
+	bool      quitthread;
 };
 
 #endif

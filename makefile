@@ -71,48 +71,34 @@ HEADERS:=										\
 	3DTrans.h									\
 	3DWorld.h									\
 	Allocator.h									\
-	authorize.h									\
-	blowfish.h									\
-	blowfish_imp.h								\
 	BMPImage.h									\
-	cfft.h										\
+	CircularBuffer.h							\
 	Complex.h									\
-	crc32.h										\
-	Database.h									\
 	DataList.h									\
+	Database.h									\
 	DateObjectPair.h							\
 	DateTime.h									\
 	ErrorHandler.h								\
 	EvalNumber.h								\
 	Evaluator.h									\
-	exif.h										\
-	fastcomplex.h								\
-	fastfft.h									\
 	FileHash.h									\
-	Hash.h										\
 	HTMLTags.h									\
 	HTTPRequest.h								\
+	Hash.h										\
 	Interpolation.h								\
-	jpegfix.h									\
-	jpeginfo.h									\
 	ListNode.h									\
 	Logger.h									\
 	Matrix.h									\
-	md5.h										\
 	MessageResponseHandler.h					\
-	misc.h										\
-	mt19937ar.h									\
 	NodeType.h									\
-	pg_types.h									\
 	PointSizeRect.h								\
 	PostgresDatabase.h							\
 	QuitHandler.h								\
 	Recurse.h									\
 	Regex.h										\
-	SettingsHandler.h							\
-	simpleeval.h								\
-	SocketServer.h								\
 	SQLQuery.h									\
+	SettingsHandler.h							\
+	SocketServer.h								\
 	StdData.h									\
 	StdDev.h									\
 	StdFile.h									\
@@ -121,17 +107,32 @@ HEADERS:=										\
 	StdSocket.h									\
 	StdUri.h									\
 	StringList.h								\
-	strsup.h									\
 	StructList.h								\
 	StructuredNode.h							\
-	tag.h										\
 	TextServer.h								\
 	Thread.h									\
 	ThreadLock.h								\
-	types.h										\
 	UDPServer.h									\
-	wxsup.h										\
-	XMLDecode.h
+	XMLDecode.h									\
+	authorize.h									\
+	blowfish.h									\
+	blowfish_imp.h								\
+	cfft.h										\
+	crc32.h										\
+	exif.h										\
+	fastcomplex.h								\
+	fastfft.h									\
+	jpegfix.h									\
+	jpeginfo.h									\
+	md5.h										\
+	misc.h										\
+	mt19937ar.h									\
+	pg_types.h									\
+	simpleeval.h								\
+	strsup.h									\
+	tag.h										\
+	types.h										\
+	wxsup.h
 
 GLOBAL_CFLAGS  += -D__LINUX__ -D_FILE_OFFSET_BITS=64 -fsigned-char
 GLOBAL_CFLAGS  += $(shell $(CC) -Wall -o arch src/arch.c && ./arch)
