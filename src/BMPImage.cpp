@@ -394,29 +394,7 @@ AImage& AImage::CopyScaled(const AImage& img)
 {
 	if (!Valid()) Create(img.GetRect().w, img.GetRect().h);
 
-	if (Valid() && img.Valid()) {
-		const PIXEL *pix1 = img.GetPixelData();
-		PIXEL       *pix2 = GetPixelData();
-		uint_t w1 = img.GetRect().w;
-		uint_t h1 = img.GetRect().h;
-		uint_t w2 = GetRect().w;
-		uint_t h2 = GetRect().h;
-		uint_t y2, x2;
-
-		for (y2 = 0; y2 < h2; y2++) {
-			uint_t y1 = (y2 * h1 + h2 / 2) / h2;
-
-			for (x2 = 0; x2 < w2; x2++) {
-				uint_t		 x1  = (x2 * w1 + w2 / 2) / w2;
-				const PIXEL& px1 = pix1[x1 + y1 * w1];
-				PIXEL&       px2 = pix2[x2 + y2 * w2];
-
-				px2 = px1;
-			}
-		}
-	}
-	
-	return *this;
+	return ModifyImage<CopyPixel>(img);
 }
 
 AImage& AImage::CopyScaled(const AImage& img, int Width, int Height)
@@ -430,101 +408,33 @@ AImage& AImage::CopyScaled(const AImage& img, int Width, int Height)
 
 AImage& AImage::operator += (const AImage& img)
 {
-	if (Valid() && img.Valid()) {
-		const PIXEL *pix1 = img.GetPixelData();
-		PIXEL       *pix2 = GetPixelData();
-		uint_t w1 = img.GetRect().w;
-		uint_t h1 = img.GetRect().h;
-		uint_t w2 = GetRect().w;
-		uint_t h2 = GetRect().h;
-		uint_t y2, x2;
-
-		for (y2 = 0; y2 < h2; y2++) {
-			uint_t y1 = (y2 * h1 + h2 / 2) / h2;
-
-			for (x2 = 0; x2 < w2; x2++) {
-				uint_t		 x1  = (x2 * w1 + w2 / 2) / w2;
-				const PIXEL& px1 = pix1[x1 + y1 * w1];
-				PIXEL&       px2 = pix2[x2 + y2 * w2];
-
-				px2.r = (uint8_t)limit((int)px2.r + (int)px1.r, 0, 255);
-				px2.g = (uint8_t)limit((int)px2.g + (int)px1.g, 0, 255);
-				px2.b = (uint8_t)limit((int)px2.b + (int)px1.b, 0, 255);
-			}
-		}
-	}
-	
-	return *this;
+	return ModifyImage<AddPixel>(img);
 }
 
 AImage& AImage::operator -= (const AImage& img)
 {
-	if (Valid() && img.Valid()) {
-		const PIXEL *pix1 = img.GetPixelData();
-		PIXEL       *pix2 = GetPixelData();
-		uint_t w1 = img.GetRect().w;
-		uint_t h1 = img.GetRect().h;
-		uint_t w2 = GetRect().w;
-		uint_t h2 = GetRect().h;
-		uint_t y2, x2;
-
-		for (y2 = 0; y2 < h2; y2++) {
-			uint_t y1 = (y2 * h1 + h2 / 2) / h2;
-
-			for (x2 = 0; x2 < w2; x2++) {
-				uint_t		 x1  = (x2 * w1 + w2 / 2) / w2;
-				const PIXEL& px1 = pix1[x1 + y1 * w1];
-				PIXEL&       px2 = pix2[x2 + y2 * w2];
-
-				px2.r = (uint8_t)limit((int)px2.r - (int)px1.r, 0, 255);
-				px2.g = (uint8_t)limit((int)px2.g - (int)px1.g, 0, 255);
-				px2.b = (uint8_t)limit((int)px2.b - (int)px1.b, 0, 255);
-			}
-		}
-	}
-	
-	return *this;
+	return ModifyImage<SubPixel>(img);
 }
 
 AImage& AImage::operator *= (const AImage& img)
 {
-	if (Valid() && img.Valid()) {
-		const PIXEL *pix1 = img.GetPixelData();
-		PIXEL       *pix2 = GetPixelData();
-		uint_t w1 = img.GetRect().w;
-		uint_t h1 = img.GetRect().h;
-		uint_t w2 = GetRect().w;
-		uint_t h2 = GetRect().h;
-		uint_t y2, x2;
-
-		for (y2 = 0; y2 < h2; y2++) {
-			uint_t y1 = (y2 * h1 + h2 / 2) / h2;
-
-			for (x2 = 0; x2 < w2; x2++) {
-				uint_t		 x1  = (x2 * w1 + w2 / 2) / w2;
-				const PIXEL& px1 = pix1[x1 + y1 * w1];
-				PIXEL&       px2 = pix2[x2 + y2 * w2];
-
-				px2.r = (uint8_t)(((int)px2.r * (int)px1.r + 127) / 255);
-				px2.g = (uint8_t)(((int)px2.g * (int)px1.g + 127) / 255);
-				px2.b = (uint8_t)(((int)px2.b * (int)px1.b + 127) / 255);
-			}
-		}
-	}
-	
-	return *this;
+	return ModifyImage<MulPixel>(img);
 }
 
 AImage& AImage::operator *= (const AColour& col)
 {
 	if (Valid()) {
+		PIXEL src;
 		PIXEL *p = GetPixelData();
 		uint_t i, n = Rect.w * Rect.h;
 
+		src.r = col.r;
+		src.g = col.g;
+		src.b = col.b;
+		src.pad = 0;
+		
 		for (i = 0; i < n; i++, p++) {
-			p->r = (uint8_t)(((int)p->r * (int)col.r + 127) / 255);
-			p->g = (uint8_t)(((int)p->g * (int)col.g + 127) / 255);
-			p->b = (uint8_t)(((int)p->b * (int)col.b + 127) / 255);
+			MulPixel::Modify(*p, src);
 		}
 	}
 
@@ -538,9 +448,7 @@ AImage& AImage::operator *= (const PIXEL& col)
 		uint_t i, n = Rect.w * Rect.h;
 
 		for (i = 0; i < n; i++, p++) {
-			p->r = (uint8_t)(((int)p->r * (int)col.r + 127) / 255);
-			p->g = (uint8_t)(((int)p->g * (int)col.g + 127) / 255);
-			p->b = (uint8_t)(((int)p->b * (int)col.b + 127) / 255);
+			MulPixel::Modify(*p, col);
 		}
 	}
 

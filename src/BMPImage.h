@@ -286,7 +286,7 @@ public:
 	}
 	void SetOrigin(const APoint& origin) {Origin = origin;}
 	const APoint& GetOrigin() const {return Origin;}
-	
+
 	void ApplyMatrix(const int mat[2][2], int divval = 1, int rndval = 0) {
 		const int a = Matrix[0][0] * mat[0][0] + Matrix[0][1] * mat[1][0];
 		const int b = Matrix[0][0] * mat[0][1] + Matrix[0][1] * mat[1][1];
@@ -399,10 +399,10 @@ public:
 	virtual AImage& operator = (const AImage& img);
 	virtual bool    operator == (const AImage& img) const;
 	virtual bool    operator != (const AImage& img) const {return !operator == (img);}
-	
+
 	virtual bool Create(int Width, int Height);
 	virtual void Delete();
-	
+
 	virtual bool Valid() const {return (pData != NULL);}
 
 	virtual void Clear(const AColour& col = AColour("$000000"));
@@ -423,7 +423,7 @@ public:
 		TAG_FILETYPE = _TAG_START,
 		TAG_JPEG_QUALITY,
 	};
-		
+
 	enum {
 		FILETYPE_BMP = 0,
 		FILETYPE_JPEG,
@@ -445,7 +445,7 @@ public:
 
 	APixelReader *SetReader(APixelReader *reader) {
 		APixelReader *oldreader = pReader;
-		pReader = reader ? reader : &DefaultReader; 
+		pReader = reader ? reader : &DefaultReader;
 		if (Valid()) pReader->Attach(this);
 		return oldreader;
 	}
@@ -543,6 +543,33 @@ public:
 	bool LoadBMP(const char *filename);
 	bool LoadBMP(AStdData& fp);
 
+	template<typename T>
+	AImage& ModifyImage(const AImage& img) {
+		if (Valid() && img.Valid()) {
+			const PIXEL *src  	 = img.GetPixelData();
+			PIXEL		*res  	 = GetPixelData();
+			const uint_t src_w	 = img.GetRect().w;
+			const uint_t src_h	 = img.GetRect().h;
+			const uint_t res_w	 = GetRect().w;
+			const uint_t res_h	 = GetRect().h;
+			const uint_t res_wd2 = res_w / 2;
+			const uint_t res_hd2 = res_h / 2;
+			uint_t res_y, res_x;
+
+			for (res_y = 0; res_y < res_h; res_y++) {
+				const uint_t src_y = (res_y * src_h + res_hd2) / res_h;
+
+				for (res_x = 0; res_x < res_w; res_x++) {
+					const uint_t src_x = (res_x * src_w + res_wd2) / res_w;
+
+					T::Modify(res[res_x + res_y * res_w], src[src_x + src_y * src_w]);
+				}
+			}
+		}
+
+		return *this;
+	}
+
 protected:
 	bool CreateData();
 	void DeleteData();
@@ -558,6 +585,38 @@ protected:
 		int step;
 		int gt_count, sm_count;
 	} LINE_INFO;
+
+	class CopyPixel {
+	public:
+		static void Modify(PIXEL& res, const PIXEL& src) {res = src;}
+	};
+
+	class AddPixel {
+	public:
+		static void Modify(PIXEL& res, const PIXEL& src) {
+			res.r = (uint8_t)limit((int)res.r + (int)src.r, 0, 255);
+			res.g = (uint8_t)limit((int)res.g + (int)src.g, 0, 255);
+			res.b = (uint8_t)limit((int)res.b + (int)src.b, 0, 255);
+		}
+	};
+
+	class SubPixel {
+	public:
+		static void Modify(PIXEL& res, const PIXEL& src) {
+			res.r = (uint8_t)limit((int)res.r - (int)src.r, 0, 255);
+			res.g = (uint8_t)limit((int)res.g - (int)src.g, 0, 255);
+			res.b = (uint8_t)limit((int)res.b - (int)src.b, 0, 255);
+		}
+	};
+
+	class MulPixel {
+	public:
+		static void Modify(PIXEL& res, const PIXEL& src) {
+			res.r = (uint8_t)(((int)res.r * (int)src.r + 127) / 255);
+			res.g = (uint8_t)(((int)res.g * (int)src.g + 127) / 255);
+			res.b = (uint8_t)(((int)res.b * (int)src.b + 127) / 255);
+		}
+	};
 
 	bool GenLineInfo(int x1, int y1, int x2, int y2, LINE_INFO& info) const;
 	inline bool NextLinePoint(LINE_INFO& info) const {
@@ -588,10 +647,10 @@ protected:
 		px *= t;
 		py *= t;
 		data.inverse.RotateXY(px, py, pz);
-		
+
 		xf = px + data.offsetx;
 		yf = py + data.offsety;
-			
+
 		return true;
 	}
 
@@ -606,7 +665,7 @@ protected:
 
 	APixelWriter *pWriter, DefaultWriter;
 	APixelReader *pReader, DefaultReader;
-	
+
 	int  TransformOptimization;
 	bool TransformInterpolation;
 };
