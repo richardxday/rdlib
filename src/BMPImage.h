@@ -402,12 +402,22 @@ public:
 	
 	virtual bool Create(int Width, int Height);
 	virtual void Delete();
-
+	
 	virtual bool Valid() const {return (pData != NULL);}
 
 	virtual void Clear(const AColour& col = AColour("$000000"));
 
+	virtual AImage& CopyScaled(const AImage& img);
+	virtual AImage& CopyScaled(const AImage& img, int Width, int Height);
+
 	typedef BGRP_PIXEL PIXEL;
+
+	virtual AImage& operator += (const AImage& img);
+	virtual AImage& operator -= (const AImage& img);
+	virtual AImage& operator *= (const AImage& img);
+	virtual AImage& operator *= (const AColour& col);
+	virtual AImage& operator *= (const PIXEL& col);
+	virtual AImage& operator *= (int val);
 
 	enum {
 		TAG_FILETYPE = _TAG_START,
