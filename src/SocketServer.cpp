@@ -842,6 +842,16 @@ AString ASocketServer::GetClientAddr(int socket) const
 	return client;
 }
 
+uint_t ASocketServer::GetClientPort(int socket) const
+{
+	const HANDLER *handler = (const HANDLER *)FindSocket(socket);
+	uint_t port = 0;
+
+	if (handler) port = ASocketServer::GetClientPort(&handler->sockaddr);
+
+	return port;
+}
+
 AString ASocketServer::GetClientAddr(const struct sockaddr_in *sockaddr)
 {
 	AString client;
@@ -851,6 +861,17 @@ AString ASocketServer::GetClientAddr(const struct sockaddr_in *sockaddr)
 	}
 
 	return client;
+}
+
+uint_t ASocketServer::GetClientPort(const struct sockaddr_in *sockaddr)
+{
+	uint_t port = 0;
+
+	if (sockaddr && (sockaddr->sin_family == AF_INET)) {
+		port = ntohs(sockaddr->sin_port);
+	}
+
+	return port;
 }
 
 bool ASocketServer::SetReceiveBufferSize(int socket, uint_t bytes)

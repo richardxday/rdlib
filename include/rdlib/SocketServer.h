@@ -78,7 +78,9 @@ public:
 	uint_t GetSocketCount() const {return SocketList.Count();}
 
 	AString GetClientAddr(int socket) const;
+	uint_t  GetClientPort(int socket) const;
 	static AString GetClientAddr(const struct sockaddr_in *sockaddr);
+	static uint_t  GetClientPort(const struct sockaddr_in *sockaddr);
 
 	class Handler {
 	public:
