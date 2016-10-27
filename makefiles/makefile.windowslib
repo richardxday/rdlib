@@ -1,5 +1,16 @@
+
+HEADERS      += $(LIBRARY)_version.h
+EXTRA_CFLAGS += -I$(WINDOWSLIB)
+
+VERSION_FILE:= $(WINDOWSLIB)/$(WINDOWSLIB)_private.h
+
 LIBRARY_VERSION_MAJOR:=$(shell grep VER_MAJOR $(VERSION_FILE) | sed -E "s/^.+([0-9]+).*/\1/")
 LIBRARY_VERSION_MINOR:=$(shell grep VER_MINOR $(VERSION_FILE) | sed -E "s/^.+([0-9]+).*/\1/")
 LIBRARY_VERSION_RELEASE:=$(shell grep VER_RELEASE $(VERSION_FILE) | sed -E "s/^.+([0-9]+).*/\1/")
 LIBRARY_VERSION_BUILD:=$(shell grep VER_BUILD $(VERSION_FILE) | sed -E "s/^.+([0-9]+).*/\1/")
 LIBRARY_DESCRIPTION:=$(shell grep FILE_DESCRIPTION $(VERSION_FILE) | sed -E "s/^.+\"(.+)\".*/\1/")
+
+$(HEADERSSRC)/$(LIBRARY)_version.h: $(VERSION_FILE)
+	@cp "$<" "$@"
+
+CLEANFILES += $(HEADERSSRC)/$(LIBRARY)_version.h

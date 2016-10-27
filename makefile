@@ -4,14 +4,12 @@ all: default-build
 MAKEFILEDIR=makefiles
 
 LIBRARY:=rdlib
+WINDOWSLIB:=winlib
 
 include $(MAKEFILEDIR)/makefile.init
+include $(MAKEFILEDIR)/makefile.windowslib
 
-VERSION_FILE=winlib/winlib_private.h
-
-include $(MAKEFILEDIR)/makefile.libversion
-
-OBJECTS:=										\
+OBJECTS +=										\
 	3DTrans.o									\
 	authorize.o									\
 	blowfish.o									\
@@ -65,7 +63,7 @@ OBJECTS:=										\
 	UDPServer.o									\
 	XMLDecode.o
 
-HEADERS:=										\
+HEADERS +=										\
 	3DTrans.h									\
 	3DWorld.h									\
 	Allocator.h									\
