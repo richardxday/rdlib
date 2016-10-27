@@ -1,4 +1,7 @@
 
+OBJECTSSRC=src
+HEADERSSSRC=include
+
 # C
 CC = gcc
 # C++ compiler
@@ -6,9 +9,11 @@ CXX = g++
 
 # Standard preprocessor flags (common for CC and CXX)
 CFLAGS=-Wall -Wextra -Werror -fPIC
+LOCAL_CFLAGS:=
 
 # Standard flags for C++
 CXXFLAGS=
+LOCAL_CXXFLAGS:=
 
 # Standard linker flags
 LDFLAGS=

@@ -742,7 +742,7 @@ uint32_t Exec(const char *cmd, uint32_t timeout)
 {
 	STARTUPINFO si;
 	PROCESS_INFORMATION pi;
-	uint32_t retcode = 0;
+	DWORD retcode = 0;
 
 	const char *cmdproc = getenv("ComSpec");
 	if (!cmdproc) cmdproc = "cmd.exe";
@@ -882,7 +882,7 @@ uint64_t GetNanosecondTicks()
   QueryPerformanceCounter(&time);
 
   // multiply time by 1e9 (s->ns) then divide by divisor
-  return muldivu(time.QuadPart, 1000000000, div);
+  return muldivu((uint64_t)time.QuadPart, 1000000000, div);
 #elif __MACH__
   static mach_timebase_info_data_t timebase;
   static bool inited = false;

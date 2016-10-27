@@ -9,7 +9,9 @@
 #ifdef __APPLE__
 #include <machine/endian.h>
 #else
+#ifndef _WIN32
 #include <endian.h>
+#endif
 #endif
 
 #ifdef _WIN32
@@ -111,7 +113,6 @@ extern void SwapBytes(void *buf, uint_t itemsize, uint_t nitems);
 #endif
 
 #ifndef MachineIsBigEndian
-#error Unknown endianness
 extern bool MachineIsBigEndian();
 #endif
 
