@@ -564,9 +564,9 @@ slong_t AStdSerial::readdata(void *buf, size_t bytes)
 	return n;
 }
 
-size_t AStdSerial::writedata(const void *buf, size_t bytes)
+slong_t AStdSerial::writedata(const void *buf, size_t bytes)
 {
-	size_t n = 0;
+	slong_t n = -1;
 
 	if (isopen() && (bytesavailable() >= 0)) {
 		DWORD n1 = 0;

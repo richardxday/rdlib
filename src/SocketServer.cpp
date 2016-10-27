@@ -732,7 +732,7 @@ sint_t ASocketServer::BytesAvailable(int socket)
 #ifdef __LINUX__
 	return recv(socket, staticbuf, sizeof(staticbuf), MSG_PEEK);
 #else
-	uint32_t bytes1 = 0;
+	u_long bytes1 = 0;
 	int bytes = -1;
 
 	if (::ioctlsocket(socket, FIONREAD, &bytes1) != SOCKET_ERROR) {
@@ -846,14 +846,8 @@ AString ASocketServer::GetClientAddr(const struct sockaddr_in *sockaddr)
 {
 	AString client;
 
-	if (sockaddr) {
-		uint32_t addr = sockaddr->sin_addr.s_addr;
-
-		client.printf("%u.%u.%u.%u",
-					  (uint)addr & 0xff,
-					  (uint)(addr >> 8) & 0xff,
-					  (uint)(addr >> 16) & 0xff,
-					  (uint)(addr >> 24));
+	if (sockaddr && (sockaddr->sin_family == AF_INET)) {
+		client = inet_ntoa(sockaddr->sin_addr);
 	}
 
 	return client;

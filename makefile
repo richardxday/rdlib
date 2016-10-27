@@ -3,15 +3,13 @@ all: default-build
 
 MAKEFILEDIR=makefiles
 
-include $(MAKEFILEDIR)/makefile.init
-
 LIBRARY:=rdlib
 
-LIBRARY_VERSION_MAJOR:=0
-LIBRARY_VERSION_MINOR:=1
-LIBRARY_VERSION_RELEASE:=0
-LIBRARY_VERSION_BUILD:=0
-LIBRARY_DESCRIPTION:=Utility library
+include $(MAKEFILEDIR)/makefile.init
+
+VERSION_FILE=winlib/winlib_private.h
+
+include $(MAKEFILEDIR)/makefile.libversion
 
 OBJECTS:=										\
 	3DTrans.o									\

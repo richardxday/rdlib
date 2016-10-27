@@ -1,0 +1,184 @@
+# Project: winlib
+# Makefile created by Dev-C++ 4.9.9.2
+
+CPP  = g++.exe
+CC   = gcc.exe
+WINDRES = windres.exe -IC:\MinGW\msys\1.0\local\include\wx-2.8
+RES  = objs/winlib_private.res
+OBJ  = objs/3DTrans.o objs/authorize.o objs/blowfish.o objs/BMPImage.o objs/cfft.o objs/crc32.o objs/DataList.o objs/DateObjectPair.o objs/DateTime.o objs/EvalNumber.o objs/Evaluator.o objs/exif.o objs/fastcomplex.o objs/fastfft.o objs/Hash.o objs/HTMLTags.o objs/HTTPRequest.o objs/jpeginfo.o objs/ListNode.o objs/Logger.o objs/Matrix.o objs/MessageResponseHandler.o objs/misc.o objs/NodeType.o objs/PointSizeRect.o objs/QuitHandler.o objs/Recurse.o objs/Regex.o objs/SettingsHandler.o objs/simpleeval.o objs/SocketServer.o objs/StdData.o objs/StdDev.o objs/StdFile.o objs/StdMemFile.o objs/StdSerial.o objs/StdSocket.o objs/StdUri.o objs/StringList.o objs/strsup.o objs/StructList.o objs/StructuredNode.o objs/tag.o objs/TextServer.o objs/Thread.o objs/ThreadLock.o objs/UDPServer.o objs/XMLDecode.o objs/blowfish_imp.o objs/md5.o objs/mt19937ar.o $(RES)
+LINKOBJ  = objs/3DTrans.o objs/authorize.o objs/blowfish.o objs/BMPImage.o objs/cfft.o objs/crc32.o objs/DataList.o objs/DateObjectPair.o objs/DateTime.o objs/EvalNumber.o objs/Evaluator.o objs/exif.o objs/fastcomplex.o objs/fastfft.o objs/Hash.o objs/HTMLTags.o objs/HTTPRequest.o objs/jpeginfo.o objs/ListNode.o objs/Logger.o objs/Matrix.o objs/MessageResponseHandler.o objs/misc.o objs/NodeType.o objs/PointSizeRect.o objs/QuitHandler.o objs/Recurse.o objs/Regex.o objs/SettingsHandler.o objs/simpleeval.o objs/SocketServer.o objs/StdData.o objs/StdDev.o objs/StdFile.o objs/StdMemFile.o objs/StdSerial.o objs/StdSocket.o objs/StdUri.o objs/StringList.o objs/strsup.o objs/StructList.o objs/StructuredNode.o objs/tag.o objs/TextServer.o objs/Thread.o objs/ThreadLock.o objs/UDPServer.o objs/XMLDecode.o objs/blowfish_imp.o objs/md5.o objs/mt19937ar.o $(RES)
+LIBS =  -L"c:/mingw/lib" -L"c:/mingw/msys/1.0/local/lib"  -s 
+INCS =  -I"c:/MinGW/include"  -I"C:/MinGW/msys/1.0/local/include"  -I"../include/rdlib" 
+CXXINCS =  -I"c:/MinGW/include"  -I"C:/MinGW/msys/1.0/local/include"  -I"C:/MinGW/msys/1.0/local/include/wx-2.8"  -I"C:/MinGW/msys/1.0/local/lib/wx/include/msw-unicode-release-static-2.8"  -I"../include/rdlib" 
+BIN  = winlib.a
+CXXFLAGS = $(CXXINCS)   -Wall -D_WIN32 -D_WIN32_IE=0x700 -O3
+CFLAGS = $(INCS)   -Wall -D_WIN32 -D_WIN32_IE=0x700 -O3
+RM = rm -f
+
+.PHONY: all all-before all-after clean clean-custom
+
+all: all-before winlib.a all-after
+
+
+clean: clean-custom
+	${RM} $(OBJ) $(BIN)
+
+$(BIN): $(LINKOBJ)
+	ar r $(BIN) $(LINKOBJ)
+	ranlib $(BIN)
+
+objs/3DTrans.o: ../src/3DTrans.cpp ../include/rdlib/3DTrans.h  ../include/rdlib/misc.h ../include/rdlib/types.h  ../include/rdlib/Matrix.h
+	$(CPP) -c ../src/3DTrans.cpp -o objs/3DTrans.o $(CXXFLAGS)
+
+objs/authorize.o: ../src/authorize.cpp ../include/rdlib/strsup.h  ../include/rdlib/ListNode.h ../include/rdlib/misc.h  ../include/rdlib/types.h ../include/rdlib/NodeType.h  ../include/rdlib/StdData.h ../include/rdlib/EvalNumber.h  ../include/rdlib/StdFile.h ../include/rdlib/strsup.h  ../include/rdlib/blowfish.h ../include/rdlib/md5.h  ../include/rdlib/authorize.h
+	$(CPP) -c ../src/authorize.cpp -o objs/authorize.o $(CXXFLAGS)
+
+objs/blowfish.o: ../src/blowfish.cpp ../include/rdlib/blowfish.h  ../include/rdlib/misc.h ../include/rdlib/types.h  ../include/rdlib/blowfish_imp.h
+	$(CPP) -c ../src/blowfish.cpp -o objs/blowfish.o $(CXXFLAGS)
+
+objs/BMPImage.o: ../src/BMPImage.cpp ../include/rdlib/StdFile.h  ../include/rdlib/misc.h ../include/rdlib/types.h  ../include/rdlib/StdData.h ../include/rdlib/NodeType.h  ../include/rdlib/strsup.h ../include/rdlib/ListNode.h  ../include/rdlib/EvalNumber.h ../include/rdlib/StdMemFile.h  ../include/rdlib/BMPImage.h ../include/rdlib/PointSizeRect.h  ../include/rdlib/tag.h ../include/rdlib/3DTrans.h  ../include/rdlib/Matrix.h ../include/rdlib/jpegfix.h  C:/MinGW/msys/1.0/local/include/jpeglib.h  C:/MinGW/msys/1.0/local/include/jconfig.h  C:/MinGW/msys/1.0/local/include/jmorecfg.h  C:/MinGW/msys/1.0/local/include/jerror.h
+	$(CPP) -c ../src/BMPImage.cpp -o objs/BMPImage.o $(CXXFLAGS)
+
+objs/cfft.o: ../src/cfft.cpp ../include/rdlib/cfft.h ../include/rdlib/misc.h  ../include/rdlib/types.h ../include/rdlib/DataList.h
+	$(CPP) -c ../src/cfft.cpp -o objs/cfft.o $(CXXFLAGS)
+
+objs/crc32.o: ../src/crc32.cpp ../include/rdlib/crc32.h  ../include/rdlib/misc.h ../include/rdlib/types.h
+	$(CPP) -c ../src/crc32.cpp -o objs/crc32.o $(CXXFLAGS)
+
+objs/DataList.o: ../src/DataList.cpp ../include/rdlib/DataList.h  ../include/rdlib/misc.h ../include/rdlib/types.h
+	$(CPP) -c ../src/DataList.cpp -o objs/DataList.o $(CXXFLAGS)
+
+objs/DateObjectPair.o: ../src/DateObjectPair.cpp  ../include/rdlib/DateObjectPair.h ../include/rdlib/ListNode.h  ../include/rdlib/misc.h ../include/rdlib/types.h  ../include/rdlib/NodeType.h ../include/rdlib/DateTime.h  ../include/rdlib/strsup.h ../include/rdlib/StdData.h  ../include/rdlib/EvalNumber.h ../include/rdlib/DataList.h
+	$(CPP) -c ../src/DateObjectPair.cpp -o objs/DateObjectPair.o $(CXXFLAGS)
+
+objs/DateTime.o: ../src/DateTime.cpp ../include/rdlib/DateTime.h  ../include/rdlib/misc.h ../include/rdlib/types.h  ../include/rdlib/strsup.h ../include/rdlib/ListNode.h  ../include/rdlib/NodeType.h ../include/rdlib/StdData.h  ../include/rdlib/EvalNumber.h ../include/rdlib/DataList.h
+	$(CPP) -c ../src/DateTime.cpp -o objs/DateTime.o $(CXXFLAGS)
+
+objs/EvalNumber.o: ../src/EvalNumber.cpp ../include/rdlib/EvalNumber.h  ../include/rdlib/types.h ../include/rdlib/strsup.h  ../include/rdlib/ListNode.h ../include/rdlib/misc.h  ../include/rdlib/NodeType.h ../include/rdlib/StdData.h  ../include/rdlib/EvalNumber.h
+	$(CPP) -c ../src/EvalNumber.cpp -o objs/EvalNumber.o $(CXXFLAGS)
+
+objs/Evaluator.o: ../src/Evaluator.cpp ../include/rdlib/Evaluator.h  ../include/rdlib/strsup.h ../include/rdlib/ListNode.h  ../include/rdlib/misc.h ../include/rdlib/types.h  ../include/rdlib/NodeType.h ../include/rdlib/StdData.h  ../include/rdlib/EvalNumber.h ../include/rdlib/Hash.h
+	$(CPP) -c ../src/Evaluator.cpp -o objs/Evaluator.o $(CXXFLAGS)
+
+objs/exif.o: ../src/exif.cpp ../include/rdlib/exif.h
+	$(CPP) -c ../src/exif.cpp -o objs/exif.o $(CXXFLAGS)
+
+objs/fastcomplex.o: ../src/fastcomplex.cpp ../include/rdlib/fastcomplex.h  ../include/rdlib/types.h
+	$(CPP) -c ../src/fastcomplex.cpp -o objs/fastcomplex.o $(CXXFLAGS)
+
+objs/fastfft.o: ../src/fastfft.cpp ../include/rdlib/fastfft.h  ../include/rdlib/fastcomplex.h ../include/rdlib/types.h  ../include/rdlib/DataList.h ../include/rdlib/misc.h
+	$(CPP) -c ../src/fastfft.cpp -o objs/fastfft.o $(CXXFLAGS)
+
+objs/Hash.o: ../src/Hash.cpp ../include/rdlib/Hash.h  ../include/rdlib/StdData.h ../include/rdlib/misc.h  ../include/rdlib/types.h ../include/rdlib/NodeType.h
+	$(CPP) -c ../src/Hash.cpp -o objs/Hash.o $(CXXFLAGS)
+
+objs/HTMLTags.o: ../src/HTMLTags.cpp ../include/rdlib/HTMLTags.h  ../include/rdlib/strsup.h ../include/rdlib/ListNode.h  ../include/rdlib/misc.h ../include/rdlib/types.h  ../include/rdlib/NodeType.h ../include/rdlib/StdData.h  ../include/rdlib/EvalNumber.h
+	$(CPP) -c ../src/HTMLTags.cpp -o objs/HTMLTags.o $(CXXFLAGS)
+
+objs/HTTPRequest.o: ../src/HTTPRequest.cpp ../include/rdlib/HTTPRequest.h  ../include/rdlib/SocketServer.h ../include/rdlib/strsup.h  ../include/rdlib/ListNode.h ../include/rdlib/misc.h  ../include/rdlib/types.h ../include/rdlib/NodeType.h  ../include/rdlib/StdData.h ../include/rdlib/EvalNumber.h  ../include/rdlib/DataList.h
+	$(CPP) -c ../src/HTTPRequest.cpp -o objs/HTTPRequest.o $(CXXFLAGS)
+
+objs/jpeginfo.o: ../src/jpeginfo.cpp ../include/rdlib/jpeginfo.h  ../include/rdlib/DateTime.h ../include/rdlib/misc.h  ../include/rdlib/types.h ../include/rdlib/strsup.h  ../include/rdlib/ListNode.h ../include/rdlib/NodeType.h  ../include/rdlib/StdData.h ../include/rdlib/EvalNumber.h  ../include/rdlib/DataList.h ../include/rdlib/exif.h  ../include/rdlib/jpegfix.h C:/MinGW/msys/1.0/local/include/jpeglib.h  C:/MinGW/msys/1.0/local/include/jconfig.h  C:/MinGW/msys/1.0/local/include/jmorecfg.h  C:/MinGW/msys/1.0/local/include/jerror.h
+	$(CPP) -c ../src/jpeginfo.cpp -o objs/jpeginfo.o $(CXXFLAGS)
+
+objs/ListNode.o: ../src/ListNode.cpp ../include/rdlib/ListNode.h  ../include/rdlib/misc.h ../include/rdlib/types.h  ../include/rdlib/NodeType.h
+	$(CPP) -c ../src/ListNode.cpp -o objs/ListNode.o $(CXXFLAGS)
+
+objs/Logger.o: ../src/Logger.cpp ../include/rdlib/StdFile.h  ../include/rdlib/misc.h ../include/rdlib/types.h  ../include/rdlib/StdData.h ../include/rdlib/NodeType.h  ../include/rdlib/strsup.h ../include/rdlib/ListNode.h  ../include/rdlib/EvalNumber.h ../include/rdlib/Logger.h  ../include/rdlib/DateTime.h ../include/rdlib/DataList.h
+	$(CPP) -c ../src/Logger.cpp -o objs/Logger.o $(CXXFLAGS)
+
+objs/Matrix.o: ../src/Matrix.cpp ../include/rdlib/Matrix.h  ../include/rdlib/misc.h ../include/rdlib/types.h
+	$(CPP) -c ../src/Matrix.cpp -o objs/Matrix.o $(CXXFLAGS)
+
+objs/MessageResponseHandler.o: ../src/MessageResponseHandler.cpp  ../include/rdlib/MessageResponseHandler.h ../include/rdlib/StdUri.h  ../include/rdlib/misc.h ../include/rdlib/types.h  ../include/rdlib/strsup.h ../include/rdlib/ListNode.h  ../include/rdlib/NodeType.h ../include/rdlib/StdData.h  ../include/rdlib/EvalNumber.h ../include/rdlib/Hash.h
+	$(CPP) -c ../src/MessageResponseHandler.cpp -o objs/MessageResponseHandler.o $(CXXFLAGS)
+
+objs/misc.o: ../src/misc.cpp ../include/rdlib/misc.h ../include/rdlib/types.h
+	$(CPP) -c ../src/misc.cpp -o objs/misc.o $(CXXFLAGS)
+
+objs/NodeType.o: ../src/NodeType.cpp ../include/rdlib/NodeType.h  ../include/rdlib/types.h
+	$(CPP) -c ../src/NodeType.cpp -o objs/NodeType.o $(CXXFLAGS)
+
+objs/PointSizeRect.o: ../src/PointSizeRect.cpp  ../include/rdlib/PointSizeRect.h ../include/rdlib/misc.h  ../include/rdlib/types.h ../include/rdlib/strsup.h  ../include/rdlib/ListNode.h ../include/rdlib/NodeType.h  ../include/rdlib/StdData.h ../include/rdlib/EvalNumber.h
+	$(CPP) -c ../src/PointSizeRect.cpp -o objs/PointSizeRect.o $(CXXFLAGS)
+
+objs/QuitHandler.o: ../src/QuitHandler.cpp ../include/rdlib/QuitHandler.h  ../include/rdlib/misc.h ../include/rdlib/types.h
+	$(CPP) -c ../src/QuitHandler.cpp -o objs/QuitHandler.o $(CXXFLAGS)
+
+objs/Recurse.o: ../src/Recurse.cpp ../include/rdlib/Recurse.h  ../include/rdlib/misc.h ../include/rdlib/types.h  ../include/rdlib/strsup.h ../include/rdlib/ListNode.h  ../include/rdlib/NodeType.h ../include/rdlib/StdData.h  ../include/rdlib/EvalNumber.h ../include/rdlib/DataList.h  ../include/rdlib/DateTime.h ../include/rdlib/QuitHandler.h  ../include/rdlib/Regex.h
+	$(CPP) -c ../src/Recurse.cpp -o objs/Recurse.o $(CXXFLAGS)
+
+objs/Regex.o: ../src/Regex.cpp ../include/rdlib/Regex.h  ../include/rdlib/strsup.h ../include/rdlib/ListNode.h  ../include/rdlib/misc.h ../include/rdlib/types.h  ../include/rdlib/NodeType.h ../include/rdlib/StdData.h  ../include/rdlib/EvalNumber.h ../include/rdlib/DataList.h
+	$(CPP) -c ../src/Regex.cpp -o objs/Regex.o $(CXXFLAGS)
+
+objs/SettingsHandler.o: ../src/SettingsHandler.cpp ../include/rdlib/Recurse.h  ../include/rdlib/misc.h ../include/rdlib/types.h  ../include/rdlib/strsup.h ../include/rdlib/ListNode.h  ../include/rdlib/NodeType.h ../include/rdlib/StdData.h  ../include/rdlib/EvalNumber.h ../include/rdlib/DataList.h  ../include/rdlib/DateTime.h ../include/rdlib/QuitHandler.h  ../include/rdlib/Regex.h ../include/rdlib/SettingsHandler.h  ../include/rdlib/StdFile.h ../include/rdlib/Hash.h
+	$(CPP) -c ../src/SettingsHandler.cpp -o objs/SettingsHandler.o $(CXXFLAGS)
+
+objs/simpleeval.o: ../src/simpleeval.cpp ../include/rdlib/simpleeval.h  ../include/rdlib/strsup.h ../include/rdlib/ListNode.h  ../include/rdlib/misc.h ../include/rdlib/types.h  ../include/rdlib/NodeType.h ../include/rdlib/StdData.h  ../include/rdlib/EvalNumber.h ../include/rdlib/Hash.h
+	$(CPP) -c ../src/simpleeval.cpp -o objs/simpleeval.o $(CXXFLAGS)
+
+objs/SocketServer.o: ../src/SocketServer.cpp ../include/rdlib/SocketServer.h  ../include/rdlib/strsup.h ../include/rdlib/ListNode.h  ../include/rdlib/misc.h ../include/rdlib/types.h  ../include/rdlib/NodeType.h ../include/rdlib/StdData.h  ../include/rdlib/EvalNumber.h ../include/rdlib/DataList.h
+	$(CPP) -c ../src/SocketServer.cpp -o objs/SocketServer.o $(CXXFLAGS)
+
+objs/StdData.o: ../src/StdData.cpp ../include/rdlib/misc.h  ../include/rdlib/types.h ../include/rdlib/StdFile.h  ../include/rdlib/misc.h ../include/rdlib/StdData.h  ../include/rdlib/NodeType.h ../include/rdlib/strsup.h  ../include/rdlib/ListNode.h ../include/rdlib/EvalNumber.h
+	$(CPP) -c ../src/StdData.cpp -o objs/StdData.o $(CXXFLAGS)
+
+objs/StdDev.o: ../src/StdDev.cpp ../include/rdlib/StdDev.h  ../include/rdlib/misc.h ../include/rdlib/types.h  ../include/rdlib/StdData.h ../include/rdlib/NodeType.h
+	$(CPP) -c ../src/StdDev.cpp -o objs/StdDev.o $(CXXFLAGS)
+
+objs/StdFile.o: ../src/StdFile.cpp ../include/rdlib/StdFile.h  ../include/rdlib/misc.h ../include/rdlib/types.h  ../include/rdlib/StdData.h ../include/rdlib/NodeType.h  ../include/rdlib/strsup.h ../include/rdlib/ListNode.h  ../include/rdlib/EvalNumber.h
+	$(CPP) -c ../src/StdFile.cpp -o objs/StdFile.o $(CXXFLAGS)
+
+objs/StdMemFile.o: ../src/StdMemFile.cpp ../include/rdlib/StdMemFile.h  ../include/rdlib/misc.h ../include/rdlib/types.h  ../include/rdlib/StdData.h ../include/rdlib/NodeType.h  ../include/rdlib/strsup.h ../include/rdlib/ListNode.h  ../include/rdlib/EvalNumber.h
+	$(CPP) -c ../src/StdMemFile.cpp -o objs/StdMemFile.o $(CXXFLAGS)
+
+objs/StdSerial.o: ../src/StdSerial.cpp ../include/rdlib/StdSerial.h  ../include/rdlib/misc.h ../include/rdlib/types.h  ../include/rdlib/StdData.h ../include/rdlib/NodeType.h  ../include/rdlib/ListNode.h ../include/rdlib/strsup.h  ../include/rdlib/EvalNumber.h
+	$(CPP) -c ../src/StdSerial.cpp -o objs/StdSerial.o $(CXXFLAGS)
+
+objs/StdSocket.o: ../src/StdSocket.cpp ../include/rdlib/StdSocket.h  ../include/rdlib/misc.h ../include/rdlib/types.h  ../include/rdlib/StdData.h ../include/rdlib/NodeType.h  ../include/rdlib/SocketServer.h ../include/rdlib/strsup.h  ../include/rdlib/ListNode.h ../include/rdlib/EvalNumber.h  ../include/rdlib/DataList.h
+	$(CPP) -c ../src/StdSocket.cpp -o objs/StdSocket.o $(CXXFLAGS)
+
+objs/StdUri.o: ../src/StdUri.cpp ../include/rdlib/StdUri.h  ../include/rdlib/misc.h ../include/rdlib/types.h  ../include/rdlib/strsup.h ../include/rdlib/ListNode.h  ../include/rdlib/NodeType.h ../include/rdlib/StdData.h  ../include/rdlib/EvalNumber.h ../include/rdlib/Hash.h  ../include/rdlib/StdSocket.h ../include/rdlib/SocketServer.h  ../include/rdlib/DataList.h ../include/rdlib/StdSerial.h  ../include/rdlib/StdFile.h ../include/rdlib/StdDev.h  ../include/rdlib/StdMemFile.h ../include/rdlib/strsup.h
+	$(CPP) -c ../src/StdUri.cpp -o objs/StdUri.o $(CXXFLAGS)
+
+objs/StringList.o: ../src/StringList.cpp ../include/rdlib/StringList.h  ../include/rdlib/strsup.h ../include/rdlib/ListNode.h  ../include/rdlib/misc.h ../include/rdlib/types.h  ../include/rdlib/NodeType.h ../include/rdlib/StdData.h  ../include/rdlib/EvalNumber.h ../include/rdlib/DataList.h
+	$(CPP) -c ../src/StringList.cpp -o objs/StringList.o $(CXXFLAGS)
+
+objs/strsup.o: ../src/strsup.cpp ../include/rdlib/StdFile.h  ../include/rdlib/misc.h ../include/rdlib/types.h  ../include/rdlib/StdData.h ../include/rdlib/NodeType.h  ../include/rdlib/strsup.h ../include/rdlib/ListNode.h  ../include/rdlib/EvalNumber.h ../include/rdlib/strsup.h  ../include/rdlib/md5.h
+	$(CPP) -c ../src/strsup.cpp -o objs/strsup.o $(CXXFLAGS)
+
+objs/StructList.o: ../src/StructList.cpp ../include/rdlib/StructList.h  ../include/rdlib/misc.h ../include/rdlib/types.h
+	$(CPP) -c ../src/StructList.cpp -o objs/StructList.o $(CXXFLAGS)
+
+objs/StructuredNode.o: ../src/StructuredNode.cpp  ../include/rdlib/StructuredNode.h ../include/rdlib/strsup.h  ../include/rdlib/ListNode.h ../include/rdlib/misc.h  ../include/rdlib/types.h ../include/rdlib/NodeType.h  ../include/rdlib/StdData.h ../include/rdlib/EvalNumber.h
+	$(CPP) -c ../src/StructuredNode.cpp -o objs/StructuredNode.o $(CXXFLAGS)
+
+objs/tag.o: ../src/tag.cpp ../include/rdlib/tag.h ../include/rdlib/misc.h  ../include/rdlib/types.h
+	$(CPP) -c ../src/tag.cpp -o objs/tag.o $(CXXFLAGS)
+
+objs/TextServer.o: ../src/TextServer.cpp ../include/rdlib/TextServer.h  ../include/rdlib/SocketServer.h ../include/rdlib/strsup.h  ../include/rdlib/ListNode.h ../include/rdlib/misc.h  ../include/rdlib/types.h ../include/rdlib/NodeType.h  ../include/rdlib/StdData.h ../include/rdlib/EvalNumber.h  ../include/rdlib/DataList.h
+	$(CPP) -c ../src/TextServer.cpp -o objs/TextServer.o $(CXXFLAGS)
+
+objs/Thread.o: ../src/Thread.cpp ../include/rdlib/misc.h  ../include/rdlib/types.h ../include/rdlib/Thread.h  ../include/rdlib/ThreadLock.h
+	$(CPP) -c ../src/Thread.cpp -o objs/Thread.o $(CXXFLAGS)
+
+objs/ThreadLock.o: ../src/ThreadLock.cpp ../include/rdlib/misc.h  ../include/rdlib/types.h ../include/rdlib/ThreadLock.h
+	$(CPP) -c ../src/ThreadLock.cpp -o objs/ThreadLock.o $(CXXFLAGS)
+
+objs/UDPServer.o: ../src/UDPServer.cpp ../include/rdlib/UDPServer.h  ../include/rdlib/SocketServer.h ../include/rdlib/strsup.h  ../include/rdlib/ListNode.h ../include/rdlib/misc.h  ../include/rdlib/types.h ../include/rdlib/NodeType.h  ../include/rdlib/StdData.h ../include/rdlib/EvalNumber.h  ../include/rdlib/DataList.h
+	$(CPP) -c ../src/UDPServer.cpp -o objs/UDPServer.o $(CXXFLAGS)
+
+objs/XMLDecode.o: ../src/XMLDecode.cpp ../include/rdlib/QuitHandler.h  ../include/rdlib/misc.h ../include/rdlib/types.h  ../include/rdlib/XMLDecode.h ../include/rdlib/StructuredNode.h  ../include/rdlib/strsup.h ../include/rdlib/ListNode.h  ../include/rdlib/NodeType.h ../include/rdlib/StdData.h  ../include/rdlib/EvalNumber.h ../include/rdlib/DataList.h
+	$(CPP) -c ../src/XMLDecode.cpp -o objs/XMLDecode.o $(CXXFLAGS)
+
+objs/blowfish_imp.o: ../src/blowfish_imp.c ../include/rdlib/blowfish_imp.h  ../include/rdlib/types.h
+	$(CPP) -c ../src/blowfish_imp.c -o objs/blowfish_imp.o $(CXXFLAGS)
+
+objs/md5.o: ../src/md5.c ../include/rdlib/md5.h
+	$(CPP) -c ../src/md5.c -o objs/md5.o $(CXXFLAGS)
+
+objs/mt19937ar.o: ../src/mt19937ar.c ../include/rdlib/mt19937ar.h
+	$(CPP) -c ../src/mt19937ar.c -o objs/mt19937ar.o $(CXXFLAGS)
+
+objs/winlib_private.res: winlib_private.rc 
+	$(WINDRES) -i winlib_private.rc --input-format=rc -o objs/winlib_private.res -O coff 
