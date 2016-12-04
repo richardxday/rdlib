@@ -35,6 +35,9 @@ inline sint_t CompareNoCase(const char *iText1, const char *iText2) {return stri
 inline sint_t CompareCaseN(const char *iText1, const char *iText2, sint_t n) {return strncmp(iText1, iText2, n);}
 inline sint_t CompareNoCaseN(const char *iText1, const char *iText2, sint_t n) {return strnicmp(iText1, iText2, n);}
 
+extern sint_t CompareWordWise(const char *pText1, const char *pText2, bool comparenumbers = true);
+extern sint_t CompareWordWiseNoCase(const char *pText1, const char *pText2, bool comparenumbers = true);
+
 extern void EnableSlashFromEnd(bool bEnable = true);
 
 extern AString Base64Encode(const uint8_t *ptr, uint_t bytes);
@@ -118,6 +121,14 @@ public:
 
 	COMP_CASE_OPERATOR(NoCase, stricmp);
 	COMP_CASE_OPERATOR_N(NoCase, strnicmp);
+
+	friend sint_t CompareWordWise(const AString& String1, const AString& String2, bool comparenumbers = true) {return CompareWordWise(String1.pText, String2.pText, comparenumbers);}
+	friend sint_t CompareWordWise(const AString& String1, const char *pText2, bool comparenumbers = true) {return CompareWordWise(String1.pText, pText2, comparenumbers);}
+	friend sint_t CompareWordWise(const char *pText1, const AString& String2, bool comparenumbers = true) {return CompareWordWise(pText1,String2.pText, comparenumbers);}
+
+	friend sint_t CompareWordWiseNoCase(const AString& String1, const AString& String2, bool comparenumbers = true) {return CompareWordWiseNoCase(String1.pText, String2.pText, comparenumbers);}
+	friend sint_t CompareWordWiseNoCase(const AString& String1, const char *pText2, bool comparenumbers = true) {return CompareWordWiseNoCase(String1.pText, pText2, comparenumbers);}
+	friend sint_t CompareWordWiseNoCase(const char *pText1, const AString& String2, bool comparenumbers = true) {return CompareWordWiseNoCase(pText1,String2.pText, comparenumbers);}
 
 	char operator[](sint_t n) const {
 		if ((n >= 0) && (n < Length)) return pText[n];

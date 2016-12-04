@@ -2793,6 +2793,82 @@ sint_t AString::FindClosing(char terminator, sint_t p, const char *nestedchars) 
 	return p;
 }
 
+sint_t CompareWordWise(const char *pText1, const char *pText2, bool comparenumbers)
+{
+	uint_t p1, p2;
+	sint_t res = 0;
+
+	for (p1 = p2 = 0; pText1[p1] && pText2[p2] && (res == 0); ) {
+		char c1 = pText1[p1];
+		char c2 = pText2[p2];
+		
+		if (IsWhiteSpace(c1) && IsWhiteSpace(c2)) {
+			while (IsWhiteSpace(pText1[++p1])) ;
+			while (IsWhiteSpace(pText2[++p2])) ;
+		}
+		else if (comparenumbers && (IsSignChar(c1) || IsNumeralChar(c1)) && (IsSignChar(c2) || IsNumeralChar(c2))) {
+			long v1 = 0, v2 = 0;
+			sscanf(pText1 + p1, "%ld", &v1);
+			sscanf(pText2 + p2, "%ld", &v2);
+			while (IsNumeralChar(pText1[++p1])) ;
+			while (IsNumeralChar(pText2[++p2])) ;
+			if		(v1 < v2) res = -1;
+			else if (v1 > v2) res =  1;
+		}
+		else if	(c1 < c2) res = -1;
+		else if (c1 > c2) res =  1;
+		else {
+			p1++;
+			p2++;
+		}
+	}
+
+	if (res == 0) {
+		if (pText1[p1]) res =  1;
+		if (pText2[p2]) res = -1;
+	}
+
+	return res;
+}
+
+sint_t CompareWordWiseNoCase(const char *pText1, const char *pText2, bool comparenumbers)
+{
+	uint_t p1, p2;
+	sint_t res = 0;
+
+	for (p1 = p2 = 0; pText1[p1] && pText2[p2] && (res == 0); ) {
+		char c1 = tolower(pText1[p1]);
+		char c2 = tolower(pText2[p2]);
+		
+		if (IsWhiteSpace(c1) && IsWhiteSpace(c2)) {
+			while (IsWhiteSpace(pText1[++p1])) ;
+			while (IsWhiteSpace(pText2[++p2])) ;
+		}
+		else if (comparenumbers && (IsSignChar(c1) || IsNumeralChar(c1)) && (IsSignChar(c2) || IsNumeralChar(c2))) {
+			long v1 = 0, v2 = 0;
+			sscanf(pText1 + p1, "%ld", &v1);
+			sscanf(pText2 + p2, "%ld", &v2);
+			while (IsNumeralChar(pText1[++p1])) ;
+			while (IsNumeralChar(pText2[++p2])) ;
+			if		(v1 < v2) res = -1;
+			else if (v1 > v2) res =  1;
+		}
+		else if	(c1 < c2) res = -1;
+		else if (c1 > c2) res =  1;
+		else {
+			p1++;
+			p2++;
+		}
+	}
+
+	if (res == 0) {
+		if (pText1[p1]) res =  1;
+		if (pText2[p2]) res = -1;
+	}
+
+	return res;
+}
+
 /*-------------------------------------------------------------------------------------------*/
 
 AStringUpdate::AStringUpdate(AString *iString, sint_t iBufferSize) : pString(NULL),
