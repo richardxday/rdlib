@@ -2803,15 +2803,15 @@ sint_t CompareWordWise(const char *pText1, const char *pText2, bool comparenumbe
 		char c2 = pText2[p2];
 		
 		if (IsWhiteSpace(c1) && IsWhiteSpace(c2)) {
-			while (IsWhiteSpace(pText1[++p1])) ;
-			while (IsWhiteSpace(pText2[++p2])) ;
+			while (IsNumeralChar(pText1[p1])) p1++;
+			while (IsNumeralChar(pText2[p2])) p2++;
 		}
 		else if (comparenumbers && (IsSignChar(c1) || IsNumeralChar(c1)) && (IsSignChar(c2) || IsNumeralChar(c2))) {
 			long v1 = 0, v2 = 0;
 			sscanf(pText1 + p1, "%ld", &v1);
 			sscanf(pText2 + p2, "%ld", &v2);
-			while (IsNumeralChar(pText1[++p1])) ;
-			while (IsNumeralChar(pText2[++p2])) ;
+			while (IsNumeralChar(pText1[p1])) p1++;
+			while (IsNumeralChar(pText2[p2])) p2++;
 			if		(v1 < v2) res = -1;
 			else if (v1 > v2) res =  1;
 		}
@@ -2841,15 +2841,15 @@ sint_t CompareWordWiseNoCase(const char *pText1, const char *pText2, bool compar
 		char c2 = tolower(pText2[p2]);
 		
 		if (IsWhiteSpace(c1) && IsWhiteSpace(c2)) {
-			while (IsWhiteSpace(pText1[++p1])) ;
-			while (IsWhiteSpace(pText2[++p2])) ;
+			while (IsNumeralChar(pText1[p1])) p1++;
+			while (IsNumeralChar(pText2[p2])) p2++;
 		}
 		else if (comparenumbers && (IsSignChar(c1) || IsNumeralChar(c1)) && (IsSignChar(c2) || IsNumeralChar(c2))) {
 			long v1 = 0, v2 = 0;
 			sscanf(pText1 + p1, "%ld", &v1);
 			sscanf(pText2 + p2, "%ld", &v2);
-			while (IsNumeralChar(pText1[++p1])) ;
-			while (IsNumeralChar(pText2[++p2])) ;
+			while (IsNumeralChar(pText1[p1])) p1++;
+			while (IsNumeralChar(pText2[p2])) p2++;
 			if		(v1 < v2) res = -1;
 			else if (v1 > v2) res =  1;
 		}
