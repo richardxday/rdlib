@@ -21,7 +21,8 @@ public:
 	void Write();
 	void CheckWrite();
 	bool HasFileChanged();
-
+	void ClearChanged() {changed = false;}
+	
 	AString Get(const AString& name, const AString& defval = "") const;
 	void Set(const AString& name, const AString& value);
 	bool Exists(const AString& name) const {return (Find(name) != NULL);}
