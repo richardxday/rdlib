@@ -144,6 +144,7 @@ void ASettingsHandler::Write()
 			if (GetFileInfo(filename, &info)) timestamp = info.WriteTime;
 		}
 	}
+	else changed = false;
 }
 
 void ASettingsHandler::CheckWrite()
