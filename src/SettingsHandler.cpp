@@ -13,7 +13,8 @@ ASettingsHandler::ASettingsHandler(const AString& name, bool inhomedir, uint32_t
 																								changed_tick(0),
 																								write_tick(0),
 																								writedelay(iwritedelay),
-																								changed(false)
+																								changed(false),
+																								writeenabled(true)
 {
 	if (inhomedir) {
 		if (homedir.Valid()) {
@@ -36,7 +37,8 @@ ASettingsHandler::ASettingsHandler(const AString& path, const AString& name, uin
 																									 changed_tick(0),
 																									 write_tick(0),
 																									 writedelay(iwritedelay),
-																									 changed(false)
+																									 changed(false),
+																									 writeenabled(true)
 {
 	Read();
 }
@@ -113,7 +115,7 @@ bool ASettingsHandler::CheckRead()
 
 void ASettingsHandler::Write()
 {
-	if (changed && filename.Valid()) {
+	if (changed && writeenabled && filename.Valid()) {
 		AStdFile fp;
 
 		if (fp.open(filename, "w")) {

@@ -14,6 +14,8 @@ public:
 	ASettingsHandler(const AString& path, const AString& name, uint32_t iwritedelay = ~0);
 	~ASettingsHandler();
 
+	void EnableWrite(bool enabled = true) {writeenabled = enabled;}
+	
 	static void SetHomeDirectory(const char *dir) {homedir = dir;}
 
 	void Read();
@@ -21,8 +23,10 @@ public:
 	void Write();
 	void CheckWrite();
 	bool HasFileChanged();
+
+	bool HasChanged() const {return changed;}
 	void ClearChanged() {changed = false;}
-	
+
 	AString Get(const AString& name, const AString& defval = "") const;
 	void Set(const AString& name, const AString& value);
 	bool Exists(const AString& name) const {return (Find(name) != NULL);}
@@ -53,8 +57,8 @@ protected:
 	uint32_t  readcheck_tick, changed_tick, write_tick;
 	uint32_t  writedelay;
 	bool  	  changed;
-	bool	  autowrite;
-
+	bool	  writeenabled;
+	
 	static AString homedir;
 };
 
