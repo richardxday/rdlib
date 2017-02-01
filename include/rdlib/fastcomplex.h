@@ -41,7 +41,7 @@ inline void     comp_add_sub(dcomplex& dst1, dcomplex& dst2, const dcomplex& obj
 
 extern double   comp_mod(const dcomplex& obj1);
 extern double   comp_arg(const dcomplex& obj1);
-inline double   comp_dot(const dcomplex& obj1, const dcomplex& obj2) {return obj1.re * obj2.im + obj1.im * obj1.im;}
+inline double   comp_dot(const dcomplex& obj1, const dcomplex& obj2) {return obj1.re * obj2.re + obj1.im * obj2.im;}
 
 /*----------------------------------------------------------------------------------------------------*/
 
@@ -61,7 +61,7 @@ inline scomplex comp_div(const scomplex& obj1, float val) {scomplex res = {obj1.
 
 extern float   	comp_mod(const scomplex& obj1);
 extern float   	comp_arg(const scomplex& obj1);
-inline float   	comp_dot(const scomplex& obj1, const scomplex& obj2) {return obj1.re * obj2.im + obj1.im * obj1.im;}
+inline float   	comp_dot(const scomplex& obj1, const scomplex& obj2) {return obj1.re * obj2.re + obj1.im * obj2.im;}
 
 inline void     comp_add(scomplex& res, const scomplex& obj1, const scomplex& obj2) {res.re = obj1.re + obj2.re; res.im = obj1.im + obj2.im;}
 inline void     comp_sub(scomplex& res, const scomplex& obj1, const scomplex& obj2) {res.re = obj1.re - obj2.re; res.im = obj1.im - obj2.im;}
