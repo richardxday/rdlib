@@ -173,7 +173,7 @@ bool AHash::Insert(const char *key, uptr_t value)
 
 	if (p) {
 		if (p[0] && ((*pCompFunc)(p[0]->Key, key) == 0)) {
-			uint32_t oldvalue = p[0]->Value;
+			uptr_t oldvalue = p[0]->Value;
 			
 			p[0]->Value = value;
 			
