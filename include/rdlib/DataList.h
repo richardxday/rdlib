@@ -101,10 +101,6 @@ public:
 	// Swap two indicies
 	bool Swap(uint_t n1, uint_t n2);
 
-	// Compare lists
-	bool operator == (const ADataList& List) const;
-	bool operator != (const ADataList& List) const {return !operator == (List);}
-
 protected:
 	void SwapEx(uint_t n1, uint_t n2);
 

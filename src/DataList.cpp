@@ -303,10 +303,3 @@ bool ADataList::Merge(ADataList& List)
 
 	return ok;
 }
-
-bool ADataList::operator == (const ADataList& List) const
-{
-	return ((size() == List.size()) &&
-			size() &&
-			(memcmp(GetList(), List.GetList(), size() * sizeof(GetList()[0])) == 0));
-}
