@@ -53,7 +53,6 @@ void ASettingsHandler::Read()
 	AStdFile fp;
 
 	hash.Delete();
-	hash.Create(50);
 	list.DeleteAll();
 	
 	if (fp.open(filename)) {

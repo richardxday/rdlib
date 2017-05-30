@@ -13,8 +13,8 @@
 
 NODETYPE_IMPLEMENT(AStdUri);
 
-AHash AStdUri::globaldefaults(20);
-AHash AStdUri::globaltypehandlers(20, &AStdUri::__deletehandler);
+AHash AStdUri::globaldefaults;
+AHash AStdUri::globaltypehandlers(&AStdUri::__deletehandler);
 
 AStdUri::AStdUri() : AStdData(),
 					 handler(NULL),
@@ -39,7 +39,7 @@ void AStdUri::__deletehandler(uptr_t item, void *context)
 
 void AStdUri::setdefault(const char *name, uptr_t value)
 {
-	if (!defaults) defaults = new AHash(20);
+	if (!defaults) defaults = new AHash();
 
 	if (defaults) defaults->Insert(name, value);
 }
@@ -48,7 +48,7 @@ void AStdUri::addtypehandler(const char *type, TYPEHANDLER handler, void *contex
 {
 	TYPEHANDLERDATA *ihandler;
 
-	if (!typehandlers) typehandlers = new AHash(20, &__deletehandler);
+	if (!typehandlers) typehandlers = new AHash(&__deletehandler);
 
 	if (typehandlers && ((ihandler = new TYPEHANDLERDATA) != NULL)) {
 		ihandler->handler = handler;

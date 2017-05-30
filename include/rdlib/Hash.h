@@ -2,68 +2,50 @@
 #ifndef __HASH__
 #define __HASH__
 
-#include "StdData.h"
+#include <map>
 
-class AHash {
+#include "StdData.h"
+#include "strsup.h"
+
+class AHash : public std::map<AString, uptr_t> {
 public:
-	AHash(uint_t size = 0, void (*freefunc)(uptr_t value, void *context) = NULL, void *context = NULL);
+	AHash(void (*fn)(uptr_t item, void *context) = NULL, void *context = NULL);
 	AHash(const AHash& hash);
 	~AHash();
 
-	void EnableCaseInSensitive(bool enable) {pCompFunc = enable ? &stricmp : &strcmp; pCompNFunc = enable ? &strnicmp : &strncmp;}
-	bool CaseInSensitiveEnabled() const {return (pCompFunc == &stricmp);}
+	void SetDestructor(void (*fn)(uptr_t item, void *context), void *context = NULL) {pDestructor = fn; pDestructorContext = context;}
 
-	bool Create(uint_t size, void (*freefunc)(uptr_t value, void *context) = NULL, void *context = NULL);
+	void EnableCaseInSensitive(bool enable) {bCaseInsensitive = enable;}
+	bool CaseInSensitiveEnabled() const {return bCaseInsensitive;}
+
 	void Delete();
-	bool Valid() const {return (pBuckets && Size);}
 
-	bool Resize(uint_t size);
+	uint_t GetItems() const {return size();}
+	
+	void Insert(const AString& key, uptr_t value = 0);
+	bool Remove(const AString& key);
 
-	uint_t GetSize()  const {return Size;}
-	uint_t GetItems() const {return nItems;}
+	bool   Exists(const AString& key) const;
+	uptr_t Read(const AString& key) const;
 
-	bool Insert(const char *key, uptr_t value = 0);
-	bool Remove(const char *key);
-
-	bool   Exists(const char *key) const;
-	uptr_t Read(const char *key) const;
-
-	const char *GetKey(const char *key) const;
-
-	bool Traverse(bool (*fn)(const char *key, uptr_t value, void *context), void *context = NULL);
-	bool TraverseCompare(const char *cmp, int l, bool (*fn)(const char *key, uptr_t value, void *context), void *context = NULL);
+	bool Traverse(bool (*fn)(const AString& key, uptr_t value, void *context), void *context = NULL);
+	bool TraverseCompare(const AString& cmp, int l, bool (*fn)(const AString& key, uptr_t value, void *context), void *context = NULL);
 
 	bool Copy(const AHash& src);
-	bool CopyCompare(const AHash& src, const char *cmp, int l = -1);
+	bool CopyCompare(const AHash& src, const AString& cmp, int l = -1);	uptr_t& operator [] (const AString& key);
 
-	bool Write(AStdData& fp, bool (*fn)(AStdData& fp, const char *key, uptr_t value, void *context), void *context = NULL);
-	bool Read(AStdData& fp, bool (*fn)(AHash& hash, AStdData& fp, const char *key, void *context), void *context = NULL);
 
-protected:
-	typedef struct _BUCKET {
-		char  *Key;
-		uptr_t Value;
-		struct _BUCKET *Next;
-	} BUCKET;
-
-	BUCKET *CreateBucket(const char *key, uptr_t value);
-	void DeleteBucket(BUCKET *p);
-
-	uint_t Hash(const char *p) const;
-	BUCKET *FindBucket(const char *key) const;
-	BUCKET **FindBucketParent(const char *key) const;
-
-	static bool __CopyKey(const char *key, uptr_t value, void *context);
+	bool Write(AStdData& fp, bool (*fn)(AStdData& fp, const AString& key, uptr_t value, void *context), void *context = NULL);
+	bool Read(AStdData& fp, bool (*fn)(AHash& hash, AStdData& fp, const AString& key, void *context), void *context = NULL);
 
 protected:
-	BUCKET **pBuckets;
-	int    (*pCompFunc)(const char *str1, const char *str2);
-	int    (*pCompNFunc)(const char *str1, const char *str2, size_t n);
-	void   (*pFreeFunc)(uptr_t value, void *context);
-	void   *pContext;
-	uint_t Size;
+	static bool __CopyKey(const AString& key, uptr_t value, void *context);
+	
+protected:
+	void   (*pDestructor)(uptr_t item, void *context);
+	void   *pDestructorContext;
 	uint_t nTraverseCount;
-	uint_t nItems;
+	bool   bCaseInsensitive;
 };
 
 #endif

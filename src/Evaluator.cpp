@@ -222,7 +222,7 @@ AString Evaluate(const AString& str, AHash *vars)
 
 		if (!vars) {
 			vars = &_vars;
-			vars->Create(100, &__DeleteVar);
+			vars->SetDestructor(&__DeleteVar);
 		}
 
 		res = EvaluateEx(str, vars);
