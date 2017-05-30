@@ -223,7 +223,7 @@ void ADataList::Sort(int (*fn)(uptr_t Item1, uptr_t Item2, void *pContext), void
 		
 		bool operator()(uptr_t Item1, uptr_t Item2)
 		{
-			return ((*fn)(Item1, Item2, pContext) > 0);
+			return ((*fn)(Item1, Item2, pContext) < 0);
 		}
 	} cmp;
 	cmp.fn = fn;
