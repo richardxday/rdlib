@@ -23,9 +23,6 @@ public:
 
 	void SetDestructor(void (*fn)(uptr_t item, void *context), void *context = NULL) {pDestructor = fn; pDestructorContext = context;}
 
-	// Clear, but do not delete memory allocated
-	void Clear();
-
 	// By default, items can appear more than once in the list
 	// Disabling duplication prevents this
 	void EnableDuplication(bool bEnable = true) {bDuplication = bEnable;}

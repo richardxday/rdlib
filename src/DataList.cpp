@@ -48,11 +48,6 @@ void ADataList::DeleteList()
 	}
 }
 
-void ADataList::Clear()
-{
-	DeleteList();
-}
-
 ADataList& ADataList::operator = (const ADataList& List)
 {
 	operator = ((ADataList *)&List);
