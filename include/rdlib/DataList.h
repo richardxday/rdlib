@@ -15,7 +15,7 @@
 
 #include "misc.h"
 
-class ADataList : public std::vector<uptr_t> {
+class ADataList {
 public:
 	ADataList(void (*fn)(uptr_t item, void *context) = NULL, void *context = NULL);
 	ADataList(const ADataList& List);
@@ -49,8 +49,8 @@ public:
 	uptr_t EndPop();
 
 	// First and last items
-	uptr_t First() const {return size() ? List()[0]          : 0;}
-	uptr_t Last()  const {return size() ? List()[size() - 1] : 0;}
+	uptr_t First() const {return !data.empty() ? data[0]               : 0;}
+	uptr_t Last()  const {return !data.empty() ? data[data.size() - 1] : 0;}
 
 	// Add item (default is to end)
 	sint_t Add(uptr_t Item, sint_t Index = MAX_SIGNED(sint_t));
@@ -77,14 +77,14 @@ public:
 	sint_t Find(uptr_t Item, sint_t Index = 0) const;
 	sint_t Find(void *ptr, sint_t Index = 0) const {return Find((uptr_t)ptr, Index);}
 
-	uint_t Count() const {return (uint_t)size();}
+	uint_t Count() const {return (uint_t)data.size();}
 
 	// Return pointer to list
-	uptr_t *List() const {return size() ? GetList() : NULL;}
+	uptr_t *List() const {return !data.empty() ? const_cast<uptr_t *>(&data[0]) : NULL;}
 
 	// Return item in list (or 0)
-	uptr_t operator [](sint_t n) const {return ((n >= 0) && (n < (sint_t)size())) ? GetList()[(size_t)n] : 0;}
-	uptr_t operator [](uint_t n) const {return (n < size()) ? GetList()[n] : 0;}
+	uptr_t operator [](sint_t n) const {return ((n >= 0) && (n < (sint_t)data.size())) ? data[(size_t)n] : 0;}
+	uptr_t operator [](uint_t n) const {return (n < data.size()) ? data[n] : 0;}
 
 	// Sort list items using hook function
 	void Sort(int (*fn)(uptr_t Item1, uptr_t Item2, void *pContext), void *pContext = NULL);
@@ -103,10 +103,9 @@ public:
 
 protected:
 	void SwapEx(uint_t n1, uint_t n2);
-
-	uptr_t *GetList() const {return _M_impl._M_start;}
 	
 protected:
+	std::vector<uptr_t> data;
 	void (*pDestructor)(uptr_t item, void *context);
 	void *pDestructorContext;
 	bool bDuplication;

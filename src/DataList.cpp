@@ -12,8 +12,7 @@
 /*------------------------------------------------------------
   Function: Standard Constructor
   ----------------------------------------------------------*/
-ADataList::ADataList(void (*fn)(uptr_t item, void *context), void *context) : std::vector<uptr_t>(),
-																			  pDestructor(fn),
+ADataList::ADataList(void (*fn)(uptr_t item, void *context), void *context) : pDestructor(fn),
 																			  pDestructorContext(context),
 																			  bDuplication(true)
 {
@@ -22,8 +21,7 @@ ADataList::ADataList(void (*fn)(uptr_t item, void *context), void *context) : st
 /*------------------------------------------------------------
   Function: 
   ----------------------------------------------------------*/
-ADataList::ADataList(const ADataList& List) : std::vector<uptr_t>(),
-											  pDestructor(NULL),
+ADataList::ADataList(const ADataList& List) : pDestructor(NULL),
 											  pDestructorContext(NULL),
 											  bDuplication(true)
 {
@@ -37,36 +35,35 @@ ADataList::~ADataList()
 
 void ADataList::DeleteList()
 {
-	if (size()) {
+	if (!data.empty()) {
 		if (pDestructor) {
 			size_t i;
-			for (i = 0; i < size(); i++) {
-				(*pDestructor)(GetList()[i], pDestructorContext);
+			for (i = 0; i < data.size(); i++) {
+				(*pDestructor)(data[i], pDestructorContext);
 			}
 		}
-		resize(0);
+		data.resize(0);
 	}
 }
 
 ADataList& ADataList::operator = (const ADataList& List)
 {
-	operator = ((ADataList *)&List);
+	DeleteList();
+	
+	if (List.data.size()) {
+		data = List.data;
+	}
+	
+	pDestructor  	   = List.pDestructor;
+	pDestructorContext = List.pDestructorContext;
+	bDuplication 	   = List.bDuplication;
 
 	return *this;
 }
 
 ADataList& ADataList::operator = (ADataList *pList)
 {
-	DeleteList();
-	
-	if (pList->size()) {
-		std::vector<uptr_t>::operator = (*pList);
-	}
-	
-	pDestructor  	   = pList->pDestructor;
-	pDestructorContext = pList->pDestructorContext;
-	bDuplication 	   = pList->bDuplication;
-
+	operator = (*pList);
 	return *this;
 }
 
@@ -76,9 +73,9 @@ sint_t ADataList::Add(uptr_t Item, sint_t Index)
 
 	if (bDuplication || ((index = Find(Item)) < 0)) {
 		Index = std::max(Index, 0);
-		Index = std::min(Index, (sint_t)size());
+		Index = std::min(Index, (sint_t)data.size());
 		
-		insert(begin() + Index, Item);
+		data.insert(data.begin() + Index, Item);
 
 		index = Index;
 	}
@@ -94,8 +91,8 @@ sint_t ADataList::Insert(uptr_t Item, int (*fn)(uptr_t Item1, uptr_t Item2, void
 	if (n) {
 		while (true) {
 			if (i >= n) i = SUBZ(i, inc);
-			else if ((*fn)(Item, GetList()[i], context) < 0) {
-				if ((i == 0) || ((*fn)(Item, GetList()[i - 1], context) >= 0)) break;
+			else if ((*fn)(Item, data[i], context) < 0) {
+				if ((i == 0) || ((*fn)(Item, data[i - 1], context) >= 0)) break;
 				i = SUBZ(i, inc);
 			}
 			else {
@@ -118,8 +115,8 @@ sint_t ADataList::Insert(void *ptr, int (*fn)(void *ptr1, void *ptr2, void *cont
 	if (n) {
 		while (true) {
 			if (i >= n) i = SUBZ(i, inc);
-			else if ((*fn)(ptr, (void *)GetList()[i], context) < 0) {
-				if ((i == 0) || ((*fn)(ptr, (void *)GetList()[i - 1], context) >= 0)) break;
+			else if ((*fn)(ptr, (void *)data[i], context) < 0) {
+				if ((i == 0) || ((*fn)(ptr, (void *)data[i - 1], context) >= 0)) break;
 				i = SUBZ(i, inc);
 			}
 			else {
@@ -139,7 +136,7 @@ sint_t ADataList::Remove(uptr_t Item)
 	sint_t index = -1;
 
 	if ((index = Find(Item)) >= 0) {
-		erase(begin() + index);
+		data.erase(data.begin() + index);
 	}
 
 	return index;
@@ -149,9 +146,9 @@ uptr_t ADataList::RemoveIndex(uint_t Index)
 {
 	uptr_t item = 0;
 
-	if (Index < size()) {
-		item = GetList()[Index];
-		erase(begin() + Index);
+	if (Index < data.size()) {
+		item = data[Index];
+		data.erase(data.begin() + Index);
 	}
 
 	return item;
@@ -159,14 +156,14 @@ uptr_t ADataList::RemoveIndex(uint_t Index)
 
 uint_t ADataList::Replace(uint_t Index, uptr_t Item, bool bAllowExpand)
 {
-	if ((Index >= size()) && bAllowExpand) {
-		resize(Index + 1);
+	if ((Index >= data.size()) && bAllowExpand) {
+		data.resize(Index + 1);
 	}
 
-	if (size()) {
-		Index = std::min(Index, (uint_t)size() - 1);
+	if (data.size()) {
+		Index = std::min(Index, (uint_t)data.size() - 1);
 
-		GetList()[Index] = Item;
+		data[Index] = Item;
 	}
 
 	return Index;
@@ -174,12 +171,12 @@ uint_t ADataList::Replace(uint_t Index, uptr_t Item, bool bAllowExpand)
 
 bool ADataList::Generate(uint_t count, sint_t start, sint_t mul, sint_t div)
 {
-	uint_t n = size();
+	uint_t n = data.size();
 	uint_t i;
 
-	resize(size() + count);
+	data.resize(data.size() + count);
 	
-	for (i = 0; i < count; i++) GetList()[n++] = muldivs(start + i, mul, div);
+	for (i = 0; i < count; i++) data[n++] = muldivs(start + i, mul, div);
 
 	return true;
 }
@@ -204,12 +201,12 @@ ADataList& ADataList::operator -= (const ADataList& List)
 
 sint_t ADataList::Find(uptr_t Item, sint_t Index) const
 {
-	ADataList::const_iterator it;
+	std::vector<uptr_t>::const_iterator it;
 	sint_t index = -1;
 
 	Index = std::max(Index, 0);
-	if ((it = std::find(begin() + Index, end(), Item)) != end()) {
-		index = it - begin();
+	if ((it = std::find(data.begin() + Index, data.end(), Item)) != data.end()) {
+		index = it - data.begin();
 	}
 
 	return index;
@@ -229,16 +226,16 @@ void ADataList::Sort(int (*fn)(uptr_t Item1, uptr_t Item2, void *pContext), void
 	cmp.fn = fn;
 	cmp.pContext = pContext;
 
-	std::sort(begin(), end(), cmp);
+	std::sort(data.begin(), data.end(), cmp);
 }
 
 uptr_t ADataList::Pop()
 {
 	uptr_t Item = 0;
 
-	if (size()) {
-		Item = GetList()[0];
-		erase(begin());
+	if (!data.empty()) {
+		Item = data[0];
+		data.erase(data.begin());
 	}
 	
 	return Item;
@@ -248,9 +245,9 @@ uptr_t ADataList::EndPop()
 {
 	uptr_t Item = 0;
 
-	if (size()) {
-		Item = GetList()[size() - 1];
-		erase(begin() + size() - 1);
+	if (!data.empty()) {
+		Item = data[data.size() - 1];
+		data.erase(data.begin() + data.size() - 1);
 	}
 	
 	return Item;
@@ -261,23 +258,23 @@ bool ADataList::Traverse(bool (*fn)(uptr_t Item, void *Context), void *Context) 
 	uint_t i;
 	bool ok = true;
 
-	for (i = 0; (i < size()) && ok; i++) ok = fn(GetList()[i], Context);
+	for (i = 0; (i < data.size()) && ok; i++) ok = fn(data[i], Context);
 
 	return ok;
 }
 
 void ADataList::Reverse()
 {
-	uint_t i, n = size() / 2;
-	for (i = 0; i < n; i++) SwapEx(i, size() - 1 - i);
+	uint_t i, n = data.size() / 2;
+	for (i = 0; i < n; i++) SwapEx(i, data.size() - 1 - i);
 }
 
 void ADataList::SwapEx(uint_t n1, uint_t n2)
 {
 	if (n1 != n2) {
-		GetList()[n1] ^= GetList()[n2];
-		GetList()[n2] ^= GetList()[n1];
-		GetList()[n1] ^= GetList()[n2];
+		data[n1] ^= data[n2];
+		data[n2] ^= data[n1];
+		data[n1] ^= data[n2];
 	}
 }
 
@@ -285,7 +282,7 @@ bool ADataList::Swap(uint_t n1, uint_t n2)
 {
 	bool success = false;
 
-	if ((n1 < size()) && (n2 < size())) {
+	if ((n1 < data.size()) && (n2 < data.size())) {
 		SwapEx(n1, n2);
 
 		success = true;
@@ -299,7 +296,7 @@ bool ADataList::Merge(ADataList& List)
 	uint_t i, n = List.Count();
 	bool ok = true;
 
-	for (i = 0; ok && (i < n); i++) ok = (Add(List[i]) >= 0);
+	for (i = 0; ok && (i < n); i++) ok = (Add(List.data[i]) >= 0);
 
 	return ok;
 }

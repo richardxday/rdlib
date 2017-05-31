@@ -6,16 +6,14 @@
 
 /* end of includes */
 
-AHash::AHash(void (*fn)(uptr_t value, void *context), void *context) : std::map<AString, uptr_t>(),
-																	   pDestructor(fn),
+AHash::AHash(void (*fn)(uptr_t value, void *context), void *context) : pDestructor(fn),
 																	   pDestructorContext(context),
 																	   nTraverseCount(0),
 																	   bCaseInsensitive(false)
 {
 }
 
-AHash::AHash(const AHash& hash) : std::map<AString, uptr_t>(),
-								  pDestructor(hash.pDestructor),
+AHash::AHash(const AHash& hash) : pDestructor(hash.pDestructor),
 								  pDestructorContext(hash.pDestructorContext),
 								  nTraverseCount(0),
 								  bCaseInsensitive(hash.bCaseInsensitive)
@@ -33,24 +31,24 @@ void AHash::Delete()
 	assert(!nTraverseCount);
 
 	if (pDestructor) {
-		AHash::iterator it;
+		std::map<AString, uptr_t>::iterator it;
 
-		for (it = begin(); it != end(); ++it) {
+		for (it = data.begin(); it != data.end(); ++it) {
 			(*pDestructor)(it->second, pDestructorContext);
 		}
 	}
 	
-	clear();
+	data.clear();
 }
 
 void AHash::Insert(const AString& key, uptr_t value)
 {
-	AHash::iterator it;
+	std::map<AString, uptr_t>::iterator it;
 	AString truekey = bCaseInsensitive ? key.ToLower() : key;
 
 	assert(!nTraverseCount);
 
-	if (pDestructor && ((it = find(truekey)) != end())) {
+	if (pDestructor && ((it = data.find(truekey)) != data.end())) {
 		(*pDestructor)(it->second, pDestructorContext);
 	}
 	
@@ -59,16 +57,16 @@ void AHash::Insert(const AString& key, uptr_t value)
 
 bool AHash::Remove(const AString& key)
 {
-	AHash::iterator it;
+	std::map<AString, uptr_t>::iterator it;
 	AString truekey = bCaseInsensitive ? key.ToLower() : key;
 	bool    success = false;
 	
 	assert(!nTraverseCount);
 
-	if ((it = find(truekey)) != end()) {
+	if ((it = data.find(truekey)) != data.end()) {
 		if (pDestructor) (*pDestructor)(it->second, pDestructorContext);
 
-		erase(it);
+		data.erase(it);
 		
 		success = true;
 	}
@@ -79,16 +77,16 @@ bool AHash::Remove(const AString& key)
 bool AHash::Exists(const AString& key) const
 {
 	AString truekey = bCaseInsensitive ? key.ToLower() : key;
-	return (find(truekey) != end());
+	return (data.find(truekey) != data.end());
 }
 
 uptr_t AHash::Read(const AString& key) const
 {
-	AHash::const_iterator it;
+	std::map<AString, uptr_t>::const_iterator it;
 	AString truekey = bCaseInsensitive ? key.ToLower() : key;
 	uptr_t  value   = 0;
 	
-	if ((it = find(truekey)) != end()) {
+	if ((it = data.find(truekey)) != data.end()) {
 		value = it->second;
 	}
 
@@ -97,13 +95,13 @@ uptr_t AHash::Read(const AString& key) const
 
 bool AHash::Traverse(bool (*fn)(const AString& key, uptr_t value, void *context), void *context)
 {
-	AHash::iterator it;
+	std::map<AString, uptr_t>::iterator it;
 	bool success = false;
 
 	nTraverseCount++;
 
 	success = true;
-	for (it = begin(); success && (it != end()); ++it) {
+	for (it = data.begin(); success && (it != data.end()); ++it) {
 		success = (*fn)(it->first, it->second, context);
 	}
 
@@ -114,7 +112,7 @@ bool AHash::Traverse(bool (*fn)(const AString& key, uptr_t value, void *context)
 
 bool AHash::TraverseCompare(const AString& cmp, int l, bool (*fn)(const AString& key, uptr_t value, void *context), void *context)
 {
-	AHash::iterator it;
+	std::map<AString, uptr_t>::iterator it;
 	AString truekey = bCaseInsensitive ? cmp.ToLower() : cmp;
 	bool    success = false;
 
@@ -123,7 +121,7 @@ bool AHash::TraverseCompare(const AString& cmp, int l, bool (*fn)(const AString&
 	if (l < 0) l = truekey.len();
 	
 	success = true;
-	for (it = begin(); success && (it != end()); ++it) {
+	for (it = data.begin(); success && (it != data.end()); ++it) {
 		if (CompareCaseN(truekey, it->first, l) == 0) {
 			success = (*fn)(it->first, it->second, context);
 		}

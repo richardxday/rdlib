@@ -7,7 +7,7 @@
 #include "StdData.h"
 #include "strsup.h"
 
-class AHash : public std::map<AString, uptr_t> {
+class AHash {
 public:
 	AHash(void (*fn)(uptr_t item, void *context) = NULL, void *context = NULL);
 	AHash(const AHash& hash);
@@ -20,7 +20,7 @@ public:
 
 	void Delete();
 
-	uint_t GetItems() const {return size();}
+	uint_t GetItems() const {return data.size();}
 	
 	void Insert(const AString& key, uptr_t value = 0);
 	bool Remove(const AString& key);
@@ -42,6 +42,7 @@ protected:
 	static bool __CopyKey(const AString& key, uptr_t value, void *context);
 	
 protected:
+	std::map<AString, uptr_t> data;
 	void   (*pDestructor)(uptr_t item, void *context);
 	void   *pDestructorContext;
 	uint_t nTraverseCount;
