@@ -774,3 +774,240 @@ AValue::operator AString() const
 {
 	return ToString();
 }
+
+AValue operator + (const AValue& val1, const AValue& val2)
+{
+	AValue res;
+	if		(val1.IsPointer() && val2.IsSigned())  res = (const void *)((uint64_t)val1 + (sint64_t)val2);
+	else if	(val1.IsPointer())					   res = (const void *)((uint64_t)val1 + (uint64_t)val2);
+	else if (val1.IsSigned()  && val2.IsPointer()) res = (const void *)((uint64_t)val1 + (sint64_t)val2);
+	else if (					 val2.IsPointer()) res = (const void *)((uint64_t)val1 + (uint64_t)val2);
+	else if	(val1.IsFloat()   || val2.IsFloat())   res = (double)val1   + (double)val2;
+	else if (val1.IsSigned()  || val2.IsSigned())  res = (sint64_t)val1 + (sint64_t)val2;
+	else if (val1.IsInteger() || val2.IsInteger()) res = (uint64_t)val1 + (uint64_t)val2;
+	return res;
+}
+
+AValue operator - (const AValue& val1, const AValue& val2)
+{
+	AValue res;
+	if		(val1.IsPointer() && val2.IsSigned())  res = (const void *)((uint64_t)val1 - (sint64_t)val2);
+	else if	(val1.IsPointer())					   res = (const void *)((uint64_t)val1 - (uint64_t)val2);
+	else if (val1.IsSigned()  && val2.IsPointer()) res = (const void *)((uint64_t)val1 - (sint64_t)val2);
+	else if (					 val2.IsPointer()) res = (const void *)((uint64_t)val1 - (uint64_t)val2);
+	else if	(val1.IsFloat()   || val2.IsFloat())   res = (double)val1   - (double)val2;
+	else if (val1.IsSigned()  || val2.IsSigned())  res = (sint64_t)val1 - (sint64_t)val2;
+	else if (val1.IsInteger() || val2.IsInteger()) res = (uint64_t)val1 - (uint64_t)val2;
+	return res;
+}
+	
+AValue operator * (const AValue& val1, const AValue& val2)
+{
+	AValue res;
+	if		(val1.IsPointer())					   res = (const void *)((uint64_t)val1 * (uint64_t)val2);
+	else if (					 val2.IsPointer()) res = (const void *)((uint64_t)val1 * (uint64_t)val2);
+	else if	(val1.IsFloat()   || val2.IsFloat())   res = (double)val1   * (double)val2;
+	else if (val1.IsSigned()  || val2.IsSigned())  res = (sint64_t)val1 * (sint64_t)val2;
+	else if (val1.IsInteger() || val2.IsInteger()) res = (uint64_t)val1 * (uint64_t)val2;
+	return res;
+}
+	
+AValue operator / (const AValue& val1, const AValue& val2)
+{
+	AValue res;
+	if		(val1.IsPointer())					   res = (const void *)((uint64_t)val1 / (uint64_t)val2);
+	else if (					 val2.IsPointer()) res = (const void *)((uint64_t)val1 / (uint64_t)val2);
+	else if	(val1.IsFloat()   || val2.IsFloat())   res = (double)val1   / (double)val2;
+	else if (val1.IsSigned()  || val2.IsSigned())  res = (sint64_t)val1 / (sint64_t)val2;
+	else if (val1.IsInteger() || val2.IsInteger()) res = (uint64_t)val1 / (uint64_t)val2;
+	return res;
+}
+
+AValue operator % (const AValue& val1, const AValue& val2)
+{
+	AValue res;
+	if		(val1.IsPointer())					   res = (const void *)((uint64_t)val1 % (uint64_t)val2);
+	else if (					 val2.IsPointer()) res = (const void *)((uint64_t)val1 % (uint64_t)val2);
+	else if	(val1.IsFloat()   || val2.IsFloat())   res = fmod((double)val1, (double)val2);
+	else if (val1.IsSigned()  || val2.IsSigned())  res = (sint64_t)val1 % (sint64_t)val2;
+	else if (val1.IsInteger() || val2.IsInteger()) res = (uint64_t)val1 % (uint64_t)val2;
+	return res;
+}
+
+AValue operator ^ (const AValue& val1, const AValue& val2)
+{
+	return AValue((uint64_t)val1 ^ (uint64_t)val2);
+}
+
+AValue operator & (const AValue& val1, const AValue& val2)
+{
+	return AValue((uint64_t)val1 & (uint64_t)val2);
+}
+
+AValue operator && (const AValue& val1, const AValue& val2)
+{
+	return AValue((uint64_t)val1 && (uint64_t)val2);
+}
+
+AValue operator | (const AValue& val1, const AValue& val2)
+{
+	return AValue((uint64_t)val1 | (uint64_t)val2);
+}
+
+AValue operator || (const AValue& val1, const AValue& val2)
+{
+	return AValue((uint64_t)val1 || (uint64_t)val2);
+}
+
+AValue operator << (const AValue& val1, const AValue& val2)
+{
+	AValue res;
+	if		(val1.IsFloat()  || val2.IsFloat())  res = (double)val1 * pow(2.0, (double)val2);
+	else if (val1.IsSigned() || val2.IsSigned()) res = (sint64_t)val1 << (sint64_t)val2;
+	else										 res = (uint64_t)val1 << (uint64_t)val2;
+	return res;
+}
+
+AValue operator >> (const AValue& val1, const AValue& val2)
+{
+	AValue res;
+	if		(val1.IsFloat()  || val2.IsFloat())  res = (double)val1 * pow(2.0, -(double)val2);
+	else if (val1.IsSigned() || val2.IsSigned()) res = (sint64_t)val1 >> (sint64_t)val2;
+	else										 res = (uint64_t)val1 >> (uint64_t)val2;
+	return res;
+}
+
+bool operator == (const AValue& val1, const AValue& val2)
+{
+	bool res;
+	if		(val1.IsFloat()  || val2.IsFloat())  res = ((double)val1   == (double)val2);
+	else if (val1.IsSigned() || val2.IsSigned()) res = ((sint64_t)val1 == (sint64_t)val2);
+	else										 res = ((uint64_t)val1 == (uint64_t)val2);
+	return res;
+}
+
+bool operator < (const AValue& val1, const AValue& val2)
+{
+	bool res;
+	if		(val1.IsFloat()  || val2.IsFloat())  res = ((double)val1   <  (double)val2);
+	else if (val1.IsSigned() || val2.IsSigned()) res = ((sint64_t)val1 <  (sint64_t)val2);
+	else										 res = ((uint64_t)val1 <  (uint64_t)val2);
+	return res;
+}
+
+bool operator <= (const AValue& val1, const AValue& val2)
+{
+	bool res;
+	if		(val1.IsFloat()  || val2.IsFloat())  res = ((double)val1   <= (double)val2);
+	else if (val1.IsSigned() || val2.IsSigned()) res = ((sint64_t)val1 <= (sint64_t)val2);
+	else										 res = ((uint64_t)val1 <= (uint64_t)val2);
+	return res;
+}
+
+bool operator > (const AValue& val1, const AValue& val2)
+{
+	bool res;
+	if		(val1.IsFloat()  || val2.IsFloat())  res = ((double)val1   >  (double)val2);
+	else if (val1.IsSigned() || val2.IsSigned()) res = ((sint64_t)val1 >  (sint64_t)val2);
+	else										 res = ((uint64_t)val1 >  (uint64_t)val2);
+	return res;
+}
+
+bool operator >= (const AValue& val1, const AValue& val2)
+{
+	bool res;
+	if		(val1.IsFloat()  || val2.IsFloat())  res = ((double)val1   >= (double)val2);
+	else if (val1.IsSigned() || val2.IsSigned()) res = ((sint64_t)val1 >= (sint64_t)val2);
+	else										 res = ((uint64_t)val1 >= (uint64_t)val2);
+	return res;
+}
+
+AValue& AValue::operator += (const AValue& val)
+{
+	*this = *this + val;
+	return *this;
+}
+
+AValue& AValue::operator -= (const AValue& val)
+{
+	*this = *this - val;
+	return *this;
+}
+	
+AValue& AValue::operator *= (const AValue& val)
+{
+	*this = *this * val;
+	return *this;
+}
+	
+AValue& AValue::operator /= (const AValue& val)
+{
+	*this = *this / val;
+	return *this;
+}
+
+AValue& AValue::operator %= (const AValue& val)
+{
+	*this = *this % val;
+	return *this;
+}
+
+AValue& AValue::operator ^= (const AValue& val)
+{
+	*this = *this ^ val;
+	return *this;
+}
+
+AValue& AValue::operator &= (const AValue& val)
+{
+	*this = *this & val;
+	return *this;
+}
+
+AValue& AValue::operator |= (const AValue& val)
+{
+	*this = *this | val;
+	return *this;
+}
+
+AValue& AValue::operator <<= (const AValue& val)
+{
+	*this = *this << val;
+	return *this;
+}
+
+AValue& AValue::operator >>= (const AValue& val)
+{
+	*this = *this >> val;
+	return *this;
+}
+
+AValue AValue::operator - () const
+{
+	AValue res;
+	if (IsValid()) {
+		if		(IsFloat()) res = -(double)*this;
+		else				res = -(sint64_t)*this;
+	}
+	return res;
+}
+
+AValue AValue::operator ~ () const
+{
+	AValue res;
+	if (IsValid()) {
+		if	 (IsFloat()) res = (double)(~(uint64_t)*this);
+		else 			 res = ~(uint64_t)*this;
+	}
+	return res;
+}
+
+AValue AValue::operator ! () const
+{
+	AValue res;
+	if (IsValid()) {
+		if	 (IsFloat()) res = (double)(!(uint64_t)*this);
+		else 			 res = !(uint64_t)*this;
+	}
+	return res;
+}

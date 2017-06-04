@@ -73,6 +73,41 @@ public:
 	AValue& operator = (const void *val);
 	AValue& operator = (const AValue& val);
 
+	AValue operator - () const;
+	AValue operator ~ () const;
+	AValue operator ! () const;
+	
+	friend AValue operator +  (const AValue& val1, const AValue& val2);
+	friend AValue operator -  (const AValue& val1, const AValue& val2);
+	friend AValue operator *  (const AValue& val1, const AValue& val2);
+	friend AValue operator /  (const AValue& val1, const AValue& val2);
+	friend AValue operator %  (const AValue& val1, const AValue& val2);
+	friend AValue operator ^  (const AValue& val1, const AValue& val2);
+	friend AValue operator &  (const AValue& val1, const AValue& val2);
+	friend AValue operator && (const AValue& val1, const AValue& val2);
+	friend AValue operator |  (const AValue& val1, const AValue& val2);
+	friend AValue operator || (const AValue& val1, const AValue& val2);
+	friend AValue operator << (const AValue& val1, const AValue& val2);
+	friend AValue operator >> (const AValue& val1, const AValue& val2);
+
+	AValue& operator +=  (const AValue& val);
+	AValue& operator -=  (const AValue& val);
+	AValue& operator *=  (const AValue& val);
+	AValue& operator /=  (const AValue& val);
+	AValue& operator %=  (const AValue& val);
+	AValue& operator ^=  (const AValue& val);
+	AValue& operator &=  (const AValue& val);
+	AValue& operator |=  (const AValue& val);
+	AValue& operator <<= (const AValue& val);
+	AValue& operator >>= (const AValue& val);
+
+	friend bool operator == (const AValue& val1, const AValue& val2);
+	friend bool operator != (const AValue& val1, const AValue& val2) {return !(val1 == val2);}
+	friend bool operator <  (const AValue& val1, const AValue& val2);
+	friend bool operator <= (const AValue& val1, const AValue& val2);
+	friend bool operator >  (const AValue& val1, const AValue& val2);
+	friend bool operator >= (const AValue& val1, const AValue& val2);
+	
 	bool Set(const void *p, uint_t type);
 	bool Get(void *p, uint_t type);
 
@@ -87,6 +122,7 @@ public:
 	bool IsPointer() const {return (Type == VALUE_POINTER);}
 	bool IsSigned()  const {return RANGE(Type, _VALUE_SIGNED_START,  _VALUE_SIGNED_END);}
 	bool IsFloat()   const {return RANGE(Type, _VALUE_FLOAT_START,   _VALUE_FLOAT_END);}
+	bool IsDouble()  const {return (Type == VALUE_DOUBLE);}
 
 	bool IsZero()    const {return (Value.u == 0);}
 	bool IsNonZero() const {return (Value.u != 0);}

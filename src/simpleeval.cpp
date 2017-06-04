@@ -8,6 +8,19 @@
 
 #define IsWhiteSpaceEx(c) (IsWhiteSpace(c) || (c == '\n') || (c == '\r'))
 
+typedef struct {
+	AValue (*fn)(const AString& funcname, const simplevars_t& vars, const simpleargs_t& values, AString& errors, void *context);
+	void *context;
+} simplefunc_t;
+
+static std::map<AString, simplefunc_t> funcs;
+
+void AddSimpleFunction(const AString& name, AValue (*fn)(const AString& funcname, const simplevars_t& vars, const simpleargs_t& values, AString& errors, void *context), void *context)
+{
+	funcs[name].fn = fn;
+	funcs[name].context = context;
+}
+
 static uint_t findendquote(const AString& str, uint_t pos, char c)
 {
 	while (str[pos] && (str[pos] != c)) {
@@ -49,7 +62,7 @@ static uint_t findend(const AString& str, uint_t pos, char c)
 			case ']':
 			case '}':
 				return pos;
-				
+
 			case '\'':
 			case '\"':
 				c1  = str[pos];
@@ -85,11 +98,11 @@ static uint_t skipwhitespace(const AString& str, uint_t pos)
 
 	if ((str[pos] == ';') && (str[pos + 1] == ';')) {
 		pos += 2;
-				
+
 		while (str[pos] && (str[pos] != '\n')) pos++;
-				
+
 		if (str[pos] == '\n') pos++;
-		
+
 		while (IsWhiteSpaceEx(str[pos])) pos++;
 	}
 
@@ -152,7 +165,7 @@ static uint_t getoper(const AString& str, uint_t pos, AString& arg)
 	return pos;
 }
 
-uint_t evaluate(const AHash& vars, const AString& str, uint_t pos, sint32_t& val)
+uint_t Evaluate(const simplevars_t& vars, const AString& str, uint_t pos, AValue& val, AString& errors)
 {
 	enum {
 		State_First_PreModifier = 0,
@@ -162,14 +175,16 @@ uint_t evaluate(const AHash& vars, const AString& str, uint_t pos, sint32_t& val
 		State_Second_Operand,
 	};
 	AString premod, oper, arg;
-	sint32_t 	val1  = 0;
-	uint_t    state = State_First_PreModifier;
+	AValue  val1  = 0;
+	uint_t  state = State_First_PreModifier;
+	uint_t  operpos = 0;
 
 	while (str[pos]) {
 		pos = skipwhitespace(str, pos);
 
 		if (str[pos] == ')') break;
 
+		uint_t pos0 = pos;
 		switch (state) {
 			case State_First_PreModifier:
 			case State_Second_PreModifier:
@@ -182,15 +197,61 @@ uint_t evaluate(const AHash& vars, const AString& str, uint_t pos, sint32_t& val
 				pos = getarg(str, pos, arg);
 
 				if (arg[0] == '(') {
-					evaluate(vars, arg.Mid(1, arg.len() - 2), 0, val1);
+					AString subexpr = arg.Mid(1, arg.len() - 2);
+					if (!Evaluate(vars, subexpr, 0, val1, errors)) {
+						errors.printf("Failed to evaluate expression '%s' at '%s'\n", subexpr.str(), str.Mid(pos0).str());
+					}
 				}
 				else if (IsSymbolStart(arg[0])) {
-					val1 = vars.Read(arg);
+					simplevars_t::const_iterator it;
+					AString args;
+
+					pos = skipwhitespace(str, pos);
+
+					if (str[pos] == '(') {
+						pos = getarg(str, pos, args);
+						pos = skipwhitespace(str, pos);
+					}
+
+					if (args.Valid()) {
+						std::map<AString, simplefunc_t>::const_iterator it;
+						
+						if ((it = funcs.find(arg)) == funcs.end()) {
+							errors.printf("Function '%s' not found at '%s'\n", arg.str(), str.Mid(pos0).str());
+						}
+						else if ((args.FirstChar() == '(') && (args.LastChar() == ')')) {
+							args = args.Mid(1, args.len() - 2);
+
+							simpleargs_t values;
+							uint_t i, n = args.CountColumns();
+							for (i = 0; i < n; i++) {
+								AString subexpr = args.Column(i);
+								AValue  val = 0;
+
+								if (Evaluate(vars, subexpr, val, errors)) {
+									values.push_back(val);
+								}
+								else {
+									errors.printf("Failed to evaluate expression '%s' at '%s'\n", subexpr.str(), str.Mid(pos0).str());
+									break;
+								}
+							}
+
+							if (errors.Empty()) {
+								val1 = (*it->second.fn)(arg, vars, values, errors, it->second.context);
+							}
+						}
+						else errors.printf("Invalid args '%s' for function '%s' at '%s'\n", args.str(), arg.str(), str.Mid(pos0).str());
+					}
+					else if ((it = vars.find(arg)) == vars.end()) {
+						errors.printf("Variable '%s' not found at '%s'\n", arg.str(), str.Mid(pos0).str());
+					}
+					else val1 = it->second;
 				}
 				else {
-					val1 = (sint32_t)arg;
+					val1 = AValue::EvalNumberEx(arg.str(), true, NULL, &errors);
 				}
-					
+
 				if		(premod == "-") val1 = -val1;
 				else if (premod == "~") val1 = ~val1;
 				else if (premod == "!") val1 = !val1;
@@ -219,20 +280,21 @@ uint_t evaluate(const AHash& vars, const AString& str, uint_t pos, sint32_t& val
 					else if (oper  == "<<")	val	<<= val1;
 					else if (oper  == ">>")	val	>>= val1;
 					else if (oper  == "%") {
-						if (val1 == 0) fprintf(stderr, "Warning: ignoring modulo by zero in '%s'\n", str.str());
-						else		   val = val % val1;
+						if (val1.IsZero()) errors.printf("Modulo by zero at '%s'\n", str.Mid(operpos).str());
+						else			   val = val % val1;
 					}
 					else if (oper  == "/") {
-						if (val1 == 0) fprintf(stderr, "Warning: ignoring divide by zero in '%s'\n", str.str());
-						else		   val = val / val1;
+						if (val1.IsZero()) errors.printf("Divide by zero at '%s'\n", str.Mid(operpos).str());
+						else			   val = val / val1;
 					}
 					state = State_Operator;
 				}
 				break;
 
 			case State_Operator:
-				pos   = getoper(str, pos, oper);
-				state = State_Second_PreModifier;
+				operpos = pos;
+				pos   	= getoper(str, pos, oper);
+				state 	= State_Second_PreModifier;
 				break;
 
 			default:
@@ -240,20 +302,21 @@ uint_t evaluate(const AHash& vars, const AString& str, uint_t pos, sint32_t& val
 				break;
 		}
 
+		if (errors.Valid()) break;
+
 		pos = skipwhitespace(str, pos);
 	}
 
 	return pos;
 }
 
-bool evaluate(const AHash& vars, const AString& expr, sint32_t& val)
+bool Evaluate(const simplevars_t& vars, const AString& expr, AValue& val, AString& errors)
 {
 	bool success = true;
 	uint_t pos = 0;
 
-	pos = evaluate(vars, expr, pos, val);
+	pos = Evaluate(vars, expr, pos, val, errors);
 	success = (expr[pos] == 0);
-	
+
 	return success;
 }
-
