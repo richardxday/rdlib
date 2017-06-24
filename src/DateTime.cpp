@@ -444,6 +444,40 @@ AString ADateTime::DateFormat(const char *format) const
 	return str;
 }
 
+AString ADateTime::SpanStr(bool incdays, bool incms) const
+{
+	uint64_t ms      = operator uint64_t();
+	uint64_t seconds = ms / 1000;
+	ms      -= seconds * 1000;
+	uint_t   days    = incdays ? (uint_t)(seconds / 86400) : 0;
+	seconds -= (uint64_t)days * 86400;
+	uint_t   hours   = (uint_t)(seconds / 3600);
+	seconds -= (uint64_t)hours * 3600;
+	uint_t   minutes = (uint_t)(seconds / 60);
+	seconds -= (uint64_t)minutes * 60;
+	AString str;
+
+	if (days) str.printf("%ud", days);
+	if (hours) {
+		if (str.Valid()) str.printf(" ");
+		str.printf("%uh", hours);
+	}
+	if (minutes) {
+		if (str.Valid()) str.printf(" ");
+		str.printf("%um", minutes);
+	}
+	if (seconds) {
+		if (str.Valid()) str.printf(" ");
+		str.printf("%us", (uint_t)seconds);
+	}
+	if (incms && ms) {
+		if (str.Valid()) str.printf(" ");
+		str.printf("%ums", (uint_t)ms);
+	}
+
+	return str;
+}
+
 int ADateTime::FindDay(const char *str, bool utc)
 {
 	int res;

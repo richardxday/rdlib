@@ -92,6 +92,8 @@ public:
 	AString DateToStr() const;
 	AString TimeStr() const;
 
+	AString SpanStr(bool incdays = true, bool incms = false) const;
+	
 	static const AString ISO8601Format;
 	static const AString ISO8601FormatWithMS;
 	
