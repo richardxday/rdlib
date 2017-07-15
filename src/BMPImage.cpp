@@ -423,52 +423,17 @@ AImage& AImage::operator *= (const AImage& img)
 
 AImage& AImage::operator *= (const AColour& col)
 {
-	if (Valid()) {
-		PIXEL src;
-		PIXEL *p = GetPixelData();
-		uint_t i, n = Rect.w * Rect.h;
-
-		src.r = col.r;
-		src.g = col.g;
-		src.b = col.b;
-		src.pad = 0;
-		
-		for (i = 0; i < n; i++, p++) {
-			MulPixel::Modify(*p, src);
-		}
-	}
-
-	return *this;
+	return ModifyImage<MulPixel>(col);
 }
 
 AImage& AImage::operator *= (const PIXEL& col)
 {
-	if (Valid()) {
-		PIXEL *p = GetPixelData();
-		uint_t i, n = Rect.w * Rect.h;
-
-		for (i = 0; i < n; i++, p++) {
-			MulPixel::Modify(*p, col);
-		}
-	}
-
-	return *this;
+	return ModifyImage<MulPixel>(col);
 }
 
 AImage& AImage::operator *= (int val)
 {
-	if (Valid()) {
-		PIXEL *p = GetPixelData();
-		uint_t i, n = Rect.w * Rect.h;
-
-		for (i = 0; i < n; i++, p++) {
-			p->r = (uint8_t)limit(((int)p->r * val + 127) / 255, 0, 255);
-			p->g = (uint8_t)limit(((int)p->g * val + 127) / 255, 0, 255);
-			p->b = (uint8_t)limit(((int)p->b * val + 127) / 255, 0, 255);
-		}
-	}
-
-	return *this;
+	return ModifyImage<MulPixel>(val);
 }
 
 bool AImage::Load(const char *filename)
@@ -708,6 +673,7 @@ bool AImage::SaveJPEG(AStdData& fp, const TAG *tags)
 	/* Start compressor */
 	jpeg_start_compress(&cinfo, true);
 
+	
 	JSAMPLE *buffer;
 	if ((buffer = new JSAMPLE[cinfo.image_width * cinfo.input_components]) != NULL) {
 		AColour col;

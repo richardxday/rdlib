@@ -543,30 +543,21 @@ public:
 	bool LoadBMP(const char *filename);
 	bool LoadBMP(AStdData& fp);
 
-	template<typename T>
-	AImage& ModifyImage(const AImage& img) {
-		if (Valid() && img.Valid()) {
-			const PIXEL *src  	 = img.GetPixelData();
-			PIXEL		*res  	 = GetPixelData();
-			const uint_t src_w	 = img.GetRect().w;
-			const uint_t src_h	 = img.GetRect().h;
-			const uint_t res_w	 = GetRect().w;
-			const uint_t res_h	 = GetRect().h;
-			const uint_t res_wd2 = res_w / 2;
-			const uint_t res_hd2 = res_h / 2;
-			uint_t res_y, res_x;
+	template<typename T1, typename T2>
+	AImage& ModifyImage(const T2& val) {
+		if (Valid()) {
+			PIXEL		 *res = GetPixelData();
+			const uint_t w	  = GetRect().w;
+			const uint_t h	  = GetRect().h;
+			uint_t x, y;
+			T1 modifier;
 
-			for (res_y = 0; res_y < res_h; res_y++) {
-				const uint_t src_y = (res_y * src_h + res_hd2) / res_h;
-
-				for (res_x = 0; res_x < res_w; res_x++) {
-					const uint_t src_x = (res_x * src_w + res_wd2) / res_w;
-
-					T::Modify(res[res_x + res_y * res_w], src[src_x + src_y * src_w]);
+			for (y = 0; y < h; y++) {
+				for (x = 0; x < w; x++, res++) {
+					modifier.Modify(res[0], val, x, w, y, h);
 				}
 			}
 		}
-
 		return *this;
 	}
 
@@ -586,32 +577,62 @@ protected:
 		int gt_count, sm_count;
 	} LINE_INFO;
 
-	class CopyPixel {
+	class ModifyPixel {
 	public:
-		static void Modify(PIXEL& res, const PIXEL& src) {res = src;}
+		void Modify(PIXEL& res, const AImage& img, uint_t x, uint_t w, uint_t y, uint_t h) const {
+			if (img.Valid()) {
+				const uint_t srcw = img.GetRect().w;
+				const uint_t srch = img.GetRect().h;
+				const uint_t srcx = (x * srcw + w / 2) / w; 
+				const uint_t srcy = (y * srch + h / 2) / h; 
+				__Modify(res, img.GetPixelData()[srcx + srcy * srcw]);
+			}
+		}
+		void Modify(PIXEL& res, const AColour& val, uint_t x, uint_t w, uint_t y, uint_t h) const {
+			PIXEL src = {val.r, val.g, val.b, 0};
+			(void)x; (void)y; (void)w; (void)h;
+			__Modify(res, src);
+		}
+		void Modify(PIXEL& res, int val, uint_t x, uint_t w, uint_t y, uint_t h) const {
+			const uint8_t v = (uint8_t)limit(val, 0, 255);
+			PIXEL src = {v, v, v, 0};
+			(void)x; (void)y; (void)w; (void)h;
+			__Modify(res, src);
+		}
+		void Modify(PIXEL& res, const PIXEL& src) const {
+			__Modify(res, src);
+		}
+
+	protected:
+		virtual void __Modify(PIXEL& res, const PIXEL& src) const = 0;
+	};
+	
+	class CopyPixel : public ModifyPixel {
+	protected:
+		virtual void __Modify(PIXEL& res, const PIXEL& src) const {res = src;}
 	};
 
-	class AddPixel {
-	public:
-		static void Modify(PIXEL& res, const PIXEL& src) {
+	class AddPixel : public ModifyPixel {
+	protected:
+		virtual void __Modify(PIXEL& res, const PIXEL& src) const {
 			res.r = (uint8_t)limit((int)res.r + (int)src.r, 0, 255);
 			res.g = (uint8_t)limit((int)res.g + (int)src.g, 0, 255);
 			res.b = (uint8_t)limit((int)res.b + (int)src.b, 0, 255);
 		}
 	};
 
-	class SubPixel {
-	public:
-		static void Modify(PIXEL& res, const PIXEL& src) {
+	class SubPixel : public ModifyPixel {
+	protected:
+		virtual void __Modify(PIXEL& res, const PIXEL& src) const {
 			res.r = (uint8_t)limit((int)res.r - (int)src.r, 0, 255);
 			res.g = (uint8_t)limit((int)res.g - (int)src.g, 0, 255);
 			res.b = (uint8_t)limit((int)res.b - (int)src.b, 0, 255);
 		}
 	};
 
-	class MulPixel {
-	public:
-		static void Modify(PIXEL& res, const PIXEL& src) {
+	class MulPixel : public ModifyPixel {
+	protected:
+		virtual void __Modify(PIXEL& res, const PIXEL& src) const {
 			res.r = (uint8_t)(((int)res.r * (int)src.r + 127) / 255);
 			res.g = (uint8_t)(((int)res.g * (int)src.g + 127) / 255);
 			res.b = (uint8_t)(((int)res.b * (int)src.b + 127) / 255);
