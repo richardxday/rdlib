@@ -1,6 +1,6 @@
 
 OBJECTSSRC:=src
-HEADERSSRC:=include/$(LIBRARY)
+HEADERSSRC:=include
 
 # C
 CC = gcc

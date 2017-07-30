@@ -1,157 +1,104 @@
-#ifndef __POSTGRES_DATABASE__
-#define __POSTGRES_DATABASE__
+#ifndef __DATABASE__
+#define __DATABASE__
 
-#include <libpq-fe.h>
+#include "strsup.h"
+#include "DateTime.h"
+#include "SQLQuery.h"
 
-#include "Database.h"
-
-class PostgresDatabase : public Database {
+class Database {
 public:
-	PostgresDatabase();
-	virtual ~PostgresDatabase();
+	Database() {}
+	virtual ~Database() {}
 
 	/*--------------------------------------------------------------------------------*/
 	/** Open admin connection to database server
 	 */
 	/*--------------------------------------------------------------------------------*/
-	virtual bool OpenAdmin(const AString& host);
+	virtual bool OpenAdmin(const AString& host) {(void)host; return false;}
 	
 	/*--------------------------------------------------------------------------------*/
 	/** Open connection to database server as user and optionally open database
 	 */
 	/*--------------------------------------------------------------------------------*/
-	virtual bool Open(const AString& host, const AString& username, const AString& password, const AString& database = "");
+	virtual bool Open(const AString& host, const AString& username, const AString& password, const AString& database = "") = 0;
 
 	/*--------------------------------------------------------------------------------*/
 	/** Check database connection
 	 */
 	/*--------------------------------------------------------------------------------*/
-	virtual bool CheckConnection();
-
-	/*--------------------------------------------------------------------------------*/
-	/** Check database connection
-	 */
-	/*--------------------------------------------------------------------------------*/
-	static bool CheckConnection(const AString& host);
+	virtual bool CheckConnection() {return false;}
 
 	/*--------------------------------------------------------------------------------*/
 	/** Return whether database connection is open and valid
 	 */
 	/*--------------------------------------------------------------------------------*/
-	virtual bool IsOpen() const {return isopen;}
+	virtual bool IsOpen() const = 0;
 	
 	/*--------------------------------------------------------------------------------*/
 	/** Close connection
 	 */
 	/*--------------------------------------------------------------------------------*/
-	virtual void Close();
+	virtual void Close() = 0;
 
 	/*--------------------------------------------------------------------------------*/
 	/** Return error message
 	 */
 	/*--------------------------------------------------------------------------------*/
-	virtual AString GetErrorMessage(bool full = false);
+	virtual AString GetErrorMessage(bool full = false) {(void)full; return "";}
 
 	/*--------------------------------------------------------------------------------*/
 	/** Clear current error information
 	 */
 	/*--------------------------------------------------------------------------------*/
-	virtual void ClearResult();
+	virtual void ClearResult() {}
 
 	/*--------------------------------------------------------------------------------*/
 	/** Create user
 	 */
 	/*--------------------------------------------------------------------------------*/
-	virtual bool AddUser(const AString& username, const AString& password);
+	virtual bool AddUser(const AString& username, const AString& password) = 0;
 
 	/*--------------------------------------------------------------------------------*/
 	/** Create database
 	 */
 	/*--------------------------------------------------------------------------------*/
-	virtual bool CreateDatabase(const AString& name);
+	virtual bool CreateDatabase(const AString& name) = 0;
 
 	/*--------------------------------------------------------------------------------*/
 	/** Grant privileges
 	 */
 	/*--------------------------------------------------------------------------------*/
-	virtual bool GrantPrivileges(const AString& database, const AString& username);
+	virtual bool GrantPrivileges(const AString& database, const AString& username) = 0;
 
 	/*--------------------------------------------------------------------------------*/
 	/** Sanitize and quote string to avoid SQL Injection vulnerabilities
 	 */
 	/*--------------------------------------------------------------------------------*/
-	virtual AString QuoteString(const AString& str) const;
+	virtual AString QuoteString(const AString& str) const {return AString::Formatify("'%s'", str.Escapify().str());}
+
+	/*--------------------------------------------------------------------------------*/
+	/** Create date string from datetime
+	 */
+	/*--------------------------------------------------------------------------------*/
+	virtual AString DateString(const ADateTime& dt) const {return dt.DateFormat("'%Y-%M-%D %h:%m:%s.%S'");}
 	
 	/*--------------------------------------------------------------------------------*/
 	/** Run simple SQL database query
 	 */
 	/*--------------------------------------------------------------------------------*/
-	virtual bool RunSQL(const AString& sql);
+	virtual bool RunSQL(const AString& sql) = 0;
 
 	/*--------------------------------------------------------------------------------*/
 	/** Run complex query returning data
 	 */
 	/*--------------------------------------------------------------------------------*/
-	virtual SQLQuery *RunQuery(const AString& sql);
+	virtual SQLQuery *RunQuery(const AString& sql) = 0;
 
 	/*--------------------------------------------------------------------------------*/
 	/** Check to see if table exists
 	 */
 	/*--------------------------------------------------------------------------------*/
-	virtual bool TableExists(const AString& name);
-	
-protected:
-	static AString GetErrorMessage(PGconn *conn, bool full = false);
-
-	class PostgresQuery : public SQLQuery {
-	public:
-		PostgresQuery(PostgresDatabase *_db, const AString& query);
-		virtual ~PostgresQuery();
-
-		/*--------------------------------------------------------------------------------*/
-		/** Get success and error message
-		 */
-		/*--------------------------------------------------------------------------------*/
-		virtual bool    GetResult()       const {return success;}
-		virtual AString GetErrorMessage() const {return PostgresDatabase::GetErrorMessage(conn);}
-
-		/*--------------------------------------------------------------------------------*/
-		/** Return row about to be fetch and optionally number of rows in total
-		 */
-		/*--------------------------------------------------------------------------------*/
-		virtual uint_t CurrentRow(uint_t *rows = NULL) const;
-
-		/*--------------------------------------------------------------------------------*/
-		/** Fetch a row of results
-		 */
-		/*--------------------------------------------------------------------------------*/
-		virtual bool Fetch(AString& results);
-
-	protected:
-		/*--------------------------------------------------------------------------------*/
-		/** Clear current error information
-		 */
-		/*--------------------------------------------------------------------------------*/
-		void ClearResult();
-
-	protected:
-		PostgresDatabase *db;
-		PGconn   *conn;
-		PGresult *res;
-		uint_t   nfields;
-		uint_t   nrows;
-		uint_t   row;
-		bool     success;
-	};
-	friend class PostgresQuery;
-								   
-	PGconn *GetConnection() {return conn;}
-		
-protected:
-	AString  connstr;
-	PGconn   *conn;
-	PGresult *res;
-	bool     isopen;
+	virtual bool TableExists(const AString& name) {(void)name; return false;}
 };
 
 #endif

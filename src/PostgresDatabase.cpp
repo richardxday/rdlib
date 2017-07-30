@@ -6,6 +6,7 @@
 #include "DateTime.h"
 #include "PostgresDatabase.h"
 
+#include <libpq-fe.h>
 #include "pg_types.h"
 
 PostgresDatabase::PostgresDatabase() : conn(NULL),
