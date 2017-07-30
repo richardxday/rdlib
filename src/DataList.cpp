@@ -212,8 +212,36 @@ sint_t ADataList::Find(uptr_t Item, sint_t Index) const
 	return index;
 }
 
+#ifdef _WIN32
+void ADataList::SwapAndSort(uint_t Index, int (*fn)(uptr_t Item1, uptr_t Item2, void *pContext), void *pContext)
+{
+	SwapEx(Index, Index + 1);
+
+	if ((Index > 0)				    && ((*fn)(data[Index - 1], data[Index],     pContext) > 0)) SwapAndSort(Index - 1, fn, pContext);
+	if ((Index < (data.size() - 2)) && ((*fn)(data[Index + 1], data[Index + 2], pContext) > 0)) SwapAndSort(Index + 1, fn, pContext);
+}
+#endif
+
 void ADataList::Sort(int (*fn)(uptr_t Item1, uptr_t Item2, void *pContext), void *pContext)
 {
+#ifdef _WIN32
+	if (data.size() > 1) {
+		uint_t i, n = data.size() - 1;
+		bool   bSort;
+
+		do {
+			bSort = false;
+
+			for (i = 0; i < n; i++) {
+				if ((*fn)(data[i], data[i + 1], pContext) > 0) {
+					SwapAndSort(i, fn, pContext);
+					bSort = true;
+					break;
+				}
+			}
+		} while (bSort);
+	}
+#else
 	struct {
 		int (*fn)(uptr_t Item1, uptr_t Item2, void *pContext);
 		void *pContext;
@@ -227,6 +255,7 @@ void ADataList::Sort(int (*fn)(uptr_t Item1, uptr_t Item2, void *pContext), void
 	cmp.pContext = pContext;
 
 	std::sort(data.begin(), data.end(), cmp);
+#endif
 }
 
 uptr_t ADataList::Pop()

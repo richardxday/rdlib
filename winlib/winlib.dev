@@ -5,14 +5,14 @@ UnitCount=116
 Type=2
 Ver=1
 ObjFiles=
-Includes=../include/rdlib
+Includes=../include
 Libs=
 PrivateResource=winlib_private.rc
 ResourceIncludes=
 MakeIncludes=
 Compiler=
 CppCompiler=
-Linker=
+Linker=-lstdc++_@@_
 IsCpp=1
 Icon=
 ExeOutput=
@@ -540,7 +540,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit52]
-FileName=..\include\rdlib\3DTrans.h
+FileName=..\include\3DTrans.h
 CompileCpp=1
 Folder=Include
 Compile=1
@@ -550,7 +550,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit53]
-FileName=..\include\rdlib\3DWorld.h
+FileName=..\include\3DWorld.h
 CompileCpp=1
 Folder=Include
 Compile=1
@@ -560,7 +560,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit54]
-FileName=..\include\rdlib\Allocator.h
+FileName=..\include\Allocator.h
 CompileCpp=1
 Folder=Include
 Compile=1
@@ -570,7 +570,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit55]
-FileName=..\include\rdlib\authorize.h
+FileName=..\include\authorize.h
 CompileCpp=1
 Folder=Include
 Compile=1
@@ -580,7 +580,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit56]
-FileName=..\include\rdlib\blowfish_imp.h
+FileName=..\include\blowfish_imp.h
 CompileCpp=1
 Folder=Include
 Compile=1
@@ -590,7 +590,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit57]
-FileName=..\include\rdlib\blowfish.h
+FileName=..\include\blowfish.h
 CompileCpp=1
 Folder=Include
 Compile=1
@@ -600,7 +600,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit58]
-FileName=..\include\rdlib\BMPImage.h
+FileName=..\include\BMPImage.h
 CompileCpp=1
 Folder=Include
 Compile=1
@@ -610,7 +610,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit59]
-FileName=..\include\rdlib\cfft.h
+FileName=..\include\cfft.h
 CompileCpp=1
 Folder=Include
 Compile=1
@@ -620,7 +620,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit60]
-FileName=..\include\rdlib\CircularBuffer.h
+FileName=..\include\CircularBuffer.h
 CompileCpp=1
 Folder=Include
 Compile=1
@@ -630,7 +630,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit61]
-FileName=..\include\rdlib\Complex.h
+FileName=..\include\Complex.h
 CompileCpp=1
 Folder=Include
 Compile=1
@@ -640,7 +640,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit62]
-FileName=..\include\rdlib\crc32.h
+FileName=..\include\crc32.h
 CompileCpp=1
 Folder=Include
 Compile=1
@@ -650,7 +650,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit63]
-FileName=..\include\rdlib\Database.h
+FileName=..\include\Database.h
 CompileCpp=1
 Folder=Include
 Compile=1
@@ -660,7 +660,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit64]
-FileName=..\include\rdlib\DataList.h
+FileName=..\include\DataList.h
 CompileCpp=1
 Folder=Include
 Compile=1
@@ -670,7 +670,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit65]
-FileName=..\include\rdlib\DateObjectPair.h
+FileName=..\include\DateObjectPair.h
 CompileCpp=1
 Folder=Include
 Compile=1
@@ -680,7 +680,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit66]
-FileName=..\include\rdlib\DateTime.h
+FileName=..\include\DateTime.h
 CompileCpp=1
 Folder=Include
 Compile=1
@@ -690,7 +690,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit67]
-FileName=..\include\rdlib\ErrorHandler.h
+FileName=..\include\ErrorHandler.h
 CompileCpp=1
 Folder=Include
 Compile=1
@@ -700,7 +700,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit68]
-FileName=..\include\rdlib\EvalNumber.h
+FileName=..\include\EvalNumber.h
 CompileCpp=1
 Folder=Include
 Compile=1
@@ -710,7 +710,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit69]
-FileName=..\include\rdlib\Evaluator.h
+FileName=..\include\Evaluator.h
 CompileCpp=1
 Folder=Include
 Compile=1
@@ -720,7 +720,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit70]
-FileName=..\include\rdlib\exif.h
+FileName=..\include\exif.h
 CompileCpp=1
 Folder=Include
 Compile=1
@@ -730,7 +730,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit71]
-FileName=..\include\rdlib\fastcomplex.h
+FileName=..\include\fastcomplex.h
 CompileCpp=1
 Folder=Include
 Compile=1
@@ -740,7 +740,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit72]
-FileName=..\include\rdlib\fastfft.h
+FileName=..\include\fastfft.h
 CompileCpp=1
 Folder=Include
 Compile=1
@@ -750,7 +750,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit73]
-FileName=..\include\rdlib\FileHash.h
+FileName=..\include\FileHash.h
 CompileCpp=1
 Folder=Include
 Compile=1
@@ -760,7 +760,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit74]
-FileName=..\include\rdlib\Hash.h
+FileName=..\include\Hash.h
 CompileCpp=1
 Folder=Include
 Compile=1
@@ -770,7 +770,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit75]
-FileName=..\include\rdlib\HTMLTags.h
+FileName=..\include\HTMLTags.h
 CompileCpp=1
 Folder=Include
 Compile=1
@@ -780,7 +780,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit76]
-FileName=..\include\rdlib\HTTPRequest.h
+FileName=..\include\HTTPRequest.h
 CompileCpp=1
 Folder=Include
 Compile=1
@@ -790,7 +790,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit77]
-FileName=..\include\rdlib\Interpolation.h
+FileName=..\include\Interpolation.h
 CompileCpp=1
 Folder=Include
 Compile=1
@@ -800,7 +800,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit78]
-FileName=..\include\rdlib\jpegfix.h
+FileName=..\include\jpegfix.h
 CompileCpp=1
 Folder=Include
 Compile=1
@@ -810,7 +810,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit79]
-FileName=..\include\rdlib\jpeginfo.h
+FileName=..\include\jpeginfo.h
 CompileCpp=1
 Folder=Include
 Compile=1
@@ -820,7 +820,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit80]
-FileName=..\include\rdlib\ListNode.h
+FileName=..\include\ListNode.h
 CompileCpp=1
 Folder=Include
 Compile=1
@@ -830,7 +830,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit81]
-FileName=..\include\rdlib\Logger.h
+FileName=..\include\Logger.h
 CompileCpp=1
 Folder=Include
 Compile=1
@@ -840,7 +840,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit82]
-FileName=..\include\rdlib\Matrix.h
+FileName=..\include\Matrix.h
 CompileCpp=1
 Folder=Include
 Compile=1
@@ -850,7 +850,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit83]
-FileName=..\include\rdlib\md5.h
+FileName=..\include\md5.h
 CompileCpp=1
 Folder=Include
 Compile=1
@@ -860,7 +860,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit84]
-FileName=..\include\rdlib\MessageResponseHandler.h
+FileName=..\include\MessageResponseHandler.h
 CompileCpp=1
 Folder=Include
 Compile=1
@@ -870,7 +870,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit85]
-FileName=..\include\rdlib\misc.h
+FileName=..\include\misc.h
 CompileCpp=1
 Folder=Include
 Compile=1
@@ -880,7 +880,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit86]
-FileName=..\include\rdlib\mt19937ar.h
+FileName=..\include\mt19937ar.h
 CompileCpp=1
 Folder=Include
 Compile=1
@@ -890,7 +890,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit87]
-FileName=..\include\rdlib\NodeType.h
+FileName=..\include\NodeType.h
 CompileCpp=1
 Folder=Include
 Compile=1
@@ -900,7 +900,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit88]
-FileName=..\include\rdlib\pg_types.h
+FileName=..\include\pg_types.h
 CompileCpp=1
 Folder=Include
 Compile=1
@@ -910,7 +910,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit89]
-FileName=..\include\rdlib\PointSizeRect.h
+FileName=..\include\PointSizeRect.h
 CompileCpp=1
 Folder=Include
 Compile=1
@@ -920,7 +920,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit90]
-FileName=..\include\rdlib\PostgresDatabase.h
+FileName=..\include\PostgresDatabase.h
 CompileCpp=1
 Folder=Include
 Compile=1
@@ -930,7 +930,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit92]
-FileName=..\include\rdlib\Recurse.h
+FileName=..\include\Recurse.h
 CompileCpp=1
 Folder=Include
 Compile=1
@@ -940,7 +940,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit93]
-FileName=..\include\rdlib\Regex.h
+FileName=..\include\Regex.h
 CompileCpp=1
 Folder=Include
 Compile=1
@@ -950,7 +950,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit94]
-FileName=..\include\rdlib\SettingsHandler.h
+FileName=..\include\SettingsHandler.h
 CompileCpp=1
 Folder=Include
 Compile=1
@@ -960,7 +960,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit95]
-FileName=..\include\rdlib\simpleeval.h
+FileName=..\include\simpleeval.h
 CompileCpp=1
 Folder=Include
 Compile=1
@@ -970,7 +970,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit96]
-FileName=..\include\rdlib\SocketServer.h
+FileName=..\include\SocketServer.h
 CompileCpp=1
 Folder=Include
 Compile=1
@@ -980,7 +980,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit97]
-FileName=..\include\rdlib\SQLQuery.h
+FileName=..\include\SQLQuery.h
 CompileCpp=1
 Folder=Include
 Compile=1
@@ -990,7 +990,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit98]
-FileName=..\include\rdlib\StdData.h
+FileName=..\include\StdData.h
 CompileCpp=1
 Folder=Include
 Compile=1
@@ -1000,7 +1000,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit99]
-FileName=..\include\rdlib\StdDev.h
+FileName=..\include\StdDev.h
 CompileCpp=1
 Folder=Include
 Compile=1
@@ -1010,7 +1010,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit100]
-FileName=..\include\rdlib\StdFile.h
+FileName=..\include\StdFile.h
 CompileCpp=1
 Folder=Include
 Compile=1
@@ -1020,7 +1020,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit101]
-FileName=..\include\rdlib\StdMemFile.h
+FileName=..\include\StdMemFile.h
 CompileCpp=1
 Folder=Include
 Compile=1
@@ -1030,7 +1030,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit102]
-FileName=..\include\rdlib\StdSerial.h
+FileName=..\include\StdSerial.h
 CompileCpp=1
 Folder=Include
 Compile=1
@@ -1040,7 +1040,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit103]
-FileName=..\include\rdlib\StdSocket.h
+FileName=..\include\StdSocket.h
 CompileCpp=1
 Folder=Include
 Compile=1
@@ -1050,7 +1050,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit104]
-FileName=..\include\rdlib\StdUri.h
+FileName=..\include\StdUri.h
 CompileCpp=1
 Folder=Include
 Compile=1
@@ -1060,7 +1060,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit105]
-FileName=..\include\rdlib\StringList.h
+FileName=..\include\StringList.h
 CompileCpp=1
 Folder=Include
 Compile=1
@@ -1070,7 +1070,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit106]
-FileName=..\include\rdlib\strsup.h
+FileName=..\include\strsup.h
 CompileCpp=1
 Folder=Include
 Compile=1
@@ -1080,7 +1080,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit107]
-FileName=..\include\rdlib\StructList.h
+FileName=..\include\StructList.h
 CompileCpp=1
 Folder=Include
 Compile=1
@@ -1090,7 +1090,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit108]
-FileName=..\include\rdlib\StructuredNode.h
+FileName=..\include\StructuredNode.h
 CompileCpp=1
 Folder=Include
 Compile=1
@@ -1100,7 +1100,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit109]
-FileName=..\include\rdlib\tag.h
+FileName=..\include\tag.h
 CompileCpp=1
 Folder=Include
 Compile=1
@@ -1110,7 +1110,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit110]
-FileName=..\include\rdlib\TextServer.h
+FileName=..\include\TextServer.h
 CompileCpp=1
 Folder=Include
 Compile=1
@@ -1120,7 +1120,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit111]
-FileName=..\include\rdlib\Thread.h
+FileName=..\include\Thread.h
 CompileCpp=1
 Folder=Include
 Compile=1
@@ -1130,7 +1130,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit112]
-FileName=..\include\rdlib\ThreadLock.h
+FileName=..\include\ThreadLock.h
 CompileCpp=1
 Folder=Include
 Compile=1
@@ -1140,7 +1140,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit113]
-FileName=..\include\rdlib\types.h
+FileName=..\include\types.h
 CompileCpp=1
 Folder=Include
 Compile=1
@@ -1150,7 +1150,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit114]
-FileName=..\include\rdlib\UDPServer.h
+FileName=..\include\UDPServer.h
 CompileCpp=1
 Folder=Include
 Compile=1
@@ -1160,7 +1160,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit115]
-FileName=..\include\rdlib\wxsup.h
+FileName=..\include\wxsup.h
 CompileCpp=1
 Folder=Include
 Compile=1
@@ -1170,7 +1170,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit116]
-FileName=..\include\rdlib\XMLDecode.h
+FileName=..\include\XMLDecode.h
 CompileCpp=1
 Folder=Include
 Compile=1
@@ -1208,7 +1208,7 @@ ProductVersion=
 AutoIncBuildNr=0
 
 [Unit91]
-FileName=..\include\rdlib\QuitHandler.h
+FileName=..\include\QuitHandler.h
 CompileCpp=1
 Folder=Include
 Compile=1

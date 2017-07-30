@@ -102,6 +102,10 @@ public:
 	bool Swap(uint_t n1, uint_t n2);
 
 protected:
+#ifdef _WIN32
+	void SwapAndSort(uint_t Index, int (*fn)(uptr_t Item1, uptr_t Item2, void *pContext), void *pContext);
+#endif
+	
 	void SwapEx(uint_t n1, uint_t n2);
 	
 protected:
