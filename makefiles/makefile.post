@@ -1,7 +1,7 @@
 
 CLEANFILES += $(DEBUG_OBJDIR)/*.d $(RELEASE_OBJDIR)/*.d
 
-.PHONY: all default-build debug release install uninstall clean cleanbins post-install
+.PHONY: all default-build debug release install uninstall clean cleanbins post-install includedirs
 
 ifdef DEBUG
 default-build: debug
@@ -24,3 +24,10 @@ uninstall:
 
 cleanbins:
 	-rm -fR $(DEBUG_BINDIR) $(DEBUG_LIBDIR) $(RELEASE_BINDIR) $(RELEASE_LIBDIR)
+
+includedirs:
+ifdef DEBUG
+	@$(MAKEFILEDIR)/extractincludes "$(CFLAGS) $(LOCAL_CFLAGS) $(CXXFLAGS) $(LOCAL_CXXFLAGS) $(GLOBAL_CFLAGS) $(EXTRA_CFLAGS) $(EXTRA_CXXFLAGS) $(DEBUG_CFLAGS) $(DEBUG_CXXFLAGS)"
+else
+	@$(MAKEFILEDIR)/extractincludes "$(CFLAGS) $(LOCAL_CFLAGS) $(CXXFLAGS) $(LOCAL_CXXFLAGS) $(GLOBAL_CFLAGS) $(EXTRA_CFLAGS) $(EXTRA_CXXFLAGS) $(RELEASE_CFLAGS) $(RELEASE_CXXFLAGS)"
+endif
