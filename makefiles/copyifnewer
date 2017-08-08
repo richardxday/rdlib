@@ -1,7 +1,7 @@
 #!/bin/sh
 SRCFILE="$1"
 DSTFILE="$2"
-test -e /usr/bin/sudo && USER="-o root"
+test -e /usr/bin/sudo && USER="-o root" || USER="-o richard"
 if [ -d "$SRCFILE" ] ; then
 	install $USER -d "$DSTFILE"
 else
