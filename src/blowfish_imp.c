@@ -55,7 +55,6 @@ have time to provide unpaid support for everyone who uses this code.
                                              -- Paul Kocher
 */
 
-
 #include "blowfish_imp.h"
 
 #define N               16

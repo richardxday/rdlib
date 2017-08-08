@@ -2,6 +2,7 @@
 #ifndef __LINUXLIB_TYPES__
 #define __LINUXLIB_TYPES__
 
+#include <limits.h>
 #include <stddef.h>
 #include <stdint.h>
 

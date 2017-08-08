@@ -8,7 +8,7 @@ CC = gcc
 CXX = g++
 
 # Standard preprocessor flags (common for CC and CXX)
-CFLAGS=-Wall -Wextra -Werror -fPIC
+CFLAGS=-Wall -Wextra -Werror
 LOCAL_CFLAGS:=
 
 # Standard flags for C++
@@ -39,12 +39,21 @@ EXTRA_LIBS:=
 DEBUG_LIBS:=
 RELEASE_LIBS:=
 
+ifeq ($(OS),Windows_NT)
+SUDO:=
+PREFIX:=/usr/local
+
+STATIC_LIBRARY_SUFFIX:=.a
+SHARED_LIBRARY_SUFFIX:=.dll
+APPLICATION_SUFFIX:=
+else
 SUDO:=sudo
 PREFIX:=/usr/local
 
 STATIC_LIBRARY_SUFFIX:=.a
 SHARED_LIBRARY_SUFFIX:=.so
 APPLICATION_SUFFIX:=
+endif
 
 OBJECTS:=
 HEADERS:=

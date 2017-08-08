@@ -18,7 +18,7 @@
 #include "windows.h"
 #endif
 
-#if !defined(__CYGWIN__) && !defined(_WIN32)
+#ifndef _WIN32
 #define stricmp strcasecmp
 #define strnicmp strncasecmp
 #define stristr strcasestr
@@ -46,6 +46,10 @@ extern uint32_t GetTickCount();
 extern void   Sleep(uint32_t ms);
 #endif
 
+#ifndef M_PI
+extern const double M_PI;
+#endif
+	
 extern uint64_t GetNanosecondTicks();
 	
 extern void debug(const char *fmt, ...) PRINTF_FORMAT_FUNCTION;

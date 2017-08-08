@@ -17,6 +17,10 @@
 
 /* end of includes */
 
+#ifndef M_PI
+const double M_PI = acos(0.0) * 2.0;
+#endif
+
 double dBToGain(double val)
 {
 	return pow(10.0, (val * .05));
