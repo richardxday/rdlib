@@ -1,11 +1,11 @@
 #!/bin/sh
 SRCFILE="$1"
 DSTFILE="$2"
-test "`uname -o`" == "Cygwin" && USER=richard || USER=root
+test -e /usr/bin/sudo && USER="-o root"
 if [ -d "$SRCFILE" ] ; then
-	install -o $USER -d "$DSTFILE"
+	install $USER -d "$DSTFILE"
 else
 	DSTDIR="`dirname "$DSTFILE"`"
-	install -v -o $USER -d "$DSTDIR"
-	install -C -v -o $USER "$SRCFILE" "$DSTFILE"
+	install -v $USER -d "$DSTDIR"
+	install -C -v $USER "$SRCFILE" "$DSTFILE"
 fi

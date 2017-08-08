@@ -23,6 +23,8 @@ int main(void)
 
 #ifdef __CYGWIN__
 	printf(" -D_GNU_SOURCE=1");
+#else
+	printf(" -fPIC");
 #endif
 	
 	printf("\n");
