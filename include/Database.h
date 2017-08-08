@@ -99,6 +99,19 @@ public:
 	 */
 	/*--------------------------------------------------------------------------------*/
 	virtual bool TableExists(const AString& name) {(void)name; return false;}
+
+	/*--------------------------------------------------------------------------------*/
+	/** Create table
+	 */
+	/*--------------------------------------------------------------------------------*/
+	virtual bool CreateTable(const AString& name, const AString& columns) {(void)name; (void)columns; return false;}
+
+protected:
+	/*--------------------------------------------------------------------------------*/
+	/** Translate simple type for database implementation
+	 */
+	/*--------------------------------------------------------------------------------*/
+	virtual AString ConvertSimpleType(const AString& ctype) const {return ctype;}
 };
 
 #endif

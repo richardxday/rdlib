@@ -100,11 +100,23 @@ public:
 	/*--------------------------------------------------------------------------------*/
 	virtual bool TableExists(const AString& name);
 
+	/*--------------------------------------------------------------------------------*/
+	/** Create table
+	 */
+	/*--------------------------------------------------------------------------------*/
+	virtual bool CreateTable(const AString& name, const AString& columns);
+
 	typedef struct pg_conn   PGconn;
 	typedef struct pg_result PGresult;
 	
 protected:
 	static AString GetErrorMessage(PGconn *conn, bool full = false);
+
+	/*--------------------------------------------------------------------------------*/
+	/** Translate simple type for database implementation
+	 */
+	/*--------------------------------------------------------------------------------*/
+	virtual AString ConvertSimpleType(const AString& ctype) const;
 
 	class PostgresQuery : public SQLQuery {
 	public:

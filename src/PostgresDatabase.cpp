@@ -256,6 +256,54 @@ bool PostgresDatabase::TableExists(const AString& name)
 	return false;
 }
 
+/*--------------------------------------------------------------------------------*/
+/** Translate simple type for database implementation
+ */
+/*--------------------------------------------------------------------------------*/
+AString PostgresDatabase::ConvertSimpleType(const AString& ctype) const
+{
+	AString type;
+
+	if      (ctype == "id")			  	type = "int not null primary key";											                        // primary key id
+	else if (ctype == "id64")			type = "bigint not null primary key";											                    // primary key id (64-bit)
+	else if (ctype.Left(6) == "string") type.printf("varchar%s", ctype.Mid(6).SearchAndReplace("[", "(").SearchAndReplace("]", ")").str()); // string type / varchar
+	else if (ctype == "datetime")     	type = "timestamp";
+	else if (ctype == "float")        	type = "real";
+	else if (ctype == "double")        	type = "real";
+	else if (ctype == "short")        	type = "smallint";
+	else if (ctype == "int64")        	type = "bigint";
+	else if (ctype == "")			  	type = "integer";
+
+	return type;
+}
+
+/*--------------------------------------------------------------------------------*/
+/** Create table
+ */
+/*--------------------------------------------------------------------------------*/
+bool PostgresDatabase::CreateTable(const AString& name, const AString& columns)
+{
+	AString sql;
+	SQLQuery *query = NULL;
+	uint_t i, n = columns.CountColumns();
+	
+	sql.printf("create table %s (", name.str());
+	for (i = 0; i < n; i++) {
+		AString column = columns.Column(i);
+		if (i > 0) sql.printf(", ");
+		sql.printf("%s %s", columns.Word(0).str(), ConvertSimpleType(column.Words(1)).str());
+	}
+	sql.printf(")");
+	
+	if ((query = RunQuery(sql)) != NULL) {
+		bool success = query->GetResult();
+		delete query;
+		return success;
+	}
+
+	return false;
+}
+
 /*----------------------------------------------------------------------------------------------------*/
 
 PostgresDatabase::PostgresQuery::PostgresQuery(PostgresDatabase *_db, const AString& query) : SQLQuery(),
