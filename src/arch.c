@@ -28,7 +28,11 @@ int main(int argc, char *argv[])
 #endif
 #endif
 	}
-	
+
+#ifdef __linux__
+	printf(" -fPIC");
+#endif
+
 	if (cflags) {
 #if defined(__linux__) || defined(__CYGWIN__)
 		printf(" -D__LINUX__");
