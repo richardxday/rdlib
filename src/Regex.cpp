@@ -3,6 +3,7 @@
 #include <ctype.h>
 
 #include "Regex.h"
+#include "EvalNumber.h"
 
 /* end of includes */
 
@@ -925,12 +926,8 @@ static bool match(const AString& str, const AString& pat, uint_t strpos, uint_t 
 						reg->pos      = strpos;
 						
 						// mark end of this region in new pattern
-#if SYSTEM_IS_64BITS
-						pat2.Format("}$%016lx:%s", (ulong_t)reg, pat.str() + patpos1);
-#else
-						pat2.Format("}$%08lx:%s", (ulong_t)reg, pat.str() + patpos1);
-#endif
-
+						pat2.Format("}%s:%s", AddressString(reg).str(), pat.str() + patpos1);
+						
 						// try matching
 						success = match_or(str, strpos, pat1, 0, pat2, data, brackets1);
 						
@@ -973,11 +970,7 @@ static bool match(const AString& str, const AString& pat, uint_t strpos, uint_t 
 				// assume real region -> extract address of region structure
 				reg = (REGEXREGION *)(uptr_t)pat.Mid(patpos);
 
-#if SYSTEM_IS_64BITS
-				patpos += 17;
-#else
-				patpos += 9;
-#endif
+				patpos = pat.Pos(":", patpos) + 1;
 
 				assert(reg);
 

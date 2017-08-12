@@ -718,7 +718,7 @@ void enabledebug(bool enabled)
 	debug_enabled = enabled;
 }
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(__MINGW32__)
 int vasprintf(char **buf, const char *fmt, va_list ap)
 {
 	int l = -1;

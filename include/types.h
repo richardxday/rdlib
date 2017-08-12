@@ -6,9 +6,13 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#ifndef __WORDSIZE
+#error __WORDSIZE not defined
+#endif
+
 #if __WORDSIZE==64
 #define SYSTEM_IS_64BITS	1
-#ifdef __APPLE__
+#if defined(__APPLE__) || defined(__MINGW64__)
 #define LONG_IS_64BITS      0
 #else
 #define LONG_IS_64BITS      1

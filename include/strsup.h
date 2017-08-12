@@ -585,4 +585,6 @@ protected:
 	NODETYPE_DEFINE(AStringTriplet);
 };
 
+inline AString AddressString(const void *p) {return AValue(p).ToString("x");}
+
 #endif

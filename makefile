@@ -130,14 +130,13 @@ HEADERS +=										\
 	types.h										\
 	wxsup.h
 
-GLOBAL_CFLAGS  += -D__LINUX__ -D_FILE_OFFSET_BITS=64 -fsigned-char
+GLOBAL_CFLAGS  += -D_FILE_OFFSET_BITS=64 -fsigned-char
 GLOBAL_CFLAGS  += $(shell $(CC) -Wall -o arch src/arch.c && ./arch)
 
 EXTRA_CFLAGS   += $(shell pkg-config --cflags libpq)
 EXTRA_CXXFLAGS += -std=c++11
 
-GLOBAL_LIBS    += -lm -lrt
-GLOBAL_LIBS    += $(shell ./arch)
+GLOBAL_LIBS    += -lm $(shell ./arch --libs)
 GLOBAL_LIBS    += $(shell pkg-config --libs libpq) -lpthread -ljpeg
 
 include $(MAKEFILEDIR)/makefile.lib

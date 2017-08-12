@@ -4,6 +4,7 @@
 #include <errno.h>
 
 #include "misc.h"
+#include "strsup.h"
 #include "ThreadLock.h"
 
 AThreadLockObject::AThreadLockObject()
@@ -16,7 +17,7 @@ AThreadLockObject::AThreadLockObject()
 
 	if (pthread_mutex_init(&mutex, &mta) != 0)
 	{
-		debug("Failed to initialise mutex<%016lx>: %s", (ulong_t)&mutex, strerror(errno));
+		debug("Failed to initialise mutex<%s>: %s", AddressString(&mutex).str(), strerror(errno));
 	}
 }
 
@@ -29,7 +30,7 @@ bool AThreadLockObject::Lock()
 {
 	bool success = (pthread_mutex_lock(&mutex) == 0);
 
-	if (!success) debug("Failed to lock mutex<%016lx>: %s", (ulong_t)&mutex, strerror(errno));
+	if (!success) debug("Failed to lock mutex<%s>: %s", AddressString(&mutex).str(), strerror(errno));
 
 	return success;
 }
@@ -38,7 +39,7 @@ bool AThreadLockObject::Unlock()
 {
 	bool success = (pthread_mutex_unlock(&mutex) == 0);
 
-	if (!success) debug("Failed to unlock mutex<%016lx>: %s", (ulong_t)&mutex, strerror(errno));
+	if (!success) debug("Failed to unlock mutex<%s>: %s", AddressString(&mutex).str(), strerror(errno));
 
 	return success;
 }
@@ -49,7 +50,7 @@ AThreadSignalObject::AThreadSignalObject() : AThreadLockObject()
 {
 	if (pthread_cond_init(&cond, NULL) != 0)
 	{
-		debug("Failed to initialise cond<%016lx>: %s", (ulong_t)&cond, strerror(errno));
+		debug("Failed to initialise cond<%s>: %s", AddressString(&cond).str(), strerror(errno));
 	}
 }
 
@@ -63,7 +64,7 @@ bool AThreadSignalObject::Wait()
 	// NOTE: mutex MUST be LOCKED at this point
 	bool success = (pthread_cond_wait(&cond, &mutex) == 0);
 
-	if (!success) debug("Failed to wait on cond<%016lx>: %s", (ulong_t)&cond, strerror(errno));
+	if (!success) debug("Failed to wait on cond<%s>: %s", AddressString(&cond).str(), strerror(errno));
 
 	return success;
 }
@@ -73,7 +74,7 @@ bool AThreadSignalObject::Signal()
 	AThreadLock lock(*this);
 	bool success = (pthread_cond_signal(&cond) == 0);
 
-	if (!success) debug("Failed to signal cond<%016lx>: %s", (ulong_t)&cond, strerror(errno));
+	if (!success) debug("Failed to signal cond<%s>: %s", AddressString(&cond).str(), strerror(errno));
 
 	return success;
 }
@@ -83,7 +84,7 @@ bool AThreadSignalObject::Broadcast()
 	AThreadLock lock(*this);
 	bool success = (pthread_cond_broadcast(&cond) == 0);
 
-	if (!success) debug("Failed to broadcast to cond<%016lx>: %s", (ulong_t)&cond, strerror(errno));
+	if (!success) debug("Failed to broadcast to cond<%s>: %s", AddressString(&cond).str(), strerror(errno));
 
 	return success;
 }

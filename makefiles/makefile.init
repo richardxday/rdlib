@@ -2,10 +2,16 @@
 OBJECTSSRC:=src
 HEADERSSRC:=include
 
-# C
-CC = gcc
+ifdef MINGW
+COMPILER=x86_64-w64-mingw32-
+else
+COMPILER=
+endif
+
+# C compiler
+CC = $(COMPILER)gcc
 # C++ compiler
-CXX = g++
+CXX = $(COMPILER)g++
 
 # Standard preprocessor flags (common for CC and CXX)
 CFLAGS=-Wall -Wextra -Werror
@@ -41,19 +47,17 @@ RELEASE_LIBS:=
 
 ifeq ($(OS),Windows_NT)
 SUDO:=
-PREFIX:=/usr/local
-
 STATIC_LIBRARY_SUFFIX:=.a
 SHARED_LIBRARY_SUFFIX:=.dll
 APPLICATION_SUFFIX:=
 else
 SUDO:=sudo
-PREFIX:=/usr/local
-
 STATIC_LIBRARY_SUFFIX:=.a
 SHARED_LIBRARY_SUFFIX:=.so
 APPLICATION_SUFFIX:=
 endif
+
+PREFIX:=/usr/local
 
 OBJECTS:=
 HEADERS:=

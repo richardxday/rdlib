@@ -10,9 +10,9 @@
 #include "tag.h"
 #include "3DTrans.h"
 
+#ifndef _WIN32
 #define BI_RGB 0
 
-#ifndef _WIN32
 typedef PACKEDSTRUCT {
 	uint32_t	biSize;
 	sint32_t	biWidth;
