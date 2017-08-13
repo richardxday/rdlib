@@ -133,11 +133,11 @@ HEADERS +=										\
 GLOBAL_CFLAGS  += -D_FILE_OFFSET_BITS=64 -fsigned-char
 GLOBAL_CFLAGS  += $(shell $(CC) -Wall -o arch src/arch.c && ./arch)
 
-EXTRA_CFLAGS   += $(shell pkg-config --cflags libpq)
+EXTRA_CFLAGS   += $(call pkgcflags,libpq)
 EXTRA_CXXFLAGS += -std=c++11
 
 GLOBAL_LIBS    += -lm $(shell ./arch --libs)
-GLOBAL_LIBS    += $(shell pkg-config --libs libpq) -lpthread -ljpeg
+GLOBAL_LIBS    += $(call pkglibs,libpq) -lpthread -ljpeg
 
 include $(MAKEFILEDIR)/makefile.lib
 

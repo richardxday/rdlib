@@ -20,57 +20,67 @@ $(LOCAL_SHARED_DEBUG_LIBRARY)_DEBUG_LIBS:=$(DEBUG_LIBS)
 $(LOCAL_SHARED_RELEASE_LIBRARY)_RELEASE_LIBS:=$(RELEASE_LIBS)
 
 $(DEBUG_LIBDIR)/$(DEBUG_STATIC_LIBRARY): $($(LOCAL_STATIC_DEBUG_LIBRARY)_DEBUG_OBJECTS) $(EXTRA_LIBS:-%=) $(GLOBAL_LIBS:-%=) $($(LOCAL_STATIC_DEBUG_LIBRARY)_DEBUG_LIBS:-%=)
-	@test -d "$(DEBUG_LIBDIR)" || mkdir -p "$(DEBUG_LIBDIR)"
+	@test -d "`dirname "$@"`" || mkdir -p "`dirname "$@"`"
 	@ar r $@ $($(call makevar,$@)_DEBUG_OBJECTS)
 	ranlib $@
 
 $(DEBUG_LIBDIR)/$(DEBUG_SHARED_LIBRARY): $($(LOCAL_SHARED_DEBUG_LIBRARY)_DEBUG_OBJECTS) $(EXTRA_LIBS:-%=) $(GLOBAL_LIBS:-%=) $($(LOCAL_SHARED_DEBUG_LIBRARY)_DEBUG_LIBS:-%=)
-	@test -d "$(DEBUG_LIBDIR)" || mkdir -p "$(DEBUG_LIBDIR)"
+	@test -d "`dirname "$@"`" || mkdir -p "`dirname "$@"`"
 	$(CXX) $(LDFLAGS) $(SHARED_LDFLAGS) $(DEBUG_LDFLAGS) -o $@ -Wl,-soname -Wl,$(DEBUG_SHARED_LIBRARY) $($(call makevar,$@)_DEBUG_OBJECTS) $(EXTRA_LIBS) $(GLOBAL_LIBS) $($(call makevar,$@)_DEBUG_LIBS)
 
 $(RELEASE_LIBDIR)/$(RELEASE_STATIC_LIBRARY): $($(LOCAL_STATIC_RELEASE_LIBRARY)_RELEASE_OBJECTS) $(EXTRA_LIBS:-%=) $(GLOBAL_LIBS:-%=) $($(LOCAL_STATIC_RELEASE_LIBRARY)_RELEASE_LIBS:-%=)
-	@test -d "$(RELEASE_LIBDIR)" || mkdir -p "$(RELEASE_LIBDIR)"
+	@test -d "`dirname "$@"`" || mkdir -p "`dirname "$@"`"
 	@ar r $@ $($(call makevar,$@)_RELEASE_OBJECTS)
 	ranlib $@
 
 $(RELEASE_LIBDIR)/$(RELEASE_SHARED_LIBRARY): $($(LOCAL_SHARED_RELEASE_LIBRARY)_RELEASE_OBJECTS) $(EXTRA_LIBS:-%=) $(GLOBAL_LIBS:-%=) $($(LOCAL_SHARED_RELEASE_LIBRARY)_RELEASE_LIBS:-%=)
-	@test -d "$(RELEASE_LIBDIR)" || mkdir -p "$(RELEASE_LIBDIR)"
+	@test -d "`dirname "$@"`" || mkdir -p "`dirname "$@"`"
 	$(CXX) $(LDFLAGS) $(SHARED_LDFLAGS) $(RELEASE_LDFLAGS) -o $@ -Wl,-soname -Wl,$(RELEASE_SHARED_LIBRARY) $($(call makevar,$@)_RELEASE_OBJECTS) $(EXTRA_LIBS) $(GLOBAL_LIBS) $($(call makevar,$@)_RELEASE_LIBS)
 
 $(INSTALLHDRDST)/$(LIBRARY)/%.h: $(HEADERSSRC)/%.h
+	@$(SUDO) test -d "`dirname "$@"`" || $(SUDO) mkdir -p "`dirname "$@"`"
 	@$(SUDO) $(MAKEFILEDIR)/copyifnewer "$<" "$@"
 
 ifdef DEBUG
 $(INSTALLLIBDST)/%$(STATIC_LIBRARY_SUFFIX): $(DEBUG_LIBDIR)/%$(STATIC_LIBRARY_SUFFIX)
+	@$(SUDO) test -d "`dirname "$@"`" || $(SUDO) mkdir -p "`dirname "$@"`"
 	@$(SUDO) $(MAKEFILEDIR)/copyifnewer "$<" "$@"
 
 $(INSTALLLIBDST)/%$(SHARED_LIBRARY_SUFFIX).$(LIBRARY_VERSION_MINOR).$(LIBRARY_VERSION_RELEASE).$(LIBRARY_VERSION_BUILD): $(DEBUG_LIBDIR)/%$(SHARED_LIBRARY_SUFFIX)
+	@$(SUDO) test -d "`dirname "$@"`" || $(SUDO) mkdir -p "`dirname "$@"`"
 	@$(SUDO) $(MAKEFILEDIR)/copyifnewer "$<" "$@"
 else
 $(INSTALLLIBDST)/%$(STATIC_LIBRARY_SUFFIX): $(RELEASE_LIBDIR)/%$(STATIC_LIBRARY_SUFFIX)
+	@$(SUDO) test -d "`dirname "$@"`" || $(SUDO) mkdir -p "`dirname "$@"`"
 	@$(SUDO) $(MAKEFILEDIR)/copyifnewer "$<" "$@"
 
 $(INSTALLLIBDST)/%$(SHARED_LIBRARY_SUFFIX).$(LIBRARY_VERSION_MINOR).$(LIBRARY_VERSION_RELEASE).$(LIBRARY_VERSION_BUILD): $(RELEASE_LIBDIR)/%$(SHARED_LIBRARY_SUFFIX)
+	@$(SUDO) test -d "`dirname "$@"`" || $(SUDO) mkdir -p "`dirname "$@"`"
 	@$(SUDO) $(MAKEFILEDIR)/copyifnewer "$<" "$@"
 endif
 
 ifeq ($(OS),Windows_NT)
 $(INSTALLLIBDST)/%$(SHARED_LIBRARY_SUFFIX).$(LIBRARY_VERSION_MINOR): $(INSTALLLIBDST)/%$(SHARED_LIBRARY_SUFFIX).$(LIBRARY_VERSION_MINOR).$(LIBRARY_VERSION_RELEASE).$(LIBRARY_VERSION_BUILD)
+	@$(SUDO) test -d "`dirname "$@"`" || $(SUDO) mkdir -p "`dirname "$@"`"
 	@$(SUDO) $(MAKEFILEDIR)/copyifnewer "$<" "$@"
 
 $(INSTALLLIBDST)/%$(SHARED_LIBRARY_SUFFIX): $(INSTALLLIBDST)/%$(SHARED_LIBRARY_SUFFIX).$(LIBRARY_VERSION_MINOR).$(LIBRARY_VERSION_RELEASE).$(LIBRARY_VERSION_BUILD)
+	@$(SUDO) test -d "`dirname "$@"`" || $(SUDO) mkdir -p "`dirname "$@"`"
 	@$(SUDO) $(MAKEFILEDIR)/copyifnewer "$<" "$@"
 else
 $(INSTALLLIBDST)/%$(SHARED_LIBRARY_SUFFIX).$(LIBRARY_VERSION_MINOR): $(INSTALLLIBDST)/%$(SHARED_LIBRARY_SUFFIX).$(LIBRARY_VERSION_MINOR).$(LIBRARY_VERSION_RELEASE).$(LIBRARY_VERSION_BUILD)
 	@echo "'$<' -> '$@' (link)"
+	@$(SUDO) test -d "`dirname "$@"`" || $(SUDO) mkdir -p "`dirname "$@"`"
 	@test -f "$@" || $(SUDO) ln -s "$<" "$@"
 
 $(INSTALLLIBDST)/%$(SHARED_LIBRARY_SUFFIX): $(INSTALLLIBDST)/%$(SHARED_LIBRARY_SUFFIX).$(LIBRARY_VERSION_MINOR).$(LIBRARY_VERSION_RELEASE).$(LIBRARY_VERSION_BUILD)
 	@echo "'$<' -> '$@' (link)"
+	@$(SUDO) test -d "`dirname "$@"`" || $(SUDO) mkdir -p "`dirname "$@"`"
 	@test -f "$@" || $(SUDO) ln -s "$<" "$@"
 endif
 
 %.pc: %.pc.in $(MAKEFILEDIR)/makefile.libbuild makefile $(VERSION_FILE)
+	@test -d "`dirname "$@"`" || mkdir -p "`dirname "$@"`"													\
 	@cat "$<" |																								\
 	sed -E "s#@prefix@#$(PREFIX)#g" |																		\
 	sed -E "s#@includedir@#$(INSTALLHDRDST)#g" |															\
@@ -111,4 +121,5 @@ endif
 	cat >"$@"
 
 $(INSTALLPKGCONFIGDST)/%-$(LIBRARY_VERSION_MAJOR_MINOR).pc: %.pc
+	@$(SUDO) test -d "`dirname "$@"`" || $(SUDO) mkdir -p "`dirname "$@"`"
 	@$(SUDO) $(MAKEFILEDIR)/copyifnewer "$<" "$@"

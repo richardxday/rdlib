@@ -2,25 +2,27 @@
 CLEANFILES += $(DEBUG_OBJECTS) $(RELEASE_OBJECTS)
 
 $(DEBUG_OBJDIR)/%.o: $(OBJECTSSRC)/%.c
-	@test -d "$(DEBUG_OBJDIR)" || mkdir -p "$(DEBUG_OBJDIR)"
+	@test -d "`dirname "$@"`" || mkdir -p "`dirname "$@"`"
 	$(CC) -c -o $@ $(CFLAGS) $(LOCAL_CFLAGS) $(GLOBAL_CFLAGS) $(EXTRA_CFLAGS) $(DEBUG_CFLAGS) $(CPPDEPS) $<
 
 $(DEBUG_OBJDIR)/%.o: $(OBJECTSSRC)/%.cpp
-	@test -d "$(DEBUG_OBJDIR)" || mkdir -p "$(DEBUG_OBJDIR)"
+	@test -d "`dirname "$@"`" || mkdir -p "`dirname "$@"`"
 	$(CXX) -c -o $@ $(CFLAGS) $(LOCAL_CFLAGS) $(CXXFLAGS) $(LOCAL_CXXFLAGS) $(GLOBAL_CFLAGS) $(EXTRA_CFLAGS) $(EXTRA_CXXFLAGS) $(DEBUG_CFLAGS) $(DEBUG_CXXFLAGS) $(CPPDEPS) $<
 
 $(RELEASE_OBJDIR)/%.o: $(OBJECTSSRC)/%.c
-	@test -d "$(RELEASE_OBJDIR)" || mkdir -p "$(RELEASE_OBJDIR)"
+	@test -d "`dirname "$@"`" || mkdir -p "`dirname "$@"`"
 	$(CC) -c -o $@ $(CFLAGS) $(LOCAL_CFLAGS) $(GLOBAL_CFLAGS) $(EXTRA_CFLAGS) $(RELEASE_CFLAGS) $(CPPDEPS) $<
 
 $(RELEASE_OBJDIR)/%.o: $(OBJECTSSRC)/%.cpp
-	@test -d "$(RELEASE_OBJDIR)" || mkdir -p "$(RELEASE_OBJDIR)"
+	@test -d "`dirname "$@"`" || mkdir -p "`dirname "$@"`"
 	$(CXX) -c -o $@ $(CFLAGS) $(LOCAL_CFLAGS) $(CXXFLAGS) $(LOCAL_CXXFLAGS) $(GLOBAL_CFLAGS) $(EXTRA_CFLAGS) $(EXTRA_CXXFLAGS) $(RELEASE_CFLAGS) $(RELEASE_CXXFLAGS) $(CPPDEPS) $<
 
 $(INSTALLSHAREDST)/%: share/%
+	@$(SUDO) test -d "`dirname "$@"`" || $(SUDO) mkdir -p "`dirname "$@"`"
 	@$(SUDO) $(MAKEFILEDIR)/copyifnewer "$<" "$@"
 
 $(INSTALLSHAREDST)/%: %
+	@$(SUDO) test -d "`dirname "$@"`" || $(SUDO) mkdir -p "`dirname "$@"`"
 	@$(SUDO) $(MAKEFILEDIR)/copyifnewer "$<" "$@"
 
 -include $(DEBUG_OBJDIR)/*.d

@@ -84,3 +84,6 @@ UNINSTALLFILES:=
 NONINSTALLEDBINARIES:=
 
 makevar=$(subst /,_,$(subst .,_,$(subst -,_,$(1))))
+pkgcflags=$(shell pkg-config --cflags $(1))
+pkglibs=$(shell pkg-config --libs $(1))
+staticlib=$(subst $(2),$(2)-static,$(1))
