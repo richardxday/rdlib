@@ -48,10 +48,10 @@ bool PostgresDatabase::Open(const AString& host, const AString& username, const 
 		if (CheckConnection()) {
 			str = connstr;
 			if (database.Valid()) str.printf("/%s", database.ToLower().str());
-		
+
 			success = (((conn = PQconnectdb(str.str())) != NULL) && (PQstatus(conn) == CONNECTION_OK));
 			if (success) {
-				if (database.Valid()) debug("Connected to database '%s' on %s\n", database.str(), host.str());			
+				if (database.Valid()) debug("Connected to database '%s' on %s\n", database.str(), host.str());
 				isopen = true;
 			}
 			else {
@@ -63,7 +63,7 @@ bool PostgresDatabase::Open(const AString& host, const AString& username, const 
 		}
 		else debug("No connection to server!\n");
 	}
-	
+
 	return success;
 }
 
@@ -115,14 +115,14 @@ void PostgresDatabase::Close()
 AString PostgresDatabase::GetErrorMessage(PGconn *conn, bool full)
 {
 	AString msg;
-	
+
 	if (conn) {
 		msg = AString(PQerrorMessage(conn)).SearchAndReplace("\r", "").SearchAndReplace("\n\n", ", ");
 		if (msg.EndsWith(", ")) msg = msg.Left(msg.len() - 2);
 		if (!full) msg = msg.Line(0);
 	}
 	else msg = "No connection!";
-	
+
 	return msg;
 }
 
@@ -177,7 +177,7 @@ bool PostgresDatabase::CreateDatabase(const AString& name)
 		}
 		else success = true;
 	}
-	
+
 	return success;
 }
 
@@ -233,9 +233,9 @@ SQLQuery *PostgresDatabase::RunQuery(const AString& sql)
 	if (conn) {
 		ClearResult();
 		query = new PostgresQuery(this, sql);
-	   
+
 	}
-	
+
 	return query;
 }
 
@@ -264,7 +264,7 @@ AString PostgresDatabase::ConvertSimpleType(const AString& ctype) const
 {
 	AString type;
 
-	if      (ctype == "id")			  	type = "int not null primary key";											                        // primary key id
+	if      (ctype == "id")			  	type = "integer not null primary key";										                        // primary key id
 	else if (ctype == "id64")			type = "bigint not null primary key";											                    // primary key id (64-bit)
 	else if (ctype.Left(6) == "string") type.printf("varchar%s", ctype.Mid(6).SearchAndReplace("[", "(").SearchAndReplace("]", ")").str()); // string type / varchar
 	else if (ctype == "datetime")     	type = "timestamp";
@@ -278,6 +278,25 @@ AString PostgresDatabase::ConvertSimpleType(const AString& ctype) const
 }
 
 /*--------------------------------------------------------------------------------*/
+/** Translate column type for database implementation
+ */
+/*--------------------------------------------------------------------------------*/
+AString PostgresDatabase::GetColumnType(const AString& column) const
+{
+	AString ctype = column.Word(1);
+	AString type;
+
+	if ((type = ConvertSimpleType(ctype)).Empty())
+	{
+		if	    (ctype == "references")   	type.printf("integer references %s", column.Word(2).str());					                        // reference to another table
+		else if	(ctype == "references64")   type.printf("bigint references %s", column.Word(2).str());						                    // reference to another table (with 64-bit id)
+		else							  	type = ctype;
+	}
+
+	return type;
+}
+
+/*--------------------------------------------------------------------------------*/
 /** Create table
  */
 /*--------------------------------------------------------------------------------*/
@@ -286,15 +305,15 @@ bool PostgresDatabase::CreateTable(const AString& name, const AString& columns)
 	AString sql;
 	SQLQuery *query = NULL;
 	uint_t i, n = columns.CountColumns();
-	
+
 	sql.printf("create table %s (", name.str());
 	for (i = 0; i < n; i++) {
 		AString column = columns.Column(i);
 		if (i > 0) sql.printf(", ");
-		sql.printf("%s %s", columns.Word(0).str(), ConvertSimpleType(column.Words(1)).str());
+		sql.printf("%s %s", column.Word(0).str(), GetColumnType(column).str());
 	}
 	sql.printf(")");
-	
+
 	if ((query = RunQuery(sql)) != NULL) {
 		bool success = query->GetResult();
 		delete query;
@@ -315,13 +334,17 @@ PostgresDatabase::PostgresQuery::PostgresQuery(PostgresDatabase *_db, const AStr
 																							  row(0),
 																							  success(false)
 {
-	if (((res = PQexec(conn, query.str())) != NULL) && (PQresultStatus(res) == PGRES_TUPLES_OK)) {		
+	ExecStatusType status;
+
+	if (((res = PQexec(conn, query.str())) != NULL) &&
+		(((status = PQresultStatus(res)) == PGRES_COMMAND_OK) ||
+		 (status == PGRES_TUPLES_OK))) {
 		nfields = PQnfields(res);
 		nrows   = PQntuples(res);
 		//debug("Query '%s' returns %u rows x %u columns\n", query.str(), nrows, nfields);
 		success = true;
 	}
-	//else debug("Query '%s' failed: %s\n", query.str(), GetErrorMessage().str());
+	//else debug("Query '%s' failed: %s (%u)\n", query.str(), GetErrorMessage().str(), res ? (uint_t)PQresultStatus(res) : 0);
 }
 
 PostgresDatabase::PostgresQuery::~PostgresQuery()
@@ -361,7 +384,7 @@ bool PostgresDatabase::PostgresQuery::Fetch(AString& results)
 
 	if (res && nfields && (row < nrows)) {
 		uint_t i;
-		
+
 		results.Delete();
 
 		for (i = 0; i < nfields; i++) {
@@ -376,7 +399,7 @@ bool PostgresDatabase::PostgresQuery::Fetch(AString& results)
 					//debug("%s->%llu->%s (%s)\n", p, (uint64)dt, dt.DateFormat("%Y-%M-%D %h:%m:%s.%S").str(), dt.UTCToLocal().DateFormat("%Y-%M-%D %h:%m:%s.%S").str());
 					break;
 				}
-						
+
 				case TEXTOID:
 				case CHAROID:
 				case VARCHAROID:
@@ -393,6 +416,6 @@ bool PostgresDatabase::PostgresQuery::Fetch(AString& results)
 		row++;
 		success = true;
 	}
-	
+
 	return success;
 }

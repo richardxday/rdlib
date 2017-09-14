@@ -118,6 +118,12 @@ protected:
 	/*--------------------------------------------------------------------------------*/
 	virtual AString ConvertSimpleType(const AString& ctype) const;
 
+	/*--------------------------------------------------------------------------------*/
+	/** Translate column type for database implementation
+	 */
+	/*--------------------------------------------------------------------------------*/
+	virtual AString GetColumnType(const AString& column) const;
+
 	class PostgresQuery : public SQLQuery {
 	public:
 		PostgresQuery(PostgresDatabase *_db, const AString& query);
