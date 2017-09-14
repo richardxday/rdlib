@@ -224,10 +224,13 @@ sint_t AStdFile::setbinarymode(bool binary)
 
 bool AStdFile::exists(const char *filename)
 {
+	AString filepart = AString(filename).FilePart();
 	FILE *fp;
 	bool success = false;
 
-	if ((fp = fopen(filename, "rb")) != NULL) {
+	if ((filepart != ".") &&
+		(filepart != "..") && 
+		((fp = fopen(filename, "rb")) != NULL)) {
 		fclose(fp);
 
 		success = true;
