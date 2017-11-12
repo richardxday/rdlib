@@ -359,24 +359,9 @@ void ADateTime::DMYToDateTime(const DAYMONTHYEAR& dmy, DATETIME& dt) const
 
 AString ADateTime::DateToStr() const
 {
-	AString String;
-	DAYMONTHYEAR dmy;
-	uint32_t t;
-	uint_t   hrs, mins, secs;
-
-	DateTimeToDMY(DateTime, dmy);
-
-	t    = DateTime.MilliSeconds / 1000;
-	hrs  = t / 3600;
-	t   -= hrs * 3600;
-	mins = t / 60;
-	secs = t - mins * 60;
-
-	String.Format("%s %02u-%s-%4u %02u:%02u:%02u",
-				  ShortDayNames[dmy.WeekDay], dmy.Day + 1, ShortMonthNames[dmy.Month], dmy.Year,
-				  hrs, mins, secs);
-
-	return String;
+	return DateFormat(bUSFormat ?
+					  "%d %M/%D/%Y %h:%m:%s" :
+					  "%d %D/%M/%Y %h:%m:%s");
 }
 
 AString ADateTime::DateFormat(const char *format) const
