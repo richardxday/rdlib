@@ -826,7 +826,12 @@ ADateTime& ADateTime::StrToDate(const AString& String, uint_t relative, uint_t *
 		case Time_Relative_Today_UTC:
 			// time is relative to midnight (UTC), today
 			utc = true;
-			__attribute__ ((fallthrough));
+			// time is relative to midnight, today
+			CurrentTime(DateTime, utc);
+			// reset to midnight
+			DateTime.MilliSeconds = 0;
+			break;
+			
 		case Time_Relative_Today:
 			// time is relative to midnight, today
 			CurrentTime(DateTime, utc);
@@ -837,7 +842,10 @@ ADateTime& ADateTime::StrToDate(const AString& String, uint_t relative, uint_t *
 		case Time_Relative_UTC:
 			// time is relative to now (UTC)
 			utc = true;
-			__attribute__ ((fallthrough));
+			// time is relative to now (local)
+			CurrentTime(DateTime, utc);
+			break;
+
 		case Time_Relative_Local:
 			// time is relative to now (local)
 			CurrentTime(DateTime, utc);
