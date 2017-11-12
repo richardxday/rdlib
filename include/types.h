@@ -78,7 +78,7 @@ typedef uint32_t       uptr_t;
 #define IsBinChar(c) (RANGE(c, '0', '1'))
 #define IsOctChar(c) (RANGE(c, '0', '7'))
 #define IsAlphaChar(c) (RANGE(c, 'a', 'z') || RANGE(c, 'A', 'Z'))
-#define IsEngSymbolChar(c) (((c) == 'e') || ((c) == 'E') || ((c) == 'x') || ((c) == 'X'))
+#define IsEngSymbolChar(c) (((c) == 'e') || ((c) == 'E') || ((c) == 'p') || ((c) == 'P'))
 #define IsSymbolStart(c) (IsAlphaChar(c) || ((c) == '_'))
 #define IsSymbolChar(c) (IsAlphaChar(c) || ((c) == '_') || IsNumeralChar(c))
 #define IsSymbolCharPoint(c) (IsAlphaChar(c) || ((c) == '_') || IsNumeralChar(c) || ((c) == '.'))

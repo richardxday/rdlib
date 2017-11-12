@@ -298,7 +298,7 @@ bool AImage::CreateData()
 {
 	bool success = false;
 
-	if (pData || !(Rect.w * Rect.h)) return false;
+	if (pData || ((Rect.w * Rect.h) == 0)) return false;
 
 	if ((pData = new PIXEL[Rect.w * Rect.h]) != NULL) {
 		memset(pData, 0, Rect.w * Rect.h * sizeof(*pData));

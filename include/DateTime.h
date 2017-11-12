@@ -33,6 +33,9 @@ public:
 	static const uint32_t DaysSince1601;
 #endif
 
+	static void EnableUSFormat(bool enable = true) {bUSFormat = enable;}
+	static bool USFormatEnabled()                  {return bUSFormat;}
+	
 	ADateTime& Set(uint_t day, uint_t month, uint_t year, uint_t hr = 0, uint_t minute = 0, uint_t second = 0);
 	ADateTime& Set(uint32_t days, uint32_t ms) {DateTime.MilliSeconds = ms; DateTime.Days = days; return *this;}
 	ADateTime& Set(uint64_t ms);
@@ -157,12 +160,14 @@ protected:
 		AValue  val;
 		AString valstr;
 		AString str;
+		uint_t  p1, p2, p3;
 	} TERM;
 	static void __DeleteTerm(uptr_t item, void *context) {
 		(void)context;
 		delete (TERM *)item;
 	}
 	uint_t ParseTerms(const AString& str, ADataList& list) const;
+	AString ReportTermError(const AString& String, const TERM *term) const;
 
 	void InitData();
 
@@ -194,6 +199,7 @@ protected:
 protected:
 	DATETIME DateTime;
 
+	static bool bUSFormat;
 	static bool bDataInit;
 	static bool bDebugStrToDate;
 	static const char *DayNames[];
@@ -205,5 +211,3 @@ protected:
 };
 
 #endif
-
-

@@ -560,6 +560,8 @@ bool AValue::IsNumberString(const AString& str, uint_t p, bool allowModifiers)
 
 const char *AValue::EvalNumber(const char *p, bool allowModifiers, const char *terminators, AString *error)
 {
+	static uint8_t charlookup[256];
+	static bool    lookupinited = false;
 	enum {
 		FORMAT_DEC = 0,
 		FORMAT_HEX,
@@ -567,6 +569,20 @@ const char *AValue::EvalNumber(const char *p, bool allowModifiers, const char *t
 		FORMAT_BIN,
 	};	
 	const char *modstart = NULL, *modend = NULL, *p0 = p;
+	uint_t i;
+	
+	if (!lookupinited) {
+		lookupinited = true;
+
+		memset(charlookup, 255, sizeof(charlookup));
+
+		for (i = 0; i < NUMBEROF(charlookup); i++) {
+			char c = (char)i;
+			if      (IsNumeralChar(c))  charlookup[i] = (c - '0');
+			else if (IsHexUpperChar(c)) charlookup[i] = (c - 'A') + 10;
+			else if (IsHexLowerChar(c)) charlookup[i] = (c - 'a') + 10;
+		}
+	}
 
 	Clear();
 
@@ -578,40 +594,25 @@ const char *AValue::EvalNumber(const char *p, bool allowModifiers, const char *t
 	}
 
 	if (IsDoubleStartChar(p[0])) {
-		ullong_t val = 0;
+		uint64_t val = 0;
 
 		p++;
 
 		while (p[0] && (!terminators || !strchr(terminators, p[0]))) {
-			if      (IsNumeralChar(p[0]))  {val = (val << 4) + (p[0] - '0');      p++;}
-			else if (IsHexLowerChar(p[0])) {val = (val << 4) + (p[0] - 'a' + 10); p++;}
-			else if (IsHexUpperChar(p[0])) {val = (val << 4) + (p[0] - 'A' + 10); p++;}
+			uint_t v = charlookup[(uint_t)p[0]];
+			if (v < 16) {
+				val = (val << 4) + v;
+				p++;
+			}
 			else break;
 		}
 
-		ullong_t *ptr = &val;
-		Value.f = *(double *)ptr;
+		memcpy(&Value.f, &val, sizeof(val));
 		Type = VALUE_DOUBLE;
 	}
 	else if (IsHexStartChar(p[0]) || IsOctStartChar(p[0]) || IsHexString(p) || IsBinString(p) || IsOctString(p) || IsNumeralChar(p[0]) || IsPointChar(p[0])) {
-		static uint8_t charlookup[256];
-		static bool    lookupinited = false;
 		static const uint_t radixes[] = {10, 16, 8, 2};
 		uint_t type = FORMAT_DEC;
-		uint_t i;
-
-		if (!lookupinited) {
-			lookupinited = true;
-
-			memset(charlookup, 255, sizeof(charlookup));
-
-			for (i = 0; i < NUMBEROF(charlookup); i++) {
-				char c = (char)i;
-				if      (IsNumeralChar(c))  charlookup[i] = (c - '0');
-				else if (IsHexUpperChar(c)) charlookup[i] = (c - 'A') + 10;
-				else if (IsHexLowerChar(c)) charlookup[i] = (c - 'a') + 10;
-			}
-		}
 
 		if      (IsHexStartChar(p[0])) {type = FORMAT_HEX; p++;}
 		else if (IsOctStartChar(p[0])) {type = FORMAT_OCT; p++;}
@@ -620,17 +621,26 @@ const char *AValue::EvalNumber(const char *p, bool allowModifiers, const char *t
 		else if (IsBinString(p))  	   {type = FORMAT_BIN; p += 2;}
 		
 		uint_t radix   = radixes[type];
- 		bool integer = true;
+ 		bool   integer = true;
 		for (i = 0; p[i] && integer && (!terminators || !strchr(terminators, p[i])); i++) {
 			uint_t v = charlookup[(uint_t)p[i]];
 			if      (v < radix) ;
-			else if (IsPointChar(p[i]) || IsEngSymbolChar(p[i])) integer = false;
+			else if (IsPointChar(p[i])			   ||
+					 (IsEngSymbolChar(p[i])		   &&
+					  (IsNumeralChar(p[i + 1])     ||
+					   IsHexStartChar(p[i + 1])    ||
+					   IsHexString(p + i + 1)      ||
+					   ((IsPositiveChar(p[i + 1])  ||
+						 IsNegativeChar(p[i + 1])) &&
+						(IsNumeralChar(p[i + 2])   ||
+						 IsHexStartChar(p[i + 2])  ||
+						 IsHexString(p + i + 2)))))) integer = false;
 			else break;
 		}
 
 		if (integer) {
-			ullong_t lradix = radix;
-			ullong_t val = 0;
+			uint64_t lradix = radix;
+			uint64_t val = 0;
 
 			while (p[0] && (!terminators || !strchr(terminators, p[0]))) {
 				uint_t v = charlookup[(uint_t)p[0]];
@@ -650,7 +660,15 @@ const char *AValue::EvalNumber(const char *p, bool allowModifiers, const char *t
 				uint_t v = charlookup[(uint_t)p[0]];
 				if      (v < radix)                   {val = val * fradix + (double)v; div *= divmul; p++;}
 				else if (!point && IsPointChar(p[0])) {divmul = fradix; point = true; p++;}
-				else if (IsEngSymbolChar(p[0])) {
+				else if (IsEngSymbolChar(p[0])    &&
+						 (IsNumeralChar(p[1])  	  ||
+						  IsHexStartChar(p[1]) 	  ||
+						  IsHexString(p + 1)   	  ||
+						  ((IsPositiveChar(p[1])  ||
+							IsNegativeChar(p[1])) &&
+						   (IsNumeralChar(p[2])   ||
+							IsHexStartChar(p[2])  ||
+							IsHexString(p + 2))))) {
 					p++;
 					eng = true;
 					if      (IsPositiveChar(p[0])) p++;
@@ -661,9 +679,17 @@ const char *AValue::EvalNumber(const char *p, bool allowModifiers, const char *t
 			}
 			
 			if (eng) {
+				uint_t radix = 10;
+				
+				if      (IsHexStartChar(p[0])) {radix = 16; p++;}
+				else if (IsOctStartChar(p[0])) {radix =  8; p++;}
+				else if (IsHexString(p))  	   {radix = 16; p += 2;}
+				else if (IsOctString(p))  	   {radix =  8; p += 2;}
+				else if (IsBinString(p))  	   {radix =  2; p += 2;}
+				
 				while (p[0] && (!terminators || !strchr(terminators, p[0]))) {
 					uint_t v = charlookup[(uint_t)p[0]];
-					if	 (v < 10) {expo = expo * 10 + v; p++;}
+					if	 (v < radix) {expo = expo * radix + v; p++;}
 					else break;
 				}
 			}

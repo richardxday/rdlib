@@ -35,6 +35,7 @@ const ADateTime ADateTime::MaxDateTime((sizeof(time_t) == sizeof(uint32_t)) ? "2
 const AString ADateTime::ISO8601Format       = "%Y-%M-%D %h:%m:%s";
 const AString ADateTime::ISO8601FormatWithMS = "%Y-%M-%D %h:%m:%s.%S";
 
+bool ADateTime::bUSFormat		= false;
 bool ADateTime::bDataInit       = false;
 bool ADateTime::bDebugStrToDate = false;
 
@@ -751,7 +752,9 @@ uint_t ADateTime::ParseTerms(const AString& str, ADataList& list) const
 
 		if ((term = new TERM) != NULL) {
 			// attempt to decode value at p
+			term->p1 = p;
 			p = term->val.EvalNumber(str, p, false);
+			term->p2 = p;
 
 			// copy string representation of value
 			term->valstr.Create(str.str() + p0, p - p0);
@@ -773,6 +776,8 @@ uint_t ADateTime::ParseTerms(const AString& str, ADataList& list) const
 			// create string from terminator
 			term->str.Create(str.str() + p0, p - p0);
 
+			term->p3 = p;
+
 			list.Add((uptr_t)term);
 		}
 
@@ -783,11 +788,22 @@ uint_t ADateTime::ParseTerms(const AString& str, ADataList& list) const
 	return list.Count();
 }
 
+AString ADateTime::ReportTermError(const AString& String, const TERM *term) const
+{
+	AString msg;
+
+	msg.printf("Error in date string:\n%s\n%s%s\n", String.str(), AString(" ").Copies(term->p1).str(), AString("^").Copies(term->p3 - term->p1).str());
+
+	return msg;
+}
+
 ADateTime& ADateTime::StrToDate(const AString& String, uint_t relative, uint_t *specified, AString *errors)
 {
+	static const AString comma = ",";
 	ADataList terms;
 	uint_t    _specified = 0;
-	bool      utc = false;		// assume local times initially
+	bool      usformat 	 = bUSFormat;
+	bool      utc      	 = false;		// assume local times initially
 
 	// delete any errors
 	if (errors) errors->Delete();
@@ -810,6 +826,7 @@ ADateTime& ADateTime::StrToDate(const AString& String, uint_t relative, uint_t *
 		case Time_Relative_Today_UTC:
 			// time is relative to midnight (UTC), today
 			utc = true;
+			__attribute__ ((fallthrough));
 		case Time_Relative_Today:
 			// time is relative to midnight, today
 			CurrentTime(DateTime, utc);
@@ -820,6 +837,7 @@ ADateTime& ADateTime::StrToDate(const AString& String, uint_t relative, uint_t *
 		case Time_Relative_UTC:
 			// time is relative to now (UTC)
 			utc = true;
+			__attribute__ ((fallthrough));
 		case Time_Relative_Local:
 			// time is relative to now (local)
 			CurrentTime(DateTime, utc);
@@ -838,7 +856,7 @@ ADateTime& ADateTime::StrToDate(const AString& String, uint_t relative, uint_t *
 			const AString& str 	  = termlist[i]->str;
 			const AString& valstr = termlist[i]->valstr;
 
-			debug("%u/%u: '%s' ('%s') / '%s'\n",
+			debug("\t%u/%u: '%s' ('%s') / '%s'\n",
 				  i, n,
 				  val.IsValid() ? val.ToString().str() : "<invalid>", valstr.str(),
 				  str.str());
@@ -850,11 +868,12 @@ ADateTime& ADateTime::StrToDate(const AString& String, uint_t relative, uint_t *
 		const AValue&  val 	  = termlist[i]->val;
 		const AString& str 	  = termlist[i]->str;
 		const AString& valstr = termlist[i]->valstr;
+		AString tempstr;
 		int ind;
 
 		if (bDebugStrToDate) {
 			// debug: output terms as they are decoded
-			debug("%u/%u: '%s' ('%s') / '%s' (%s, pos=%u, neg=%u)\n",
+			debug("\t%u/%u: '%s' ('%s') / '%s' (%s, pos=%u, neg=%u)\n",
 				  i, n,
 				  val.IsValid() ? val.ToString().str() : "<invalid>", valstr.str(),
 				  str.str(),
@@ -1032,6 +1051,12 @@ ADateTime& ADateTime::StrToDate(const AString& String, uint_t relative, uint_t *
 				utc   = true;
 				_specified |= Specified_Time;
 			}
+			else if ((str == "us") || (str == "mdy")) {
+				usformat = true;
+			}
+			else if ((str == "uk") || (str == "dmy")) {
+				usformat = false;
+			}
 			else if ((ind = FindDay(str, utc)) >= 0) {
 				// day name (long or short) used
 				DAYMONTHYEAR dmy;
@@ -1059,7 +1084,7 @@ ADateTime& ADateTime::StrToDate(const AString& String, uint_t relative, uint_t *
 			else if (((str == "next") || (str == "last")) &&
 					 ((i + 2) < n) &&
 					 !termlist[i + 1]->val.IsValid() &&
-					 (termlist[i + 1]->str.Words(0).Empty() || (termlist[i + 1]->str == ",")) &&
+					 ((tempstr = termlist[i + 1]->str.Words(0)).Empty() || (tempstr == comma)) &&
 					 !termlist[i + 2]->val.IsValid()) {
 				// handle {next|last} {week|month|year|<day>|<monthname>}
 				const AString& str2 = termlist[i + 2]->str;
@@ -1112,16 +1137,16 @@ ADateTime& ADateTime::StrToDate(const AString& String, uint_t relative, uint_t *
 					_specified |= Specified_Date;
 				}
 				else {
-					if (errors) errors->printf("Unrecognized next/last string '%s' in date\n", str2.str());
-					else		debug("Unrecognized next/last string '%s' in date\n", str2.str());
+					if (errors) *errors += ReportTermError(String, termlist[i]);
+					else		debug("%s", ReportTermError(String, termlist[i]).str());
 					break;
 				}
 			}
 			// if empty string terminator, reset to absolute mode
-			else if (str.Words(0).Empty() || (str == ",")) pos = neg = false;
+			else if ((tempstr = str.Words(0)).Empty() || (tempstr == comma)) pos = neg = false;
 			else {
-				if (errors) errors->printf("Unrecognized string '%s' in date\n", str.str());
-				else		debug("Unrecognized string '%s' in date\n", str.str());
+				if (errors) *errors += ReportTermError(String, termlist[i]);
+				else		debug("%s", ReportTermError(String, termlist[i]).str());
 				break;
 			}
 		}
@@ -1149,7 +1174,7 @@ ADateTime& ADateTime::StrToDate(const AString& String, uint_t relative, uint_t *
 			// look for W as prefix to two digit week or three digit week and day
 			if (((i + 1) < n) &&
 				termlist[i + 1]->val.IsValid() &&
-				(termlist[i + 1]->str.Words(0).Empty() || (termlist[i + 1]->str.Words(0) == ","))) {
+				(termlist[i + 1]->str.Words(0).Empty() || (termlist[i + 1]->str.Words(0) == comma))) {
 				ModifyYear(DateTime, (double)val, pos, neg);
 
 				double w = (double)termlist[++i]->val;
@@ -1211,7 +1236,7 @@ ADateTime& ADateTime::StrToDate(const AString& String, uint_t relative, uint_t *
 			_specified |= Specified_Time;
 		}
 		// no suffix means either decimal hours or 14 digit explicit date and time
-		else if (str.Words(0).Empty() || (str == ",")) {
+		else if (str.Words(0).Empty() || (str == comma)) {
 			DAYMONTHYEAR dmy;
 			uint_t h, m;
 			double s;
@@ -1347,12 +1372,14 @@ ADateTime& ADateTime::StrToDate(const AString& String, uint_t relative, uint_t *
 			AValue  val2 = termlist[++i]->val;
 			AString str2 = termlist[i]->str;
 			uint_t  inc  = 0;
-
+			bool    yearfirst = false;
+			
 			// detect year first
 			if ((uint_t)val >= DATUM_YEAR) {
 				ModifyYear(DateTime, (double)val, false, false);
 
 				_specified |= Specified_Date;
+				yearfirst   = true;
 			}
 			// or year third
 			else if (val2.IsValid() && (str2 == str) && ((i + 1) < n) && termlist[i + 1]->val.IsValid()) {
@@ -1371,10 +1398,11 @@ ADateTime& ADateTime::StrToDate(const AString& String, uint_t relative, uint_t *
 				_specified |= Specified_Date;
 			}
 
-			// second value is a number, assume it is a month
-			// (either YYYY-MM or DD-MM)
+			// second value is a number, assume it is month or day in US format
+			// (either YYYY-MM or DD-MM or MM-DD in US format)
 			if (val2.IsValid()) {
-				ModifyMonth(DateTime, (double)val2, false, false);
+				if (yearfirst || !usformat) ModifyMonth(DateTime, (double)val2, false, false);
+				else					    ModifyDay(DateTime, (double)val2, false, false);
 
 				_specified |= Specified_Date;
 			}
@@ -1393,22 +1421,28 @@ ADateTime& ADateTime::StrToDate(const AString& String, uint_t relative, uint_t *
 				_specified |= Specified_Date;
 			}
 
-			// detect when first value is day of month
-			if ((uint_t)val < DATUM_YEAR) {
-				ModifyDay(DateTime, (double)val, false, false);
+			// detect when first value is day of month (or month in US format)
+			if (!yearfirst) {
+				if (usformat) ModifyMonth(DateTime, (double)val, false, false);
+				else		  ModifyDay(DateTime, (double)val, false, false);
 
 				_specified |= Specified_Date;
 			}
-			// or month value was used and third value is present
-			else if (val2.IsValid() && (str2 == str) && ((i + 1) < n) && termlist[i + 1]->val.IsValid()) {
+			// or month value was used and third value is present which is day
+			else if (val2.IsValid() &&
+					 (str2 == str) &&
+					 ((i + 1) < n) &&
+					 termlist[i + 1]->val.IsValid()) {
 				ModifyDay(DateTime, (double)termlist[i + 1]->val, false, false);
 				inc = 1;
 				
 				_specified |= Specified_Date;
 			}
 			// or month name was used (hence extra term used) and third value is present
-			else if (!val2.IsValid() && ((i + 2) < n) &&
-					 !termlist[i + 1]->val.IsValid() && (termlist[i + 1]->str == str) &&
+			else if (!val2.IsValid() &&
+					 ((i + 2) < n) &&
+					 !termlist[i + 1]->val.IsValid() &&
+					 (termlist[i + 1]->str == str) &&
 					 termlist[i + 2]->val.IsValid()) {
 				ModifyDay(DateTime, (double)termlist[i + 2]->val, false, false);
 				inc = 2;
@@ -1416,7 +1450,7 @@ ADateTime& ADateTime::StrToDate(const AString& String, uint_t relative, uint_t *
 				_specified |= Specified_Date;
 			}
 			// detect YYYY-Www or YYYY-Www-d form used (ISO8601)
-			else if (((uint_t)val >= DATUM_YEAR) &&
+			else if (yearfirst &&
 					 !val2.IsValid() && ((i + 1) < n) &&
 					 ((str2 == "W") || (str2 == "w")) &&
 					 termlist[i + 1]->val.IsValid()) {
@@ -1436,16 +1470,16 @@ ADateTime& ADateTime::StrToDate(const AString& String, uint_t relative, uint_t *
 				_specified |= Specified_Date;
 			}
 			else {
-				if (errors) errors->printf("Unrecognized string '%s' in date\n", str2.str());
-				else		debug("Unrecognized string '%s' in date\n", str2.str());
+				if (errors) *errors += ReportTermError(String, termlist[i]);
+				else		debug("%s", ReportTermError(String, termlist[i]).str());
 				break;
 			}
 
 			i += inc;
 		}
 		else {
-			if (errors) errors->printf("Unrecognized string '%s' in date\n", str.str());
-			else		debug("Unrecognized string '%s' in date\n", str.str());
+			if (errors) *errors += ReportTermError(String, termlist[i]);
+			else		debug("%s", ReportTermError(String, termlist[i]).str());
 			break;
 		}
 
