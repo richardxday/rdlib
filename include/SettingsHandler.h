@@ -10,6 +10,7 @@
 
 class ASettingsHandler {
 public:
+	ASettingsHandler();
 	ASettingsHandler(const AString& name, bool inhomedir = true, uint32_t iwritedelay = ~0);
 	ASettingsHandler(const AString& path, const AString& name, uint32_t iwritedelay = ~0);
 	~ASettingsHandler();

@@ -9,6 +9,15 @@
 
 AString ASettingsHandler::homedir;
 
+ASettingsHandler::ASettingsHandler() : readcheck_tick(0),
+									   changed_tick(0),
+									   write_tick(0),
+									   writedelay(0),
+									   changed(false),
+									   writeenabled(false)
+{
+}
+
 ASettingsHandler::ASettingsHandler(const AString& name, bool inhomedir, uint32_t iwritedelay) : readcheck_tick(0),
 																								changed_tick(0),
 																								write_tick(0),
@@ -55,7 +64,7 @@ void ASettingsHandler::Read()
 	hash.Delete();
 	list.DeleteAll();
 	
-	if (fp.open(filename)) {
+	if (filename.Valid() && fp.open(filename)) {
 		AString line;
 
 		while (line.ReadLn(fp) >= 0) {
@@ -102,7 +111,7 @@ bool ASettingsHandler::CheckRead()
 {
 	bool changedondisk = false;
 	
-	if ((GetTickCount() - readcheck_tick) >= 2000)
+	if (filename.Valid() && ((GetTickCount() - readcheck_tick) >= 2000))
 	{
 		readcheck_tick = GetTickCount();
 		
@@ -148,7 +157,8 @@ void ASettingsHandler::Write()
 
 void ASettingsHandler::CheckWrite()
 {
-	if (changed &&
+	if (writeenabled &&
+		changed      &&
 		(((GetTickCount() - changed_tick) >= writedelay) ||
 		 ((GetTickCount() - write_tick)   >= 60000))) {
 		Write();
@@ -160,7 +170,8 @@ bool ASettingsHandler::HasFileChanged()
 	FILE_INFO info;
 	bool      changed = false;
 
-	if (GetFileInfo(filename, &info)) {
+	if (filename.Valid() &&
+		GetFileInfo(filename, &info)) {
 		changed = (info.WriteTime > timestamp);
 		//if (changed) debug("%s changed by %ld (%s, %s)\n", filename.str(), (long)(sint64_t)(info.WriteTime - timestamp), info.WriteTime.DateFormat("%h:%m:%s.%S %D-%N-%Y").str(), timestamp.DateFormat("%h:%m:%s.%S %D-%N-%Y").str());
 	}
