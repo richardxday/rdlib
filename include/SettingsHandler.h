@@ -40,7 +40,8 @@ public:
 		PairType_Other,
 	};
 
-	const AStringPairWithInt *GetFirst() const {return AStringPairWithInt::Cast(list.First());}
+	typedef AStringPairWithInt Value;
+	const Value *GetFirst() const {return Value::Cast(list.First());}
 	uint_t GetCount() const {return list.Count();}
 
 	const AString& GetFilename() const {return filename;}
@@ -48,7 +49,7 @@ public:
 	uint_t GetAllLike(ADataList& list, const AString& str, bool regex = false) const;
 	
 protected:
-	const AStringPairWithInt *Find(const AString& name) const;
+	const Value *Find(const AString& name) const;
 
 protected:
 	AString   filename;

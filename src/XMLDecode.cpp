@@ -17,7 +17,7 @@ static uint_t FindXMLMarker(const AString& str, uint_t p1)
 {
 	uint_t i, p2 = 0;
 	int quote = 0;
-	
+
 	for (i = p1; str[i]; i++) {
 		if		(quote && (str[i] == quote)) quote = 0;
 		else if (!quote && IsQuoteChar(str[i])) quote = str[i];
@@ -36,17 +36,20 @@ bool DecodeXML(AStructuredNode& root, const AString& str)
 	AKeyValuePair   *pAttr;
 	ADataList       stack;
 	uint_t p1 = 0, p2;
-	
+
 	while (IsXMLWhiteSpace(str[p1])) p1++;
 	while (!HasQuit() && pNode && (str[p1] == '<')) {
 		bool popnode = false;
 
 		p1++;
+
+		if (debug_decode) debug("p1: %u, str: '%s'\n", p1, str.Mid(p1, 40).str());
+
 		if (str[p1] == '/') {
 			p1++;
 			if ((pNode != &root) && ((p2 = FindXMLMarker(str, p1)) > p1)) {
 				uint_t p3 = p1;
-				
+
 				if (IsSymbolStart(str[p1])) p1++;
 				while (IsXMLNameChar(str[p1])) p1++;
 
@@ -67,7 +70,7 @@ bool DecodeXML(AStructuredNode& root, const AString& str)
 			}
 		}
 		else if (str.Mid(p1, 3) == "!--") {
-			if ((p2 = str.Pos("-->", p1 + 3)) > p1) p1 = p2 + 2;
+			if ((p2 = str.Pos("-->", p1 + 3)) > p1) p1 = p2 + 3;
 			else {
 				debug("Unterminated comment marker at %u\n", p1);
 				break;
@@ -75,17 +78,17 @@ bool DecodeXML(AStructuredNode& root, const AString& str)
 		}
 		else if ((p2 = FindXMLMarker(str, p1)) > p1) {
 			if (pNode) stack.Push((void *)pNode);
-			
+
 			if ((pNode = new AStructuredNode) != NULL) {
 				uint_t p3 = p2;
 				bool   complete = ((str[p3 - 1] == '/') || ((str[p1] == '?') && (str[p3 - 1] == '?')));
-				
+
 				if (complete) p3--;
 
 				complete |= (str[p1] == '!');
 
 				if ((str[p1] == '?') || (str[p1] == '!')) pNode->SetType(str[p1++]);
-				
+
 				while (IsXMLWhiteSpace(str[p1])) p1++;
 
 				uint_t p4 = p1;
@@ -102,7 +105,7 @@ bool DecodeXML(AStructuredNode& root, const AString& str)
 					if (IsSymbolStart(str[p1])) p1++;
 					while (IsXMLNameChar(str[p1])) p1++;
 					uint_t p5 = p1;
-					
+
 					while (IsXMLWhiteSpace(str[p1])) p1++;
 					if (str[p1] == '=') p1++;
 					while (IsXMLWhiteSpace(str[p1])) p1++;
@@ -126,7 +129,7 @@ bool DecodeXML(AStructuredNode& root, const AString& str)
 					}
 					else break;
 				}
-				
+
 				AStructuredNode *pParent = (AStructuredNode *)stack.Last();
 				if (pParent) pParent->AddChild(pNode);
 
@@ -158,13 +161,13 @@ bool DecodeXML(AStructuredNode& root, const AString& str)
 				break;
 			}
 		}
-		
+
 		while (IsXMLWhiteSpace(str[p1])) p1++;
 	}
 
 	if (stack.Count()) debug("Unterminated XML entries at %u\n", p1);
 	if (!pNode)		   debug("Extra XML termination at %u\n", p1);
-	
+
 	return (!str[p1] && (pNode == &root));
 }
 
@@ -172,11 +175,10 @@ bool DecodeXMLFromFile(AStructuredNode& root, const AString& filename)
 {
 	AString str;
 	bool    success = false;
-	
+
 	if (str.ReadFromFile(filename)) {
 		success = DecodeXML(root, str);
 	}
 
 	return success;
 }
-

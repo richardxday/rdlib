@@ -73,9 +73,9 @@ void ASettingsHandler::Read()
 			if ((line[0] != '#') && (line[0] != ';') && ((p = line.Pos("=")) > 0)) {
 				AString var = line.Left(p);
 				AString val = line.Mid(p + 1).DeQuotify().DeEscapify();
-				AStringPairWithInt *pair;
+				Value *pair;
 
-				if ((pair = new AStringPairWithInt) != NULL) {
+				if ((pair = new Value) != NULL) {
 					pair->Integer = PairType_Value;
 					pair->String1 = var;
 					pair->String2 = val;
@@ -84,9 +84,9 @@ void ASettingsHandler::Read()
 				}
 			}
 			else {
-				AStringPairWithInt *pair;
+				Value *pair;
 
-				if ((pair = new AStringPairWithInt) != NULL) {
+				if ((pair = new Value) != NULL) {
 					pair->Integer = PairType_Other;
 					pair->String1 = line;
 					list.Add(pair);
@@ -127,7 +127,7 @@ void ASettingsHandler::Write()
 		AStdFile fp;
 
 		if (fp.open(filename, "w")) {
-			const AStringPairWithInt *pair = AStringPairWithInt::Cast(list.First());
+			const Value *pair = Value::Cast(list.First());
 
 			while (pair) {
 				switch (pair->Integer) {
@@ -181,7 +181,7 @@ bool ASettingsHandler::HasFileChanged()
 
 AString ASettingsHandler::Get(const AString& name, const AString& defval) const
 {
-	const AStringPairWithInt *pair;
+	const Value *pair;
 
 	if ((pair = Find(name)) != NULL) return pair->String2;
 
@@ -190,11 +190,11 @@ AString ASettingsHandler::Get(const AString& name, const AString& defval) const
 
 void ASettingsHandler::Set(const AString& name, const AString& value)
 {
-	AStringPairWithInt *pair;
+	Value *pair;
 
-	if ((pair = (AStringPairWithInt *)Find(name)) == NULL) {
+	if ((pair = (Value *)Find(name)) == NULL) {
 		// doesn't exist -> create
-		if ((pair = new AStringPairWithInt) != NULL) {
+		if ((pair = new Value) != NULL) {
 			// set name
 			pair->Integer = PairType_Value;
 			pair->String1 = name;
@@ -226,9 +226,9 @@ void ASettingsHandler::Set(const AString& name, const AString& value)
 
 void ASettingsHandler::Delete(const AString& name)
 {
-	AStringPairWithInt *pair;
+	Value *pair;
 
-	if ((pair = (AStringPairWithInt *)Find(name)) != NULL) {
+	if ((pair = (Value *)Find(name)) != NULL) {
 		list.Remove(pair);
 		hash.Remove(pair->String1);
 		delete pair;
@@ -241,16 +241,16 @@ void ASettingsHandler::Delete(const AString& name)
 	CheckWrite();
 }
 
-const AStringPairWithInt *ASettingsHandler::Find(const AString& name) const
+const ASettingsHandler::Value *ASettingsHandler::Find(const AString& name) const
 {
-	return AStringPairWithInt::Cast((const AListNode *)hash.Read(name));
+	return Value::Cast((const AListNode *)hash.Read(name));
 }
 
 void ASettingsHandler::AddLine(const AString& str)
 {
-	AStringPairWithInt *pair;
+	Value *pair;
 
-	if ((pair = new AStringPairWithInt) != NULL) {
+	if ((pair = new Value) != NULL) {
 		pair->Integer = PairType_Other;
 		pair->String1 = str;
 
@@ -266,7 +266,7 @@ void ASettingsHandler::AddLine(const AString& str)
 
 uint_t ASettingsHandler::GetAllLike(ADataList& list, const AString& str, bool regex) const
 {
-	const AStringPairWithInt *item = GetFirst();
+	const Value *item = GetFirst();
 	AString pat;
 
 	if (regex) pat = ParseRegex(str);
