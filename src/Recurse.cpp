@@ -508,3 +508,27 @@ bool TraverseFiles(const AList& list, bool (*fn)(const AFileNode& file, void *co
 
 	return success;
 }
+
+int CompareWriteTimes(const AString& Filename1, const AString& Filename2)
+{
+	FILE_INFO info1, info2;
+
+	return (::GetFileInfo(Filename1, &info1) &&
+			::GetFileInfo(Filename2, &info2)) ? COMPARE_ITEMS(info1.WriteTime, info2.WriteTime) : 0;
+}
+
+bool FileNewerThan(const AString& Filename1, const AString& Filename2)
+{
+	FILE_INFO info1, info2;
+
+	return (::GetFileInfo(Filename1, &info1) &&
+			(!::GetFileInfo(Filename2, &info2) || (info1.WriteTime > info2.WriteTime)));
+}
+
+bool FileOlderThan(const AString& Filename1, const AString& Filename2)
+{
+	FILE_INFO info1, info2;
+
+	return (::GetFileInfo(Filename1, &info1) &&
+			(!::GetFileInfo(Filename2, &info2) || (info1.WriteTime < info2.WriteTime)));
+}

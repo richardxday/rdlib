@@ -297,6 +297,10 @@ public:
 
 	virtual sint_t  setbinarymode(bool binary = true) {UNUSED(binary); return -1;}
 
+	sint_t Put(sint_t c) {return putc(c);}
+	sint_t Get() {return getc();}
+	sint_t Flush() {return flush();}
+	
 	NODETYPE(AStdData, ANodeType);
 
 protected:

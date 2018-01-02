@@ -37,6 +37,10 @@ extern bool Recurse(const AString& Path, const AString& Pattern, uint_t nSubDirs
 
 extern bool GetFileInfo(const AString& Filename, FILE_INFO *file);
 
+extern int CompareWriteTimes(const AString& Filename1, const AString& Filename2);
+extern bool FileNewerThan(const AString& Filename1, const AString& Filename2);
+extern bool FileOlderThan(const AString& Filename1, const AString& Filename2);
+
 extern bool CollectFiles(const AString& Path, const AString& Pattern, uint_t nSubdirs, AList& list, uint16_t attribMask = FILE_FLAG_IS_DIR, uint16_t attribCmp = 0, AQuitHandler *pQuitHandler = NULL);
 extern bool TraverseFiles(const AList& list, bool (*fn)(const FILE_INFO *file, void *context), void *context = NULL);
 
