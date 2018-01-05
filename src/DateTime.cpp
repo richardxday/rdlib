@@ -1346,7 +1346,8 @@ ADateTime& ADateTime::StrToDate(const AString& String, uint_t relative, uint_t *
 				(termlist[i]->str == " ") &&
 				!termlist[i + 1]->val.IsValid() &&
 				((termlist[i + 1]->str == "+") || (termlist[i + 1]->str == "-")) &&
-				(termlist[i + 2]->val.IsInteger() && (termlist[i + 2]->valstr.len() == 4))) {
+				termlist[i + 2]->val.IsInteger() &&
+				(termlist[i + 2]->valstr.len() == 4)) {
 				uint_t 	 _offset = (uint_t)termlist[i + 2]->val;
 				uint_t 	 hours   = _offset / 100;
 				uint_t 	 mins    = _offset % 100;
@@ -1362,11 +1363,20 @@ ADateTime& ADateTime::StrToDate(const AString& String, uint_t relative, uint_t *
 		}
 		// date specified as [[YYYY-]MM-]DD or DD[-MM[-YYYY]] or [[YYYY/]MM/]DD or DD[/MM[/YYYY]]
 		else if (((str == "-") || (str == "/")) && ((i + 1) < n)) {
-			AValue  val2 = termlist[++i]->val;
-			AString str2 = termlist[i]->str;
-			uint_t  inc  = 0;
+			AValue  val2    = termlist[++i]->val;
+			AString str2    = termlist[i]->str;
+			AString val2str = termlist[i]->valstr;
+			uint_t  inc     = 0;
 			bool    yearfirst = false;
-			
+
+			if (bDebugStrToDate) {
+				debug("\t%u/%u: '%s' ('%s') / '%s'\n",
+					  i, n,
+					  val2.IsValid() ? val2.ToString().str() : "<invalid>",
+					  val2str.str(),
+					  str2.str());
+			}
+
 			// detect year first
 			if ((uint_t)val >= DATUM_YEAR) {
 				ModifyYear(DateTime, (double)val, false, false);
@@ -1375,15 +1385,20 @@ ADateTime& ADateTime::StrToDate(const AString& String, uint_t relative, uint_t *
 				yearfirst   = true;
 			}
 			// or year third
-			else if (val2.IsValid() && (str2 == str) && ((i + 1) < n) && termlist[i + 1]->val.IsValid()) {
+			else if (val2.IsValid() &&
+					 (str2 == str) &&
+					 ((i + 1) < n) &&
+					 termlist[i + 1]->val.IsValid()) {
 				ModifyYear(DateTime, (double)termlist[i + 1]->val, false, false);
 				inc = 1;
 
 				_specified |= Specified_Date;
 			}
 			// detect year third when month name is used which results in an extra term
-			else if (!val2.IsValid() && ((i + 2) < n) &&
-					 !termlist[i + 1]->val.IsValid() && (termlist[i + 1]->str == str) &&
+			else if (!val2.IsValid() &&
+					 ((i + 2) < n) &&
+					 !termlist[i + 1]->val.IsValid() &&
+					 (termlist[i + 1]->str == str) &&
 					 termlist[i + 2]->val.IsValid()) {
 				ModifyYear(DateTime, (double)termlist[i + 2]->val, false, false);
 				inc = 2;
@@ -1416,8 +1431,14 @@ ADateTime& ADateTime::StrToDate(const AString& String, uint_t relative, uint_t *
 
 			// detect when first value is day of month (or month in US format)
 			if (!yearfirst) {
-				if (usformat) ModifyMonth(DateTime, (double)val, false, false);
-				else		  ModifyDay(DateTime, (double)val, false, false);
+				// if non-US format or month name is used, modify day (for DD-MMM)
+				if (!usformat ||
+					(!val2.IsValid() &&
+					 str2.Valid())) {
+					ModifyDay(DateTime, (double)val, false, false);
+				}
+				// otherwise modify month
+				else ModifyMonth(DateTime, (double)val, false, false);
 
 				_specified |= Specified_Date;
 			}
