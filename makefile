@@ -11,31 +11,19 @@ include $(MAKEFILEDIR)/makefile.windowslib
 
 OBJECTS +=										\
 	3DTrans.o									\
-	authorize.o									\
-	blowfish.o									\
-	blowfish_imp.o								\
 	BMPImage.o									\
-	cfft.o										\
-	crc32.o										\
 	DataList.o									\
 	DateObjectPair.o							\
 	DateTime.o									\
 	EvalNumber.o								\
 	Evaluator.o									\
-	exif.o										\
-	fastcomplex.o								\
-	fastfft.o									\
-	Hash.o										\
 	HTMLTags.o									\
 	HTTPRequest.o								\
-	jpeginfo.o									\
+	Hash.o										\
 	ListNode.o									\
 	Logger.o									\
 	Matrix.o									\
-	md5.o										\
 	MessageResponseHandler.o					\
-	misc.o										\
-	mt19937ar.o									\
 	NodeType.o									\
 	PointSizeRect.o								\
 	PostgresDatabase.o							\
@@ -43,7 +31,6 @@ OBJECTS +=										\
 	Recurse.o									\
 	Regex.o										\
 	SettingsHandler.o							\
-	simpleeval.o								\
 	SocketServer.o								\
 	StdData.o									\
 	StdDev.o									\
@@ -53,15 +40,29 @@ OBJECTS +=										\
 	StdSocket.o									\
 	StdUri.o									\
 	StringList.o								\
-	strsup.o									\
 	StructList.o								\
 	StructuredNode.o							\
-	tag.o										\
 	TextServer.o								\
 	Thread.o									\
 	ThreadLock.o								\
 	UDPServer.o									\
-	XMLDecode.o
+	XMLDecode.o									\
+	authorize.o									\
+	blowfish.o									\
+	blowfish_imp.o								\
+	cfft.o										\
+	crc32.o										\
+	exif.o										\
+	fastcomplex.o								\
+	fastfft.o									\
+	jpeginfo.o									\
+	md5.o										\
+	misc.o										\
+	mt19937ar.o									\
+	printtable.o								\
+	simpleeval.o								\
+	strsup.o									\
+	tag.o
 
 HEADERS +=										\
 	3DTrans.h									\
@@ -124,6 +125,7 @@ HEADERS +=										\
 	misc.h										\
 	mt19937ar.h									\
 	pg_types.h									\
+	printtable.h								\
 	simpleeval.h								\
 	strsup.h									\
 	tag.h										\
