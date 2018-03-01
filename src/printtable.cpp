@@ -50,3 +50,13 @@ void PrintTable(AStdData& fp, TABLE& table)
 		fp.printf("|\n");
 	}
 }
+
+void PrintTable(AStdData *fp, TABLE& table)
+{
+	PrintTable(*fp, table);
+}
+
+void PrintTable(TABLE& table)
+{
+	PrintTable(*Stdout, table);
+}

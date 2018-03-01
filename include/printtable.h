@@ -15,5 +15,7 @@ typedef struct {
 
 extern void UpdateTable(TABLE& table);
 extern void PrintTable(AStdData& fp, TABLE& table);
+extern void PrintTable(AStdData *fp, TABLE& table);
+extern void PrintTable(TABLE& table);
 
 #endif
