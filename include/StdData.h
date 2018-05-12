@@ -300,7 +300,9 @@ public:
 	sint_t Put(sint_t c) {return putc(c);}
 	sint_t Get() {return getc();}
 	sint_t Flush() {return flush();}
-	
+
+	typedef char Ch;
+
 	NODETYPE(AStdData, ANodeType);
 
 protected:
@@ -331,6 +333,8 @@ protected:
 
 	NODETYPE_DEFINE(AStdData);
 };
+
+inline int PutUnsafe(AStdData& stream, AStdData::Ch c) {return stream.putc(c);}
 
 /*--------------------------------------------------------------------------------*/
 /** Simple stackable StdData ptr swapper (useful for remapping Stdin/Stdout)
