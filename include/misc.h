@@ -49,9 +49,9 @@ extern void   Sleep(uint32_t ms);
 #ifndef M_PI
 extern const double M_PI;
 #endif
-	
+
 extern uint64_t GetNanosecondTicks();
-	
+
 extern void debug(const char *fmt, ...) PRINTF_FORMAT_FUNCTION;
 extern void enabledebug(bool enabled = true);
 
@@ -62,7 +62,7 @@ extern void enabledebug(bool enabled = true);
 #ifdef __cplusplus
 template<typename T>
 const T& limit(const T& a, const T& b, const T& c) {
-	return (a >= b) ? ((a <= c) ? a : c) : b;
+    return (a >= b) ? ((a <= c) ? a : c) : b;
 }
 #endif
 
@@ -100,7 +100,7 @@ extern float    SwapBytes(float data);
 extern double   SwapBytes(double data);
 
 enum {
-	MAX_SWAP_BYTES = 16,
+    MAX_SWAP_BYTES = 16,
 };
 extern void SwapBytes(void *buf, uint_t nbytes);
 extern void SwapBytes(void *buf, uint_t itemsize, uint_t nitems);

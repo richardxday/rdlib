@@ -8,26 +8,26 @@
 
 class AStdDev : public AStdData {
 public:
-	AStdDev();
-	virtual ~AStdDev();
+    AStdDev();
+    virtual ~AStdDev();
 
-	virtual bool open(const char *name, uint_t mode = O_RDONLY);
-	virtual sint_t close();
-	
-	virtual bool isopen() const;
+    virtual bool open(const char *name, uint_t mode = O_RDONLY);
+    virtual sint_t close();
 
-	virtual sint_t flush();
+    virtual bool isopen() const;
 
-	NODETYPE(AStdDev, AStdData);
+    virtual sint_t flush();
 
-protected:
-	virtual slong_t readdata(void *buf, size_t bytes);
-	virtual slong_t writedata(const void *buf, size_t bytes);
+    NODETYPE(AStdDev, AStdData);
 
 protected:
-	int fd;
+    virtual slong_t readdata(void *buf, size_t bytes);
+    virtual slong_t writedata(const void *buf, size_t bytes);
 
-	NODETYPE_DEFINE(AStdDev);
+protected:
+    int fd;
+
+    NODETYPE_DEFINE(AStdDev);
 };
 
 #endif

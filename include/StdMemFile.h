@@ -8,50 +8,50 @@
 class AString;
 class AStdMemFile : public AStdData {
 public:
-	AStdMemFile();
-	virtual ~AStdMemFile();
+    AStdMemFile();
+    virtual ~AStdMemFile();
 
-	virtual bool    open(const char *mode = "w", const void *data = NULL, size_t length = 0);
-	virtual sint_t  close();
-	
-	virtual bool    isopen() const {return (pData != NULL);}
+    virtual bool    open(const char *mode = "w", const void *data = NULL, size_t length = 0);
+    virtual sint_t  close();
 
-	virtual slong_t tell()   {return isopen() ? (slong_t)Pos : -1;}
-	virtual sint_t  seek(slong_t offset, uint_t origin = SEEK_SET);
-	virtual sint_t  flush()  {return isopen() ? 0 : -1;}
-	virtual void    rewind() {if (isopen()) Pos = 0;}
+    virtual bool    isopen() const {return (pData != NULL);}
 
-	virtual sint_t  eof()    {return isopen() ? (Pos >= Length) : 0;}
+    virtual slong_t tell()   {return isopen() ? (slong_t)Pos : -1;}
+    virtual sint_t  seek(slong_t offset, uint_t origin = SEEK_SET);
+    virtual sint_t  flush()  {return isopen() ? 0 : -1;}
+    virtual void    rewind() {if (isopen()) Pos = 0;}
 
-	bool			AllocData(size_t bytes = 0);
+    virtual sint_t  eof()    {return isopen() ? (Pos >= Length) : 0;}
 
-	void			AddBytes(size_t bytes);
-	void			RemoveBytes(size_t bytes);
-	const uint8_t   *GetData()  	   const {return pData;}
-	uint8_t         *GetData()  	         {return pData;}
-	const uint8_t   *GetCurrentData()  const {return pData + Pos;}
-	uint8_t         *GetCurrentData()        {return pData + Pos;}
-	size_t          GetPos()    	   const {return Pos;}
-	size_t		    GetLength() 	   const {return Length;}
-	AString 		Base64Encode() const;
-	bool    		Base64Decode(const AString& str);
+    bool            AllocData(size_t bytes = 0);
 
-	operator AString() const;
-	
-	NODETYPE(AStdMemFile, AStdData);
+    void            AddBytes(size_t bytes);
+    void            RemoveBytes(size_t bytes);
+    const uint8_t   *GetData()         const {return pData;}
+    uint8_t         *GetData()               {return pData;}
+    const uint8_t   *GetCurrentData()  const {return pData + Pos;}
+    uint8_t         *GetCurrentData()        {return pData + Pos;}
+    size_t          GetPos()           const {return Pos;}
+    size_t          GetLength()        const {return Length;}
+    AString         Base64Encode() const;
+    bool            Base64Decode(const AString& str);
 
-protected:
-	virtual slong_t readdata(void *buf, size_t bytes);
-	virtual slong_t writedata(const void *buf, size_t bytes);
+    operator AString() const;
+
+    NODETYPE(AStdMemFile, AStdData);
 
 protected:
-	uint8_t *pData;
-	size_t  Pos, Length, AllocatedLength, SizeInc;
-	bool    bAllocated;
+    virtual slong_t readdata(void *buf, size_t bytes);
+    virtual slong_t writedata(const void *buf, size_t bytes);
 
-	static uint32_t DefaultSizeInc;
+protected:
+    uint8_t *pData;
+    size_t  Pos, Length, AllocatedLength, SizeInc;
+    bool    bAllocated;
 
-	NODETYPE_DEFINE(AStdMemFile);
+    static uint32_t DefaultSizeInc;
+
+    NODETYPE_DEFINE(AStdMemFile);
 };
 
 #endif

@@ -7,10 +7,10 @@
 
 typedef std::vector<AString> TABLEROW;
 typedef struct {
-	std::vector<uint8_t>  justify;
-	std::vector<int>      widths;
-	std::vector<TABLEROW> rows;
-	bool				  headerscentred;
+    std::vector<uint8_t>  justify;
+    std::vector<int>      widths;
+    std::vector<TABLEROW> rows;
+    bool                  headerscentred;
 } TABLE;
 
 extern void UpdateTable(TABLE& table);

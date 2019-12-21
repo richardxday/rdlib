@@ -1,6 +1,6 @@
 /*
- * File:	exif.h
- * Purpose:	cpp EXIF reader
+ * File:    exif.h
+ * Purpose: cpp EXIF reader
  * 16/Mar/2003 <ing.davide.pizzolato@libero.it>
  * based on jhead-1.8 by Matthias Wandel <mwandel(at)rim(dot)net>
  */
@@ -18,7 +18,7 @@
 #define MAX_SECTIONS 20
 
 typedef struct tag_ExifInfo {
-	char  Version      [5];
+    char  Version      [5];
     char  CameraMake   [32];
     char  CameraModel  [40];
     char  DateTime     [20];
@@ -38,19 +38,19 @@ typedef struct tag_ExifInfo {
     int   ExposureProgram;
     int   ISOequivalent;
     int   CompressionLevel;
-	float FocalplaneXRes;
-	float FocalplaneYRes;
-	float FocalplaneUnits;
-	float Xresolution;
-	float Yresolution;
-	float ResolutionUnit;
-	float Brightness;
+    float FocalplaneXRes;
+    float FocalplaneYRes;
+    float FocalplaneUnits;
+    float Xresolution;
+    float Yresolution;
+    float ResolutionUnit;
+    float Brightness;
     char  Comments[MAX_COMMENT];
 
     unsigned char * ThumbnailPointer;  /* Pointer at the thumbnail */
     unsigned ThumbnailSize;     /* Size of thumbnail. */
 
-	bool  IsExif;
+    bool  IsExif;
 } EXIFINFO;
 
 //--------------------------------------------------------------------------
@@ -77,41 +77,41 @@ typedef struct tag_ExifInfo {
 #define M_SOS   0xDA            // Start Of Scan (begins compressed data)
 #define M_JFIF  0xE0            // Jfif marker
 #define M_EXIF  0xE1            // Exif marker
-#define M_COM   0xFE            // COMment 
+#define M_COM   0xFE            // COMment
 
 class Exif {
 public:
-	EXIFINFO* m_exifinfo;
-	char m_szLastError[256];
-	Exif(EXIFINFO* info = NULL);
-	~Exif();
+    EXIFINFO* m_exifinfo;
+    char m_szLastError[256];
+    Exif(EXIFINFO* info = NULL);
+    ~Exif();
 
-	bool DecodeExif(FILE* hFile);
+    bool DecodeExif(FILE* hFile);
 
 protected:
-	typedef struct tag_Section_t {
-		unsigned char*    Data;
-		int      Type;
-		unsigned Size;
-	} Section_t;
+    typedef struct tag_Section_t {
+        unsigned char*    Data;
+        int      Type;
+        unsigned Size;
+    } Section_t;
 
-	bool process_EXIF(unsigned char * CharBuf, unsigned int length);
-	void process_COM (const unsigned char * Data, int length);
-	void process_SOFn (const unsigned char * Data, int marker);
-	int Get16u(void * Short);
-	int Get16m(void * Short);
-	long Get32s(void * Long);
-	unsigned long Get32u(void * Long);
-	double ConvertAnyFormat(void * ValuePtr, int Format);
-	bool ProcessExifDir(unsigned char * DirStart, unsigned char * OffsetBase, unsigned ExifLength,
+    bool process_EXIF(unsigned char * CharBuf, unsigned int length);
+    void process_COM (const unsigned char * Data, int length);
+    void process_SOFn (const unsigned char * Data, int marker);
+    int Get16u(void * Short);
+    int Get16m(void * Short);
+    long Get32s(void * Long);
+    unsigned long Get32u(void * Long);
+    double ConvertAnyFormat(void * ValuePtr, int Format);
+    bool ProcessExifDir(unsigned char * DirStart, unsigned char * OffsetBase, unsigned ExifLength,
                            EXIFINFO * const pInfo, unsigned char ** const LastExifRefdP);
 
 protected:
-	int ExifImageWidth;
-	int MotorolaOrder;
-	Section_t Sections[MAX_SECTIONS];
-	int SectionsRead;
-	bool freeinfo;
+    int ExifImageWidth;
+    int MotorolaOrder;
+    Section_t Sections[MAX_SECTIONS];
+    int SectionsRead;
+    bool freeinfo;
 };
 
 #endif

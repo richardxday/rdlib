@@ -17,102 +17,102 @@
 
 class ADataList {
 public:
-	ADataList(void (*fn)(uptr_t item, void *context) = NULL, void *context = NULL);
-	ADataList(const ADataList& List);
-	virtual ~ADataList();
+    ADataList(void (*fn)(uptr_t item, void *context) = NULL, void *context = NULL);
+    ADataList(const ADataList& List);
+    virtual ~ADataList();
 
-	void SetDestructor(void (*fn)(uptr_t item, void *context), void *context = NULL) {pDestructor = fn; pDestructorContext = context;}
+    void SetDestructor(void (*fn)(uptr_t item, void *context), void *context = NULL) {pDestructor = fn; pDestructorContext = context;}
 
-	// By default, items can appear more than once in the list
-	// Disabling duplication prevents this
-	void EnableDuplication(bool bEnable = true) {bDuplication = bEnable;}
+    // By default, items can appear more than once in the list
+    // Disabling duplication prevents this
+    void EnableDuplication(bool bEnable = true) {bDuplication = bEnable;}
 
-	// overloaded operators
-	ADataList& operator = (const ADataList& List);
-	ADataList& operator = (ADataList *pList);
-	ADataList& operator += (uptr_t Item) {Add(Item);    return *this;}
-	ADataList& operator += (void *ptr)   {Add(ptr);     return *this;}
-	ADataList& operator += (const ADataList& List);
-	ADataList& operator -= (uptr_t Item) {Remove(Item); return *this;}
-	ADataList& operator -= (void *ptr)   {Remove(ptr);  return *this;}
-	ADataList& operator -= (const ADataList& List);
+    // overloaded operators
+    ADataList& operator = (const ADataList& List);
+    ADataList& operator = (ADataList *pList);
+    ADataList& operator += (uptr_t Item) {Add(Item);    return *this;}
+    ADataList& operator += (void *ptr)   {Add(ptr);     return *this;}
+    ADataList& operator += (const ADataList& List);
+    ADataList& operator -= (uptr_t Item) {Remove(Item); return *this;}
+    ADataList& operator -= (void *ptr)   {Remove(ptr);  return *this;}
+    ADataList& operator -= (const ADataList& List);
 
-	// FIFO/LIFO type operations
-	// Push adds to end, Pop removes first item
-	bool Push(uptr_t Item) {return (Add(Item) >= 0);}
-	bool Push(void   *ptr) {return (Add((uptr_t)ptr) >= 0);}
-	uptr_t Pop();
-	// StartPush pushes item on the start of the list
-	bool StartPush(uptr_t Item) {return (Add(Item, 0) >= 0);}
-	bool StartPush(void   *ptr) {return (Add((uptr_t)ptr, 0) >= 0);}
-	// EndPop removes the last item on the list
-	uptr_t EndPop();
+    // FIFO/LIFO type operations
+    // Push adds to end, Pop removes first item
+    bool Push(uptr_t Item) {return (Add(Item) >= 0);}
+    bool Push(void   *ptr) {return (Add((uptr_t)ptr) >= 0);}
+    uptr_t Pop();
+    // StartPush pushes item on the start of the list
+    bool StartPush(uptr_t Item) {return (Add(Item, 0) >= 0);}
+    bool StartPush(void   *ptr) {return (Add((uptr_t)ptr, 0) >= 0);}
+    // EndPop removes the last item on the list
+    uptr_t EndPop();
 
-	// First and last items
-	uptr_t First() const {return !data.empty() ? data[0]               : 0;}
-	uptr_t Last()  const {return !data.empty() ? data[data.size() - 1] : 0;}
+    // First and last items
+    uptr_t First() const {return !data.empty() ? data[0]               : 0;}
+    uptr_t Last()  const {return !data.empty() ? data[data.size() - 1] : 0;}
 
-	// Add item (default is to end)
-	sint_t Add(uptr_t Item, sint_t Index = MAX_SIGNED(sint_t));
-	sint_t Add(void *ptr, sint_t Index = MAX_SIGNED(sint_t)) {return Add((uptr_t)ptr, Index);}
-	sint_t Remove(uptr_t Item);
-	sint_t Remove(void *ptr) {return Remove((uptr_t)ptr);}
-	sint_t Insert(uptr_t Item, int (*fn)(uptr_t Item1, uptr_t Item2, void *context), void *context = NULL);
-	sint_t Insert(void *ptr, int (*fn)(void *ptr1, void *ptr2, void *context), void *context = NULL);
-	
-	// Remove a specific index
-	uptr_t RemoveIndex(uint_t Index);
+    // Add item (default is to end)
+    sint_t Add(uptr_t Item, sint_t Index = MAX_SIGNED(sint_t));
+    sint_t Add(void *ptr, sint_t Index = MAX_SIGNED(sint_t)) {return Add((uptr_t)ptr, Index);}
+    sint_t Remove(uptr_t Item);
+    sint_t Remove(void *ptr) {return Remove((uptr_t)ptr);}
+    sint_t Insert(uptr_t Item, int (*fn)(uptr_t Item1, uptr_t Item2, void *context), void *context = NULL);
+    sint_t Insert(void *ptr, int (*fn)(void *ptr1, void *ptr2, void *context), void *context = NULL);
 
-	// Replace item (with optional list expanding)
-	uint_t Replace(uint_t Index, uptr_t Item, bool bAllowExpand = true);
-	uint_t Replace(uint_t Index, void *ptr, bool bAllowExpand = true) {return Replace(Index, (uptr_t)ptr, bAllowExpand);}
+    // Remove a specific index
+    uptr_t RemoveIndex(uint_t Index);
 
-	// Generate a sequence of values (ints)
-	bool Generate(uint_t count, sint_t start = 0, sint_t mul = 1, sint_t div = 1);
+    // Replace item (with optional list expanding)
+    uint_t Replace(uint_t Index, uptr_t Item, bool bAllowExpand = true);
+    uint_t Replace(uint_t Index, void *ptr, bool bAllowExpand = true) {return Replace(Index, (uptr_t)ptr, bAllowExpand);}
 
-	// Delete list, de-allocating any allocated memory
-	void DeleteList();
+    // Generate a sequence of values (ints)
+    bool Generate(uint_t count, sint_t start = 0, sint_t mul = 1, sint_t div = 1);
 
-	// Search list
-	sint_t Find(uptr_t Item, sint_t Index = 0) const;
-	sint_t Find(void *ptr, sint_t Index = 0) const {return Find((uptr_t)ptr, Index);}
+    // Delete list, de-allocating any allocated memory
+    void DeleteList();
 
-	uint_t Count() const {return (uint_t)data.size();}
+    // Search list
+    sint_t Find(uptr_t Item, sint_t Index = 0) const;
+    sint_t Find(void *ptr, sint_t Index = 0) const {return Find((uptr_t)ptr, Index);}
 
-	// Return pointer to list
-	uptr_t *List() const {return !data.empty() ? const_cast<uptr_t *>(&data[0]) : NULL;}
+    uint_t Count() const {return (uint_t)data.size();}
 
-	// Return item in list (or 0)
-	uptr_t operator [](sint_t n) const {return ((n >= 0) && (n < (sint_t)data.size())) ? data[(size_t)n] : 0;}
-	uptr_t operator [](uint_t n) const {return (n < data.size()) ? data[n] : 0;}
+    // Return pointer to list
+    uptr_t *List() const {return !data.empty() ? const_cast<uptr_t *>(&data[0]) : NULL;}
 
-	// Sort list items using hook function
-	void Sort(int (*fn)(uptr_t Item1, uptr_t Item2, void *pContext), void *pContext = NULL);
+    // Return item in list (or 0)
+    uptr_t operator [](sint_t n) const {return ((n >= 0) && (n < (sint_t)data.size())) ? data[(size_t)n] : 0;}
+    uptr_t operator [](uint_t n) const {return (n < data.size()) ? data[n] : 0;}
 
-	// Execute hook funtion on each item in list until false is returned
-	bool Traverse(bool (*fn)(uptr_t Item, void *pContext), void *pContext = NULL) const;
+    // Sort list items using hook function
+    void Sort(int (*fn)(uptr_t Item1, uptr_t Item2, void *pContext), void *pContext = NULL);
 
-	// Reverse the order the list
-	void Reverse();
+    // Execute hook funtion on each item in list until false is returned
+    bool Traverse(bool (*fn)(uptr_t Item, void *pContext), void *pContext = NULL) const;
 
-	// Merge in a list
-	bool Merge(ADataList& List);
+    // Reverse the order the list
+    void Reverse();
 
-	// Swap two indicies
-	bool Swap(uint_t n1, uint_t n2);
+    // Merge in a list
+    bool Merge(ADataList& List);
+
+    // Swap two indicies
+    bool Swap(uint_t n1, uint_t n2);
 
 protected:
 #ifdef _WIN32
-	void SwapAndSort(uint_t Index, int (*fn)(uptr_t Item1, uptr_t Item2, void *pContext), void *pContext);
+    void SwapAndSort(uint_t Index, int (*fn)(uptr_t Item1, uptr_t Item2, void *pContext), void *pContext);
 #endif
-	
-	void SwapEx(uint_t n1, uint_t n2);
-	
+
+    void SwapEx(uint_t n1, uint_t n2);
+
 protected:
-	std::vector<uptr_t> data;
-	void (*pDestructor)(uptr_t item, void *context);
-	void *pDestructorContext;
-	bool bDuplication;
+    std::vector<uptr_t> data;
+    void (*pDestructor)(uptr_t item, void *context);
+    void *pDestructorContext;
+    bool bDuplication;
 };
 
 #endif

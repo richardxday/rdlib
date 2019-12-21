@@ -5,15 +5,15 @@
 #include "misc.h"
 
 typedef struct {
-	uint32_t Tag;
-	uptr_t   Value;
+    uint32_t Tag;
+    uptr_t   Value;
 } TAG;
 
 enum {
-	TAG_DONE = 0,
-	TAG_SUB_LIST,
-	TAG_LINKED_LIST,
-	_TAG_START,
+    TAG_DONE = 0,
+    TAG_SUB_LIST,
+    TAG_LINKED_LIST,
+    _TAG_START,
 };
 
 extern uint_t TagCount(const TAG  *tags);

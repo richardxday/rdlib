@@ -7,7 +7,7 @@
 
 AStringList::AStringList()
 {
-	LockedStringList.EnableDuplication(true);
+    LockedStringList.EnableDuplication(true);
 }
 
 AStringList::~AStringList()
@@ -16,47 +16,47 @@ AStringList::~AStringList()
 
 AString *AStringList::AddString(const AString& str, bool locked)
 {
-	AString *pstr = new AString(str);
+    AString *pstr = new AString(str);
 
-	if (pstr) {
-		StringList.Add(pstr);
-		if (locked) LockedStringList.Add(pstr);
+    if (pstr) {
+        StringList.Add(pstr);
+        if (locked) LockedStringList.Add(pstr);
 
-		ModifyString(pstr);
-	}
+        ModifyString(pstr);
+    }
 
-	return pstr;
+    return pstr;
 }
 
 bool AStringList::RemoveString(AString *str)
 {
-	bool member = StringList.IsMember(str);
-	
-	if (member) {
-		ModifyString(str);
-		LockedStringList.Remove(str);
-		StringList.Remove(str);
-	}
-	
-	return member;
+    bool member = StringList.IsMember(str);
+
+    if (member) {
+        ModifyString(str);
+        LockedStringList.Remove(str);
+        StringList.Remove(str);
+    }
+
+    return member;
 }
 
 uint_t AStringList::LimitStrings(uint_t n)
 {
-	uint_t nremoved = 0;
+    uint_t nremoved = 0;
 
-	AString *str = (AString *)StringList.First();
-	while (str && (StringList.Count() > (sint_t)n)) {
-		while (str && (LockedStringList.Find(str) >= 0)) str = str->Next();
+    AString *str = (AString *)StringList.First();
+    while (str && (StringList.Count() > (sint_t)n)) {
+        while (str && (LockedStringList.Find(str) >= 0)) str = str->Next();
 
-		if (!str) break;
+        if (!str) break;
 
-		AString *str1 = str->Next();
-		StringList.Remove(str);
+        AString *str1 = str->Next();
+        StringList.Remove(str);
 
-		nremoved++;
-		str = str1;
-	}
+        nremoved++;
+        str = str1;
+    }
 
-	return nremoved;
+    return nremoved;
 }

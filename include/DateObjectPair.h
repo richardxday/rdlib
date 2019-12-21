@@ -7,23 +7,23 @@
 
 class ADateObjectPair : public AListNode {
 public:
-	ADateObjectPair(bool autodelete = true);
-	ADateObjectPair(const ADateObjectPair& object, bool autodelete = true);
-	virtual ~ADateObjectPair();
+    ADateObjectPair(bool autodelete = true);
+    ADateObjectPair(const ADateObjectPair& object, bool autodelete = true);
+    virtual ~ADateObjectPair();
 
-	LIST_FUNCTIONS(ADateObjectPair);
+    LIST_FUNCTIONS(ADateObjectPair);
 
-	LISTNODE_DUPLICATE(ADateObjectPair);
+    LISTNODE_DUPLICATE(ADateObjectPair);
 
-	ADateTime Date;
-	AListNode *pObject;
+    ADateTime Date;
+    AListNode *pObject;
 
-	static sint_t CompareDate(const AListNode *pNode1, const AListNode *pNode2, void *pContext);
+    static sint_t CompareDate(const AListNode *pNode1, const AListNode *pNode2, void *pContext);
 
 protected:
-	bool bAutoDelete;
+    bool bAutoDelete;
 
-	NODETYPE_DEFINE(ADateObjectPair);
+    NODETYPE_DEFINE(ADateObjectPair);
 };
 
 #endif

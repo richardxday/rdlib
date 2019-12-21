@@ -11,28 +11,28 @@ extern bool HasQuit();
 
 class AQuitHandler {
 public:
-	AQuitHandler(QUITFUNC func = NULL, void *context = NULL);
-	~AQuitHandler();
+    AQuitHandler(QUITFUNC func = NULL, void *context = NULL);
+    ~AQuitHandler();
 
-	void SetHandler(QUITFUNC func, void *context = NULL) {pFunc = func; pContext = context;}
+    void SetHandler(QUITFUNC func, void *context = NULL) {pFunc = func; pContext = context;}
 
-	bool HasQuit() const {return bHasQuit;}
+    bool HasQuit() const {return bHasQuit;}
 
-	void ClearQuit() {bHasQuit = false;}
-	void ForceQuit() {bHasQuit = true;}
+    void ClearQuit() {bHasQuit = false;}
+    void ForceQuit() {bHasQuit = true;}
 
-	static AQuitHandler *GetQuitHandler() {return pDefaultHandler;}
-
-protected:
-	static void __Signal(int sig);
-	void Signal(int sig);
+    static AQuitHandler *GetQuitHandler() {return pDefaultHandler;}
 
 protected:
-	QUITFUNC pFunc;
-	void     *pContext;
-	bool     bHasQuit;
+    static void __Signal(int sig);
+    void Signal(int sig);
 
-	static AQuitHandler *pDefaultHandler;
+protected:
+    QUITFUNC pFunc;
+    void     *pContext;
+    bool     bHasQuit;
+
+    static AQuitHandler *pDefaultHandler;
 };
 
 #endif

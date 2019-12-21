@@ -15,23 +15,23 @@
 class AThreadLockObject
 {
 public:
-	AThreadLockObject();
-	virtual ~AThreadLockObject();
+    AThreadLockObject();
+    virtual ~AThreadLockObject();
 
-	/*--------------------------------------------------------------------------------*/
-	/** Explicit lock of mutex (AVOID: use a ThreadLock object)
-	 */
-	/*--------------------------------------------------------------------------------*/
-	virtual bool Lock();
+    /*--------------------------------------------------------------------------------*/
+    /** Explicit lock of mutex (AVOID: use a ThreadLock object)
+     */
+    /*--------------------------------------------------------------------------------*/
+    virtual bool Lock();
 
-	/*--------------------------------------------------------------------------------*/
-	/** Explicit unlock of mutex (AVOID: use a ThreadLock object)
-	 */
-	/*--------------------------------------------------------------------------------*/
-	virtual bool Unlock();
+    /*--------------------------------------------------------------------------------*/
+    /** Explicit unlock of mutex (AVOID: use a ThreadLock object)
+     */
+    /*--------------------------------------------------------------------------------*/
+    virtual bool Unlock();
 
 protected:
-	pthread_mutex_t mutex;
+    pthread_mutex_t mutex;
 };
 
 /*--------------------------------------------------------------------------------*/
@@ -41,24 +41,24 @@ protected:
 class AThreadLock
 {
 public:
-	/*--------------------------------------------------------------------------------*/
-	/** Constructor locks ThreadLockObject
-	 */
-	/*--------------------------------------------------------------------------------*/
-	AThreadLock(AThreadLockObject& lockobj) : obj(lockobj) {obj.Lock();}
-	/*--------------------------------------------------------------------------------*/
-	/** Const constructor to allow use in const methods
-	 */
-	/*--------------------------------------------------------------------------------*/
-	AThreadLock(const AThreadLockObject& lockobj) : obj(const_cast<AThreadLockObject&>(lockobj)) {obj.Lock();}
-	/*--------------------------------------------------------------------------------*/
-	/** Destructor unlocks ThreadLockObject
-	 */
-	/*--------------------------------------------------------------------------------*/
-	~AThreadLock() {obj.Unlock();}
+    /*--------------------------------------------------------------------------------*/
+    /** Constructor locks ThreadLockObject
+     */
+    /*--------------------------------------------------------------------------------*/
+    AThreadLock(AThreadLockObject& lockobj) : obj(lockobj) {obj.Lock();}
+    /*--------------------------------------------------------------------------------*/
+    /** Const constructor to allow use in const methods
+     */
+    /*--------------------------------------------------------------------------------*/
+    AThreadLock(const AThreadLockObject& lockobj) : obj(const_cast<AThreadLockObject&>(lockobj)) {obj.Lock();}
+    /*--------------------------------------------------------------------------------*/
+    /** Destructor unlocks ThreadLockObject
+     */
+    /*--------------------------------------------------------------------------------*/
+    ~AThreadLock() {obj.Unlock();}
 
 protected:
-	AThreadLockObject& obj;
+    AThreadLockObject& obj;
 };
 
 /*--------------------------------------------------------------------------------*/
@@ -69,31 +69,31 @@ protected:
 class AThreadSignalObject : public AThreadLockObject
 {
 public:
-	AThreadSignalObject();
-	virtual ~AThreadSignalObject();
+    AThreadSignalObject();
+    virtual ~AThreadSignalObject();
 
-	/*--------------------------------------------------------------------------------*/
-	/** Wait for condition to be triggered
-	 *
-	 * @note condition MUST NOT be set or this will wait forever!
-	 */
-	/*--------------------------------------------------------------------------------*/
-	virtual bool Wait();
+    /*--------------------------------------------------------------------------------*/
+    /** Wait for condition to be triggered
+     *
+     * @note condition MUST NOT be set or this will wait forever!
+     */
+    /*--------------------------------------------------------------------------------*/
+    virtual bool Wait();
 
-	/*--------------------------------------------------------------------------------*/
-	/** Signal first waiting thread
-	 */
-	/*--------------------------------------------------------------------------------*/
-	virtual bool Signal();
+    /*--------------------------------------------------------------------------------*/
+    /** Signal first waiting thread
+     */
+    /*--------------------------------------------------------------------------------*/
+    virtual bool Signal();
 
-	/*--------------------------------------------------------------------------------*/
-	/** Signal all waiting threads
-	 */
-	/*--------------------------------------------------------------------------------*/
-	virtual bool Broadcast();
+    /*--------------------------------------------------------------------------------*/
+    /** Signal all waiting threads
+     */
+    /*--------------------------------------------------------------------------------*/
+    virtual bool Broadcast();
 
 protected:
-	pthread_cond_t cond;
+    pthread_cond_t cond;
 };
 
 /*--------------------------------------------------------------------------------*/
@@ -103,29 +103,29 @@ protected:
 class AThreadBoolSignalObject : public AThreadSignalObject
 {
 public:
-	AThreadBoolSignalObject(bool initial_condition = false);
-	virtual ~AThreadBoolSignalObject();
+    AThreadBoolSignalObject(bool initial_condition = false);
+    virtual ~AThreadBoolSignalObject();
 
-	/*--------------------------------------------------------------------------------*/
-	/** Wait for condition to be true
-	 */
-	/*--------------------------------------------------------------------------------*/
-	virtual bool Wait();
+    /*--------------------------------------------------------------------------------*/
+    /** Wait for condition to be true
+     */
+    /*--------------------------------------------------------------------------------*/
+    virtual bool Wait();
 
-	/*--------------------------------------------------------------------------------*/
-	/** Signal first waiting thread
-	 */
-	/*--------------------------------------------------------------------------------*/
-	virtual bool Signal();
+    /*--------------------------------------------------------------------------------*/
+    /** Signal first waiting thread
+     */
+    /*--------------------------------------------------------------------------------*/
+    virtual bool Signal();
 
-	/*--------------------------------------------------------------------------------*/
-	/** Signal all waiting threads
-	 */
-	/*--------------------------------------------------------------------------------*/
-	virtual bool Broadcast();
-    
+    /*--------------------------------------------------------------------------------*/
+    /** Signal all waiting threads
+     */
+    /*--------------------------------------------------------------------------------*/
+    virtual bool Broadcast();
+
 protected:
-	volatile bool condition;
+    volatile bool condition;
 };
 
 #endif

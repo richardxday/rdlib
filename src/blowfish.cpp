@@ -16,12 +16,12 @@
 /*--------------------------------------------------------------------------------*/
 ABlowfish::ABlowfish(const uint8_t *key, uint_t keyLen) : context(NULL)
 {
-	SetKey(key, keyLen);
+    SetKey(key, keyLen);
 }
 
 ABlowfish::~ABlowfish()
 {
-	DeleteContext();
+    DeleteContext();
 }
 
 /*--------------------------------------------------------------------------------*/
@@ -32,13 +32,13 @@ ABlowfish::~ABlowfish()
 /*--------------------------------------------------------------------------------*/
 void *ABlowfish::GetContext()
 {
-	if (!context) {
-		if ((context = new BLOWFISH_CTX) != NULL) {
-			memset(context, 0, sizeof(BLOWFISH_CTX));
-		}
-	}
+    if (!context) {
+        if ((context = new BLOWFISH_CTX) != NULL) {
+            memset(context, 0, sizeof(BLOWFISH_CTX));
+        }
+    }
 
-	return context;
+    return context;
 }
 
 /*--------------------------------------------------------------------------------*/
@@ -49,13 +49,13 @@ void *ABlowfish::GetContext()
 /*--------------------------------------------------------------------------------*/
 void ABlowfish::DeleteContext()
 {
-	if (context) {
-		BLOWFISH_CTX *ctx = (BLOWFISH_CTX *)GetContext();
-		memset(ctx, 0, sizeof(*ctx));
-		delete ctx;
+    if (context) {
+        BLOWFISH_CTX *ctx = (BLOWFISH_CTX *)GetContext();
+        memset(ctx, 0, sizeof(*ctx));
+        delete ctx;
 
-		context = NULL;
-	}
+        context = NULL;
+    }
 }
 
 /*--------------------------------------------------------------------------------*/
@@ -69,18 +69,18 @@ void ABlowfish::DeleteContext()
 /*--------------------------------------------------------------------------------*/
 void ABlowfish::SetKey(const uint8_t *key, uint_t keyLen)
 {
-	if (key && keyLen) {
-		// valid key -> create and initialise context
-		BLOWFISH_CTX *ctx = (BLOWFISH_CTX *)GetContext();
-		
-		// zero context for safety
-		memset(ctx, 0, sizeof(*ctx));
+    if (key && keyLen) {
+        // valid key -> create and initialise context
+        BLOWFISH_CTX *ctx = (BLOWFISH_CTX *)GetContext();
 
-		// initialise Blowfish tables with key
-		Blowfish_Init(ctx, key, keyLen);
-	}
-	// no key -> delete existing context
-	else DeleteContext();
+        // zero context for safety
+        memset(ctx, 0, sizeof(*ctx));
+
+        // initialise Blowfish tables with key
+        Blowfish_Init(ctx, key, keyLen);
+    }
+    // no key -> delete existing context
+    else DeleteContext();
 }
 
 /*--------------------------------------------------------------------------------*/
@@ -98,41 +98,41 @@ void ABlowfish::SetKey(const uint8_t *key, uint_t keyLen)
 /*--------------------------------------------------------------------------------*/
 void ABlowfish::Encrypt(const uint8_t *src, uint8_t *dst, uint32_t& iv1, uint32_t& iv2)
 {
-	BLOWFISH_CTX *ctx = (BLOWFISH_CTX *)GetContext();
-	uint32_t l, r;
+    BLOWFISH_CTX *ctx = (BLOWFISH_CTX *)GetContext();
+    uint32_t l, r;
 
-	// copy bytes into 2 32-bit variables
-	memcpy(&l, src, sizeof(l)); src += sizeof(l);
-	memcpy(&r, src, sizeof(r));
+    // copy bytes into 2 32-bit variables
+    memcpy(&l, src, sizeof(l)); src += sizeof(l);
+    memcpy(&r, src, sizeof(r));
 
-	// for little endian machines, swap bytes to make all data big-endian
-	if (!MachineIsBigEndian()) {
-		l = SwapBytes(l);
-		r = SwapBytes(r);
-	}
+    // for little endian machines, swap bytes to make all data big-endian
+    if (!MachineIsBigEndian()) {
+        l = SwapBytes(l);
+        r = SwapBytes(r);
+    }
 
-	// XOR in initialisation vectors (for CBC mode)
-	l ^= iv1;
-	r ^= iv2;
+    // XOR in initialisation vectors (for CBC mode)
+    l ^= iv1;
+    r ^= iv2;
 
-	// encrypt data
-	Blowfish_Encrypt(ctx, &l, &r);
+    // encrypt data
+    Blowfish_Encrypt(ctx, &l, &r);
 
-	// return new initialisation vectors (for CBC mode)
-	iv1 = l;
-	iv2 = r;
+    // return new initialisation vectors (for CBC mode)
+    iv1 = l;
+    iv2 = r;
 
-	// for little endian machines, swap bytes back to make all data little-endian
-	if (!MachineIsBigEndian()) {
-		l = SwapBytes(l);
-		r = SwapBytes(r);
-	}
+    // for little endian machines, swap bytes back to make all data little-endian
+    if (!MachineIsBigEndian()) {
+        l = SwapBytes(l);
+        r = SwapBytes(r);
+    }
 
-	// copy bytes to destination
-	memcpy(dst, &l, sizeof(l)); dst += sizeof(l);
-	memcpy(dst, &r, sizeof(r));
+    // copy bytes to destination
+    memcpy(dst, &l, sizeof(l)); dst += sizeof(l);
+    memcpy(dst, &r, sizeof(r));
 
-	l = r = 0;	// clear local variables to prevent security leaks
+    l = r = 0;  // clear local variables to prevent security leaks
 }
 
 /*--------------------------------------------------------------------------------*/
@@ -150,44 +150,44 @@ void ABlowfish::Encrypt(const uint8_t *src, uint8_t *dst, uint32_t& iv1, uint32_
 /*--------------------------------------------------------------------------------*/
 void ABlowfish::Decrypt(const uint8_t *src, uint8_t *dst, uint32_t& iv1, uint32_t& iv2)
 {
-	BLOWFISH_CTX *ctx = (BLOWFISH_CTX *)GetContext();
-	uint32_t l, r, iv1_1 = iv1, iv2_1 = iv2;
+    BLOWFISH_CTX *ctx = (BLOWFISH_CTX *)GetContext();
+    uint32_t l, r, iv1_1 = iv1, iv2_1 = iv2;
 
-	// copy bytes into 2 32-bit variables
-	memcpy(&l, src, sizeof(l));
-	memcpy(&r, src + sizeof(l), sizeof(r));
+    // copy bytes into 2 32-bit variables
+    memcpy(&l, src, sizeof(l));
+    memcpy(&r, src + sizeof(l), sizeof(r));
 
-	// for little endian machines, swap bytes to make all data big-endian
-	if (!MachineIsBigEndian()) {
-		l = SwapBytes(l);
-		r = SwapBytes(r);
-	}
+    // for little endian machines, swap bytes to make all data big-endian
+    if (!MachineIsBigEndian()) {
+        l = SwapBytes(l);
+        r = SwapBytes(r);
+    }
 
-	// return new initialisation vectors (for CBC mode)
-	iv1 = l;
-	iv2 = r;
-	
-	// decrypt data
-	Blowfish_Decrypt(ctx, &l, &r);
+    // return new initialisation vectors (for CBC mode)
+    iv1 = l;
+    iv2 = r;
 
-	// XOR in initialisation vectors (for CBC mode)
-	l ^= iv1_1;
-	r ^= iv2_1;
+    // decrypt data
+    Blowfish_Decrypt(ctx, &l, &r);
 
-	// zero local variables for security
-	iv1_1 = iv2_1 = 0;
+    // XOR in initialisation vectors (for CBC mode)
+    l ^= iv1_1;
+    r ^= iv2_1;
 
-	// for little endian machines, swap bytes back to make all data little-endian
-	if (!MachineIsBigEndian()) {
-		l = SwapBytes(l);
-		r = SwapBytes(r);
-	}
+    // zero local variables for security
+    iv1_1 = iv2_1 = 0;
 
-	// copy bytes to destination
-	memcpy(dst, &l, sizeof(l));
-	memcpy(dst + sizeof(l), &r, sizeof(r));
+    // for little endian machines, swap bytes back to make all data little-endian
+    if (!MachineIsBigEndian()) {
+        l = SwapBytes(l);
+        r = SwapBytes(r);
+    }
 
-	l = r = 0;	// clear local variables to prevent security leaks
+    // copy bytes to destination
+    memcpy(dst, &l, sizeof(l));
+    memcpy(dst + sizeof(l), &r, sizeof(r));
+
+    l = r = 0;  // clear local variables to prevent security leaks
 }
 
 /*--------------------------------------------------------------------------------*/
@@ -207,34 +207,34 @@ void ABlowfish::Decrypt(const uint8_t *src, uint8_t *dst, uint32_t& iv1, uint32_
 /*--------------------------------------------------------------------------------*/
 void ABlowfish::Encrypt(const uint8_t *src, uint8_t *dst, uint_t nbytes, bool cbc, uint32_t *ivec)
 {
-	if (context) {
-		// setup initialisation vectors
-		uint32_t iv1 = (cbc && ivec) ? ivec[0] : 0;
-		uint32_t iv2 = (cbc && ivec) ? ivec[1] : 0;
+    if (context) {
+        // setup initialisation vectors
+        uint32_t iv1 = (cbc && ivec) ? ivec[0] : 0;
+        uint32_t iv2 = (cbc && ivec) ? ivec[1] : 0;
 
-		// encrypt whole blocks
-		while (nbytes >= BLOCKSIZE) {
-			if (!cbc) {
-				// if not running in CBC, zero initialisation vectors)
-				iv1 = iv2 = 0;
-			}
+        // encrypt whole blocks
+        while (nbytes >= BLOCKSIZE) {
+            if (!cbc) {
+                // if not running in CBC, zero initialisation vectors)
+                iv1 = iv2 = 0;
+            }
 
-			Encrypt(src, dst, iv1, iv2);
+            Encrypt(src, dst, iv1, iv2);
 
-			src    += BLOCKSIZE;
-			dst    += BLOCKSIZE;
-			nbytes -= BLOCKSIZE;
-		}
+            src    += BLOCKSIZE;
+            dst    += BLOCKSIZE;
+            nbytes -= BLOCKSIZE;
+        }
 
-		if (cbc && ivec) {
-			// if running in CBC mode, update caller's initialisation vectors
-			ivec[0] = iv1;
-			ivec[1] = iv2;
-		}
+        if (cbc && ivec) {
+            // if running in CBC mode, update caller's initialisation vectors
+            ivec[0] = iv1;
+            ivec[1] = iv2;
+        }
 
-		// zero local variables
-		iv1 = iv2 = 0;
-	}
+        // zero local variables
+        iv1 = iv2 = 0;
+    }
 }
 
 /*--------------------------------------------------------------------------------*/
@@ -254,32 +254,32 @@ void ABlowfish::Encrypt(const uint8_t *src, uint8_t *dst, uint_t nbytes, bool cb
 /*--------------------------------------------------------------------------------*/
 void ABlowfish::Decrypt(const uint8_t *src, uint8_t *dst, uint_t nbytes, bool cbc, uint32_t *ivec)
 {
-	if (context) {
-		// setup initialisation vectors
-		uint32_t iv1 = (cbc && ivec) ? ivec[0] : 0;
-		uint32_t iv2 = (cbc && ivec) ? ivec[1] : 0;
+    if (context) {
+        // setup initialisation vectors
+        uint32_t iv1 = (cbc && ivec) ? ivec[0] : 0;
+        uint32_t iv2 = (cbc && ivec) ? ivec[1] : 0;
 
-		// decrypt whole blocks
-		while (nbytes >= BLOCKSIZE) {
-			if (!cbc) {
-				// if not running in CBC, zero initialisation vectors)
-				iv1 = iv2 = 0;
-			}
+        // decrypt whole blocks
+        while (nbytes >= BLOCKSIZE) {
+            if (!cbc) {
+                // if not running in CBC, zero initialisation vectors)
+                iv1 = iv2 = 0;
+            }
 
-			Decrypt(src, dst, iv1, iv2);
+            Decrypt(src, dst, iv1, iv2);
 
-			src    += BLOCKSIZE;
-			dst    += BLOCKSIZE;
-			nbytes -= BLOCKSIZE;
-		}
+            src    += BLOCKSIZE;
+            dst    += BLOCKSIZE;
+            nbytes -= BLOCKSIZE;
+        }
 
-		if (cbc && ivec) {
-			// if running in CBC mode, update caller's initialisation vectors
-			ivec[0] = iv1;
-			ivec[1] = iv2;
-		}
+        if (cbc && ivec) {
+            // if running in CBC mode, update caller's initialisation vectors
+            ivec[0] = iv1;
+            ivec[1] = iv2;
+        }
 
-		// zero local variables
-		iv1 = iv2 = 0;
-	}
+        // zero local variables
+        iv1 = iv2 = 0;
+    }
 }

@@ -8,13 +8,11 @@
 #include "strsup.h"
 
 inline wxString _wxString(const AString& str) {
-	return wxString::FromAscii(str.str());
+    return wxString::FromAscii(str.str());
 }
 
 inline AString _AString(const wxString& str) {
-	return AString(str.mb_str(wxConvUTF8));
+    return AString(str.mb_str(wxConvUTF8));
 }
 
 #endif
-
-

@@ -5,14 +5,14 @@
 #include "DateTime.h"
 
 typedef struct {
-	AString   CameraMake;
-	AString   CameraModel;
-	int  	  Width;
-	int  	  Height;
-	uint_t 	  Orientation;
-	ADateTime DateTime;
-	bool	  bDateValid;
-	AString   Comments;
+    AString   CameraMake;
+    AString   CameraModel;
+    int       Width;
+    int       Height;
+    uint_t    Orientation;
+    ADateTime DateTime;
+    bool      bDateValid;
+    AString   Comments;
 } JPEG_INFO;
 
 extern bool ReadJPEGInfo(const char *filename, JPEG_INFO& info);

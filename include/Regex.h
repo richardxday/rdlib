@@ -6,8 +6,8 @@
 #include "DataList.h"
 
 typedef struct {
-	AString marker;
-	uint_t pos, len;
+    AString marker;
+    uint_t pos, len;
 } REGEXREGION;
 
 extern AString ParseRegex(const AString& str, char escchar = '\\');

@@ -4,15 +4,15 @@
 #include "types.h"
 
 typedef struct {
-	float re, im;
+    float re, im;
 } scomplex;
 
 typedef struct {
-	double re, im;
+    double re, im;
 } dcomplex;
 
 typedef struct {
-	sint16_t re, im;
+    sint16_t re, im;
 } icomplex;
 
 extern dcomplex comp_exp(double w, double r = 1.0);
@@ -59,9 +59,9 @@ extern scomplex comp_div(const scomplex& obj1, const scomplex& obj2);
 inline scomplex comp_mul(const scomplex& obj1, float val) {scomplex res = {obj1.re * val, obj1.im * val}; return res;}
 inline scomplex comp_div(const scomplex& obj1, float val) {scomplex res = {obj1.re / val, obj1.im / val}; return res;}
 
-extern float   	comp_mod(const scomplex& obj1);
-extern float   	comp_arg(const scomplex& obj1);
-inline float   	comp_dot(const scomplex& obj1, const scomplex& obj2) {return obj1.re * obj2.re + obj1.im * obj2.im;}
+extern float    comp_mod(const scomplex& obj1);
+extern float    comp_arg(const scomplex& obj1);
+inline float    comp_dot(const scomplex& obj1, const scomplex& obj2) {return obj1.re * obj2.re + obj1.im * obj2.im;}
 
 inline void     comp_add(scomplex& res, const scomplex& obj1, const scomplex& obj2) {res.re = obj1.re + obj2.re; res.im = obj1.im + obj2.im;}
 inline void     comp_sub(scomplex& res, const scomplex& obj1, const scomplex& obj2) {res.re = obj1.re - obj2.re; res.im = obj1.im - obj2.im;}

@@ -13,4 +13,3 @@ void fft(const icomplex *in, icomplex *out, uint_t n);
 void ifft(const icomplex *in, icomplex *out, uint_t n);
 
 #endif
-

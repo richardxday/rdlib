@@ -11,23 +11,23 @@
 #endif
 
 #if __WORDSIZE==64
-#define SYSTEM_IS_64BITS	1
+#define SYSTEM_IS_64BITS    1
 #if defined(__APPLE__) || defined(__MINGW64__)
 #define LONG_IS_64BITS      0
 #else
 #define LONG_IS_64BITS      1
 #endif
 #else
-#define SYSTEM_IS_64BITS	0
+#define SYSTEM_IS_64BITS    0
 #define LONG_IS_64BITS      0
 #endif
 
 #define INT32_IS_INT        (!LONG_IS_64BITS)
-     
-typedef int8_t		   sint8_t;
-typedef int16_t		   sint16_t;
-typedef int32_t		   sint32_t;
-typedef int64_t		   sint64_t;
+
+typedef int8_t         sint8_t;
+typedef int16_t        sint16_t;
+typedef int32_t        sint32_t;
+typedef int64_t        sint64_t;
 
 typedef signed   short sshort_t;
 typedef unsigned short ushort_t;

@@ -11,177 +11,177 @@
 
 class ASocketServer {
 public:
-	ASocketServer();
-	~ASocketServer();
+    ASocketServer();
+    ~ASocketServer();
 
-	enum {
-		Type_Invalid = 0,
-		Type_Server,
-		Type_Client,
-		Type_Datagram,
-	};
+    enum {
+        Type_Invalid = 0,
+        Type_Server,
+        Type_Client,
+        Type_Datagram,
+    };
 
-	static bool Resolve(const char *host, uint_t port, struct sockaddr_in *sockaddr);
+    static bool Resolve(const char *host, uint_t port, struct sockaddr_in *sockaddr);
 
-	int CreateHandler(uint_t type,
-					  const char *host,
-					  uint_t port,
-					  void (*connectcallback)(ASocketServer *server, int socket, void *context),
-					  void (*readcallback)(ASocketServer *server, int socket, void *context),
-					  void (*writecallback)(ASocketServer *server, int socket, void *context) = NULL,
-					  void (*destructor)(ASocketServer *server, int socket, void *context) = NULL,
-					  bool (*needwritecallback)(ASocketServer *server, int socket, void *context) = NULL,
-					  void *context = NULL);
-	void DeleteAllHandlers();
+    int CreateHandler(uint_t type,
+                      const char *host,
+                      uint_t port,
+                      void (*connectcallback)(ASocketServer *server, int socket, void *context),
+                      void (*readcallback)(ASocketServer *server, int socket, void *context),
+                      void (*writecallback)(ASocketServer *server, int socket, void *context) = NULL,
+                      void (*destructor)(ASocketServer *server, int socket, void *context) = NULL,
+                      bool (*needwritecallback)(ASocketServer *server, int socket, void *context) = NULL,
+                      void *context = NULL);
+    void DeleteAllHandlers();
 
-	void EnableAutoCloseUnestablishedSockets(bool enable = true) {autocloseunestablishedsockets = enable;}
-	bool AutoCloseUnestablishedSocketsEnabled() const            {return autocloseunestablishedsockets;}
-	
-	int Process(uint_t timeout);
+    void EnableAutoCloseUnestablishedSockets(bool enable = true) {autocloseunestablishedsockets = enable;}
+    bool AutoCloseUnestablishedSocketsEnabled() const            {return autocloseunestablishedsockets;}
 
-	void SetConnectHandler(int socket, void (*connectcallback)(ASocketServer *server, int socket, void *context));
-	void SetReadHandler(int socket, void (*readcallback)(ASocketServer *server, int socket, void *context));
-	void SetWriteHandler(int socket, void (*writecallback)(ASocketServer *server, int socket, void *context));
-	void SetDestructor(int socket, void (*destructor)(ASocketServer *server, int socket, void *context));
-	void SetNeedWriteHandler(int socket, bool (*needwritecallback)(ASocketServer *server, int socket, void *context));
-	void SetContext(int socket, void *context);
-	const struct sockaddr_in *GetDatagramSource(int socket) const;
-	bool SetDatagramDestination(int socket, const struct sockaddr_in *to);
+    int Process(uint_t timeout);
 
-	void DeleteWriteBuffer(int socket);
-	void DeleteHandler(int socket);
+    void SetConnectHandler(int socket, void (*connectcallback)(ASocketServer *server, int socket, void *context));
+    void SetReadHandler(int socket, void (*readcallback)(ASocketServer *server, int socket, void *context));
+    void SetWriteHandler(int socket, void (*writecallback)(ASocketServer *server, int socket, void *context));
+    void SetDestructor(int socket, void (*destructor)(ASocketServer *server, int socket, void *context));
+    void SetNeedWriteHandler(int socket, bool (*needwritecallback)(ASocketServer *server, int socket, void *context));
+    void SetContext(int socket, void *context);
+    const struct sockaddr_in *GetDatagramSource(int socket) const;
+    bool SetDatagramDestination(int socket, const struct sockaddr_in *to);
 
-	sint_t BytesAvailable(int socket);
-	sint_t BytesLeftToWrite(int socket);
-	sint_t ReadSocket(int socket, uint8_t *buffer, uint_t bytes, struct sockaddr *from = NULL);
-	sint_t WriteSocket(int socket, const uint8_t *buffer, uint_t bytes, const struct sockaddr *to = NULL);
+    void DeleteWriteBuffer(int socket);
+    void DeleteHandler(int socket);
 
-	uint_t GetMaxSendBuffer() const {return MaxSendBuffer;}
-	void SetMaxSendBuffer(uint_t bufsize) {MaxSendBuffer = bufsize;}
+    sint_t BytesAvailable(int socket);
+    sint_t BytesLeftToWrite(int socket);
+    sint_t ReadSocket(int socket, uint8_t *buffer, uint_t bytes, struct sockaddr *from = NULL);
+    sint_t WriteSocket(int socket, const uint8_t *buffer, uint_t bytes, const struct sockaddr *to = NULL);
 
-	const struct sockaddr_in *GetSocketAddr(int socket) const;
+    uint_t GetMaxSendBuffer() const {return MaxSendBuffer;}
+    void SetMaxSendBuffer(uint_t bufsize) {MaxSendBuffer = bufsize;}
 
-	typedef struct {
-		uint8_t    buffer[1024];
-		AString lines;
-	} SOCKETREADER;
+    const struct sockaddr_in *GetSocketAddr(int socket) const;
 
-	sint_t ReadLineData(int socket, SOCKETREADER& reader, struct sockaddr *from = NULL);
-	static bool ReadLine(SOCKETREADER& reader, AString& line);
+    typedef struct {
+        uint8_t    buffer[1024];
+        AString lines;
+    } SOCKETREADER;
 
-	sint_t WriteSocket(int socket, const AString& str, const struct sockaddr *to = NULL) {
-		return WriteSocket(socket, (const uint8_t *)str.str(), str.len(), to);
-	}
+    sint_t ReadLineData(int socket, SOCKETREADER& reader, struct sockaddr *from = NULL);
+    static bool ReadLine(SOCKETREADER& reader, AString& line);
 
-	virtual bool SetReceiveBufferSize(int socket, uint_t bytes);
+    sint_t WriteSocket(int socket, const AString& str, const struct sockaddr *to = NULL) {
+        return WriteSocket(socket, (const uint8_t *)str.str(), str.len(), to);
+    }
 
-	uint_t GetSocketCount() const {return SocketList.Count();}
+    virtual bool SetReceiveBufferSize(int socket, uint_t bytes);
 
-	AString GetClientAddr(int socket) const;
-	uint_t  GetClientPort(int socket) const;
-	static AString GetClientAddr(const struct sockaddr_in *sockaddr);
-	static uint_t  GetClientPort(const struct sockaddr_in *sockaddr);
+    uint_t GetSocketCount() const {return SocketList.Count();}
 
-	class Handler {
-	public:
-		Handler(ASocketServer *_server = NULL) : server(_server),
-												 socket(-1) {}
-		Handler(ASocketServer *_server, const char *host, uint_t port) : server(_server),
-																		 socket(-1) {Open(host, port);}
-		virtual ~Handler() {Close();}
+    AString GetClientAddr(int socket) const;
+    uint_t  GetClientPort(int socket) const;
+    static AString GetClientAddr(const struct sockaddr_in *sockaddr);
+    static uint_t  GetClientPort(const struct sockaddr_in *sockaddr);
 
-		void SetSocketServer(ASocketServer *_server) {server = _server;}
+    class Handler {
+    public:
+        Handler(ASocketServer *_server = NULL) : server(_server),
+                                                 socket(-1) {}
+        Handler(ASocketServer *_server, const char *host, uint_t port) : server(_server),
+                                                                         socket(-1) {Open(host, port);}
+        virtual ~Handler() {Close();}
 
-		virtual bool Open(const char *host, uint_t port);
-		bool IsOpen() const {return (server && (socket >= 0));}
-		virtual void Close();
+        void SetSocketServer(ASocketServer *_server) {server = _server;}
 
-	protected:
-		virtual void OnConnect() {}
-		virtual void OnRead() {}
-		virtual void OnWrite() {}
-		virtual bool NeedWrite() {return false;}
-		virtual void Cleanup() {socket = -1;}
+        virtual bool Open(const char *host, uint_t port);
+        bool IsOpen() const {return (server && (socket >= 0));}
+        virtual void Close();
 
-		virtual bool SetReceiveBufferSize(uint_t bytes);
+    protected:
+        virtual void OnConnect() {}
+        virtual void OnRead() {}
+        virtual void OnWrite() {}
+        virtual bool NeedWrite() {return false;}
+        virtual void Cleanup() {socket = -1;}
 
-		static void __connectcallback(ASocketServer *server, int socket, void *context) {
-			UNUSED(server); UNUSED(socket);
-			((Handler *)context)->OnConnect();
-		}
-		static void __readcallback(ASocketServer *server, int socket, void *context) {
-			UNUSED(server); UNUSED(socket);
-			((Handler *)context)->OnRead();
-		}
-		static void __writecallback(ASocketServer *server, int socket, void *context) {
-			UNUSED(server); UNUSED(socket);
-			((Handler *)context)->OnWrite();
-		}
-		static void __destructor(ASocketServer *server, int socket, void *context) {
-			UNUSED(server); UNUSED(socket);
-			((Handler *)context)->Cleanup();
-		}
-		static bool __needwritecallback(ASocketServer *server, int socket, void *context) {
-			UNUSED(server); UNUSED(socket);
-			return ((Handler *)context)->NeedWrite();
-		}
+        virtual bool SetReceiveBufferSize(uint_t bytes);
 
-	protected:
-		ASocketServer *server;
-		int socket;
-	};
+        static void __connectcallback(ASocketServer *server, int socket, void *context) {
+            UNUSED(server); UNUSED(socket);
+            ((Handler *)context)->OnConnect();
+        }
+        static void __readcallback(ASocketServer *server, int socket, void *context) {
+            UNUSED(server); UNUSED(socket);
+            ((Handler *)context)->OnRead();
+        }
+        static void __writecallback(ASocketServer *server, int socket, void *context) {
+            UNUSED(server); UNUSED(socket);
+            ((Handler *)context)->OnWrite();
+        }
+        static void __destructor(ASocketServer *server, int socket, void *context) {
+            UNUSED(server); UNUSED(socket);
+            ((Handler *)context)->Cleanup();
+        }
+        static bool __needwritecallback(ASocketServer *server, int socket, void *context) {
+            UNUSED(server); UNUSED(socket);
+            return ((Handler *)context)->NeedWrite();
+        }
 
-protected:
-	static void SetupSockets();
-
-	static void __DeleteSocket(uptr_t item, void *context);
-	static void __AcceptSocket(ASocketServer *server, int socket, void *context);
-	static void __DeleteWriteSocket(uptr_t item, void *context);
-	static void CloseSocket(int socket);
-
-	void *FindSocket(int socket) const;
-	void AcceptSocket(int socket);
-	void DeleteSockets(bool force = false);
-	void SetNonBlocking(int socket);
-	void SetNoDelay(int socket);
-
-	typedef struct {
-		int      socket;
-		uint_t   type;
-		void   	 (*connectcallback)(ASocketServer *server, int socket, void *context);
-		void   	 (*readcallback)(ASocketServer *server, int socket, void *context);
-		void   	 (*writecallback)(ASocketServer *server, int socket, void *context);
-		void   	 (*destructor)(ASocketServer *server, int socket, void *context);
-		bool   	 (*needwritecallback)(ASocketServer *server, int socket, void *context);
-		void   	 *context;
-		struct sockaddr_in sockaddr;
-		struct sockaddr from;
-		struct sockaddr to;
-		uint32_t starttick;
-		bool     connected;
-	} HANDLER;
-
-	typedef struct {
-		HANDLER handler;
-		HANDLER acceptedhandler;
-	} ACCEPTHANDLER;
-
-	typedef struct {
-		uint8_t *buffer;
-		uint_t  pos, len;
-		struct sockaddr dest;
-	} WRITEBUFFER;
+    protected:
+        ASocketServer *server;
+        int socket;
+    };
 
 protected:
-	ADataList SocketList;
-	ADataList DeleteSocketList;
-	ADataList WriteSocketList;
-	uint_t	  MaxSendBuffer;
-	uint_t	  ProcessingDepth;
-	void      *readfds, *writefds, *exceptfds;
-	bool	  autocloseunestablishedsockets;
-	
-	static uint8_t staticbuf[4096];
+    static void SetupSockets();
+
+    static void __DeleteSocket(uptr_t item, void *context);
+    static void __AcceptSocket(ASocketServer *server, int socket, void *context);
+    static void __DeleteWriteSocket(uptr_t item, void *context);
+    static void CloseSocket(int socket);
+
+    void *FindSocket(int socket) const;
+    void AcceptSocket(int socket);
+    void DeleteSockets(bool force = false);
+    void SetNonBlocking(int socket);
+    void SetNoDelay(int socket);
+
+    typedef struct {
+        int      socket;
+        uint_t   type;
+        void     (*connectcallback)(ASocketServer *server, int socket, void *context);
+        void     (*readcallback)(ASocketServer *server, int socket, void *context);
+        void     (*writecallback)(ASocketServer *server, int socket, void *context);
+        void     (*destructor)(ASocketServer *server, int socket, void *context);
+        bool     (*needwritecallback)(ASocketServer *server, int socket, void *context);
+        void     *context;
+        struct sockaddr_in sockaddr;
+        struct sockaddr from;
+        struct sockaddr to;
+        uint32_t starttick;
+        bool     connected;
+    } HANDLER;
+
+    typedef struct {
+        HANDLER handler;
+        HANDLER acceptedhandler;
+    } ACCEPTHANDLER;
+
+    typedef struct {
+        uint8_t *buffer;
+        uint_t  pos, len;
+        struct sockaddr dest;
+    } WRITEBUFFER;
+
+protected:
+    ADataList SocketList;
+    ADataList DeleteSocketList;
+    ADataList WriteSocketList;
+    uint_t    MaxSendBuffer;
+    uint_t    ProcessingDepth;
+    void      *readfds, *writefds, *exceptfds;
+    bool      autocloseunestablishedsockets;
+
+    static uint8_t staticbuf[4096];
 };
 
 #endif

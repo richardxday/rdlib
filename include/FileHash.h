@@ -9,49 +9,49 @@
 
 class AFileHash : public AListNode {
 public:
-	AFileHash(const AString& Line);
-	AFileHash(const FILE_INFO *pFile);
-	virtual ~AFileHash();
+    AFileHash(const AString& Line);
+    AFileHash(const FILE_INFO *pFile);
+    virtual ~AFileHash();
 
-	LIST_FUNCTIONS(AFileHash);
+    LIST_FUNCTIONS(AFileHash);
 
-	static AString ExtractFilename(const AString& Line);
+    static AString ExtractFilename(const AString& Line);
 
-	const AString& GetFilename()   const {return Filename;}
-	const ADateTime& GetFileTime() const {return FileTime;}
-	uint64_t GetHashValue() const {return HashValue;}
+    const AString& GetFilename()   const {return Filename;}
+    const ADateTime& GetFileTime() const {return FileTime;}
+    uint64_t GetHashValue() const {return HashValue;}
 
-	AFileHash *Find(const AString& filename) {
-		if (CompareNoCase(Filename, filename) == 0) return this;
-		else if (Next())							return Next()->Find(filename);
-		else										return NULL;
-	}
+    AFileHash *Find(const AString& filename) {
+        if (CompareNoCase(Filename, filename) == 0) return this;
+        else if (Next())                            return Next()->Find(filename);
+        else                                        return NULL;
+    }
 
-	enum {
-		STATE_UNKNOWN = 0,
-		STATE_UNCHANGED,
-		STATE_CHANGED,
-		STATE_CHANGED_BY_DATE,
-		STATE_NEW,
-		STATE_DELETED,
-	};
+    enum {
+        STATE_UNKNOWN = 0,
+        STATE_UNCHANGED,
+        STATE_CHANGED,
+        STATE_CHANGED_BY_DATE,
+        STATE_NEW,
+        STATE_DELETED,
+    };
 
-	byte GetState() const {return State;}
+    byte GetState() const {return State;}
 
-	void CheckFile();
-	void Output(FILE *fp);
-
-protected:
-	bool CalcHash(uint64_t *value);
+    void CheckFile();
+    void Output(FILE *fp);
 
 protected:
-	AString   Filename;
-	ADateTime FileTime;
-	uint64_t    HashValue;
-	byte     State;
-	bool	  bHashCalculated;
+    bool CalcHash(uint64_t *value);
 
-	NODETYPE_DEFINE(AFileHash);
+protected:
+    AString   Filename;
+    ADateTime FileTime;
+    uint64_t    HashValue;
+    byte     State;
+    bool      bHashCalculated;
+
+    NODETYPE_DEFINE(AFileHash);
 };
 
 #endif

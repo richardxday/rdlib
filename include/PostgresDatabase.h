@@ -7,172 +7,172 @@ struct pg_conn;
 struct pg_result;
 class PostgresDatabase : public Database {
 public:
-	PostgresDatabase();
-	virtual ~PostgresDatabase();
+    PostgresDatabase();
+    virtual ~PostgresDatabase();
 
-	/*--------------------------------------------------------------------------------*/
-	/** Open admin connection to database server
-	 */
-	/*--------------------------------------------------------------------------------*/
-	virtual bool OpenAdmin(const AString& host);
-	
-	/*--------------------------------------------------------------------------------*/
-	/** Open connection to database server as user and optionally open database
-	 */
-	/*--------------------------------------------------------------------------------*/
-	virtual bool Open(const AString& host, const AString& username, const AString& password, const AString& database = "");
+    /*--------------------------------------------------------------------------------*/
+    /** Open admin connection to database server
+     */
+    /*--------------------------------------------------------------------------------*/
+    virtual bool OpenAdmin(const AString& host);
 
-	/*--------------------------------------------------------------------------------*/
-	/** Check database connection
-	 */
-	/*--------------------------------------------------------------------------------*/
-	virtual bool CheckConnection();
+    /*--------------------------------------------------------------------------------*/
+    /** Open connection to database server as user and optionally open database
+     */
+    /*--------------------------------------------------------------------------------*/
+    virtual bool Open(const AString& host, const AString& username, const AString& password, const AString& database = "");
 
-	/*--------------------------------------------------------------------------------*/
-	/** Check database connection
-	 */
-	/*--------------------------------------------------------------------------------*/
-	static bool CheckConnection(const AString& host);
+    /*--------------------------------------------------------------------------------*/
+    /** Check database connection
+     */
+    /*--------------------------------------------------------------------------------*/
+    virtual bool CheckConnection();
 
-	/*--------------------------------------------------------------------------------*/
-	/** Return whether database connection is open and valid
-	 */
-	/*--------------------------------------------------------------------------------*/
-	virtual bool IsOpen() const {return isopen;}
-	
-	/*--------------------------------------------------------------------------------*/
-	/** Close connection
-	 */
-	/*--------------------------------------------------------------------------------*/
-	virtual void Close();
+    /*--------------------------------------------------------------------------------*/
+    /** Check database connection
+     */
+    /*--------------------------------------------------------------------------------*/
+    static bool CheckConnection(const AString& host);
 
-	/*--------------------------------------------------------------------------------*/
-	/** Return error message
-	 */
-	/*--------------------------------------------------------------------------------*/
-	virtual AString GetErrorMessage(bool full = false);
+    /*--------------------------------------------------------------------------------*/
+    /** Return whether database connection is open and valid
+     */
+    /*--------------------------------------------------------------------------------*/
+    virtual bool IsOpen() const {return isopen;}
 
-	/*--------------------------------------------------------------------------------*/
-	/** Clear current error information
-	 */
-	/*--------------------------------------------------------------------------------*/
-	virtual void ClearResult();
+    /*--------------------------------------------------------------------------------*/
+    /** Close connection
+     */
+    /*--------------------------------------------------------------------------------*/
+    virtual void Close();
 
-	/*--------------------------------------------------------------------------------*/
-	/** Create user
-	 */
-	/*--------------------------------------------------------------------------------*/
-	virtual bool AddUser(const AString& username, const AString& password);
+    /*--------------------------------------------------------------------------------*/
+    /** Return error message
+     */
+    /*--------------------------------------------------------------------------------*/
+    virtual AString GetErrorMessage(bool full = false);
 
-	/*--------------------------------------------------------------------------------*/
-	/** Create database
-	 */
-	/*--------------------------------------------------------------------------------*/
-	virtual bool CreateDatabase(const AString& name);
+    /*--------------------------------------------------------------------------------*/
+    /** Clear current error information
+     */
+    /*--------------------------------------------------------------------------------*/
+    virtual void ClearResult();
 
-	/*--------------------------------------------------------------------------------*/
-	/** Grant privileges
-	 */
-	/*--------------------------------------------------------------------------------*/
-	virtual bool GrantPrivileges(const AString& database, const AString& username);
+    /*--------------------------------------------------------------------------------*/
+    /** Create user
+     */
+    /*--------------------------------------------------------------------------------*/
+    virtual bool AddUser(const AString& username, const AString& password);
 
-	/*--------------------------------------------------------------------------------*/
-	/** Sanitize and quote string to avoid SQL Injection vulnerabilities
-	 */
-	/*--------------------------------------------------------------------------------*/
-	virtual AString QuoteString(const AString& str) const;
-	
-	/*--------------------------------------------------------------------------------*/
-	/** Run simple SQL database query
-	 */
-	/*--------------------------------------------------------------------------------*/
-	virtual bool RunSQL(const AString& sql);
+    /*--------------------------------------------------------------------------------*/
+    /** Create database
+     */
+    /*--------------------------------------------------------------------------------*/
+    virtual bool CreateDatabase(const AString& name);
 
-	/*--------------------------------------------------------------------------------*/
-	/** Run complex query returning data
-	 */
-	/*--------------------------------------------------------------------------------*/
-	virtual SQLQuery *RunQuery(const AString& sql);
+    /*--------------------------------------------------------------------------------*/
+    /** Grant privileges
+     */
+    /*--------------------------------------------------------------------------------*/
+    virtual bool GrantPrivileges(const AString& database, const AString& username);
 
-	/*--------------------------------------------------------------------------------*/
-	/** Check to see if table exists
-	 */
-	/*--------------------------------------------------------------------------------*/
-	virtual bool TableExists(const AString& name);
+    /*--------------------------------------------------------------------------------*/
+    /** Sanitize and quote string to avoid SQL Injection vulnerabilities
+     */
+    /*--------------------------------------------------------------------------------*/
+    virtual AString QuoteString(const AString& str) const;
 
-	/*--------------------------------------------------------------------------------*/
-	/** Create table
-	 */
-	/*--------------------------------------------------------------------------------*/
-	virtual bool CreateTable(const AString& name, const AString& columns);
+    /*--------------------------------------------------------------------------------*/
+    /** Run simple SQL database query
+     */
+    /*--------------------------------------------------------------------------------*/
+    virtual bool RunSQL(const AString& sql);
 
-	typedef struct pg_conn   PGconn;
-	typedef struct pg_result PGresult;
-	
+    /*--------------------------------------------------------------------------------*/
+    /** Run complex query returning data
+     */
+    /*--------------------------------------------------------------------------------*/
+    virtual SQLQuery *RunQuery(const AString& sql);
+
+    /*--------------------------------------------------------------------------------*/
+    /** Check to see if table exists
+     */
+    /*--------------------------------------------------------------------------------*/
+    virtual bool TableExists(const AString& name);
+
+    /*--------------------------------------------------------------------------------*/
+    /** Create table
+     */
+    /*--------------------------------------------------------------------------------*/
+    virtual bool CreateTable(const AString& name, const AString& columns);
+
+    typedef struct pg_conn   PGconn;
+    typedef struct pg_result PGresult;
+
 protected:
-	static AString GetErrorMessage(PGconn *conn, bool full = false);
+    static AString GetErrorMessage(PGconn *conn, bool full = false);
 
-	/*--------------------------------------------------------------------------------*/
-	/** Translate simple type for database implementation
-	 */
-	/*--------------------------------------------------------------------------------*/
-	virtual AString ConvertSimpleType(const AString& ctype) const;
+    /*--------------------------------------------------------------------------------*/
+    /** Translate simple type for database implementation
+     */
+    /*--------------------------------------------------------------------------------*/
+    virtual AString ConvertSimpleType(const AString& ctype) const;
 
-	/*--------------------------------------------------------------------------------*/
-	/** Translate column type for database implementation
-	 */
-	/*--------------------------------------------------------------------------------*/
-	virtual AString GetColumnType(const AString& column) const;
+    /*--------------------------------------------------------------------------------*/
+    /** Translate column type for database implementation
+     */
+    /*--------------------------------------------------------------------------------*/
+    virtual AString GetColumnType(const AString& column) const;
 
-	class PostgresQuery : public SQLQuery {
-	public:
-		PostgresQuery(PostgresDatabase *_db, const AString& query);
-		virtual ~PostgresQuery();
+    class PostgresQuery : public SQLQuery {
+    public:
+        PostgresQuery(PostgresDatabase *_db, const AString& query);
+        virtual ~PostgresQuery();
 
-		/*--------------------------------------------------------------------------------*/
-		/** Get success and error message
-		 */
-		/*--------------------------------------------------------------------------------*/
-		virtual bool    GetResult()       const {return success;}
-		virtual AString GetErrorMessage() const {return PostgresDatabase::GetErrorMessage(conn);}
+        /*--------------------------------------------------------------------------------*/
+        /** Get success and error message
+         */
+        /*--------------------------------------------------------------------------------*/
+        virtual bool    GetResult()       const {return success;}
+        virtual AString GetErrorMessage() const {return PostgresDatabase::GetErrorMessage(conn);}
 
-		/*--------------------------------------------------------------------------------*/
-		/** Return row about to be fetch and optionally number of rows in total
-		 */
-		/*--------------------------------------------------------------------------------*/
-		virtual uint_t CurrentRow(uint_t *rows = NULL) const;
+        /*--------------------------------------------------------------------------------*/
+        /** Return row about to be fetch and optionally number of rows in total
+         */
+        /*--------------------------------------------------------------------------------*/
+        virtual uint_t CurrentRow(uint_t *rows = NULL) const;
 
-		/*--------------------------------------------------------------------------------*/
-		/** Fetch a row of results
-		 */
-		/*--------------------------------------------------------------------------------*/
-		virtual bool Fetch(AString& results);
+        /*--------------------------------------------------------------------------------*/
+        /** Fetch a row of results
+         */
+        /*--------------------------------------------------------------------------------*/
+        virtual bool Fetch(AString& results);
 
-	protected:
-		/*--------------------------------------------------------------------------------*/
-		/** Clear current error information
-		 */
-		/*--------------------------------------------------------------------------------*/
-		void ClearResult();
+    protected:
+        /*--------------------------------------------------------------------------------*/
+        /** Clear current error information
+         */
+        /*--------------------------------------------------------------------------------*/
+        void ClearResult();
 
-	protected:
-		PostgresDatabase *db;
-		PGconn   *conn;
-		PGresult *res;
-		uint_t   nfields;
-		uint_t   nrows;
-		uint_t   row;
-		bool     success;
-	};
-	friend class PostgresQuery;
+    protected:
+        PostgresDatabase *db;
+        PGconn   *conn;
+        PGresult *res;
+        uint_t   nfields;
+        uint_t   nrows;
+        uint_t   row;
+        bool     success;
+    };
+    friend class PostgresQuery;
 
-	struct pg_conn *GetConnection() {return conn;}
-		
+    struct pg_conn *GetConnection() {return conn;}
+
 protected:
-	AString	 connstr;
-	PGconn   *conn;
-	PGresult *res;
-	bool	 isopen;
+    AString  connstr;
+    PGconn   *conn;
+    PGresult *res;
+    bool     isopen;
 };
 
 #endif

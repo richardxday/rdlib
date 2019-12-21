@@ -9,44 +9,44 @@
 
 class AHash {
 public:
-	AHash(void (*fn)(uptr_t item, void *context) = NULL, void *context = NULL);
-	AHash(const AHash& hash);
-	~AHash();
+    AHash(void (*fn)(uptr_t item, void *context) = NULL, void *context = NULL);
+    AHash(const AHash& hash);
+    ~AHash();
 
-	void SetDestructor(void (*fn)(uptr_t item, void *context), void *context = NULL) {pDestructor = fn; pDestructorContext = context;}
+    void SetDestructor(void (*fn)(uptr_t item, void *context), void *context = NULL) {pDestructor = fn; pDestructorContext = context;}
 
-	void EnableCaseInSensitive(bool enable) {bCaseInsensitive = enable;}
-	bool CaseInSensitiveEnabled() const {return bCaseInsensitive;}
+    void EnableCaseInSensitive(bool enable) {bCaseInsensitive = enable;}
+    bool CaseInSensitiveEnabled() const {return bCaseInsensitive;}
 
-	void Delete();
+    void Delete();
 
-	uint_t GetItems() const {return data.size();}
-	
-	void Insert(const AString& key, uptr_t value = 0);
-	bool Remove(const AString& key);
+    uint_t GetItems() const {return data.size();}
 
-	bool   Exists(const AString& key) const;
-	uptr_t Read(const AString& key) const;
+    void Insert(const AString& key, uptr_t value = 0);
+    bool Remove(const AString& key);
 
-	bool Traverse(bool (*fn)(const AString& key, uptr_t value, void *context), void *context = NULL);
-	bool TraverseCompare(const AString& cmp, int l, bool (*fn)(const AString& key, uptr_t value, void *context), void *context = NULL);
+    bool   Exists(const AString& key) const;
+    uptr_t Read(const AString& key) const;
 
-	bool Copy(const AHash& src);
-	bool CopyCompare(const AHash& src, const AString& cmp, int l = -1);	uptr_t& operator [] (const AString& key);
+    bool Traverse(bool (*fn)(const AString& key, uptr_t value, void *context), void *context = NULL);
+    bool TraverseCompare(const AString& cmp, int l, bool (*fn)(const AString& key, uptr_t value, void *context), void *context = NULL);
+
+    bool Copy(const AHash& src);
+    bool CopyCompare(const AHash& src, const AString& cmp, int l = -1); uptr_t& operator [] (const AString& key);
 
 
-	bool Write(AStdData& fp, bool (*fn)(AStdData& fp, const AString& key, uptr_t value, void *context), void *context = NULL);
-	bool Read(AStdData& fp, bool (*fn)(AHash& hash, AStdData& fp, const AString& key, void *context), void *context = NULL);
+    bool Write(AStdData& fp, bool (*fn)(AStdData& fp, const AString& key, uptr_t value, void *context), void *context = NULL);
+    bool Read(AStdData& fp, bool (*fn)(AHash& hash, AStdData& fp, const AString& key, void *context), void *context = NULL);
 
 protected:
-	static bool __CopyKey(const AString& key, uptr_t value, void *context);
-	
+    static bool __CopyKey(const AString& key, uptr_t value, void *context);
+
 protected:
-	std::map<AString, uptr_t> data;
-	void   (*pDestructor)(uptr_t item, void *context);
-	void   *pDestructorContext;
-	uint_t nTraverseCount;
-	bool   bCaseInsensitive;
+    std::map<AString, uptr_t> data;
+    void   (*pDestructor)(uptr_t item, void *context);
+    void   *pDestructorContext;
+    uint_t nTraverseCount;
+    bool   bCaseInsensitive;
 };
 
 #endif

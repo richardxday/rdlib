@@ -25,7 +25,7 @@ See blowfish.c for more information about this file.
 #ifdef __cplusplus
 extern "C" {
 #endif
-  
+
 #include "types.h"
 
 typedef struct {
