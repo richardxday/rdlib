@@ -136,7 +136,7 @@ public:
     }
     char operator[](uint_t n) const {
         if (n < (uint_t)Length) return pText[n];
-        else                  return 0;
+        else                    return 0;
     }
 
     operator bool()           const;
@@ -161,8 +161,9 @@ public:
     AValue EvalNumber(bool allowModifiers, const char *terminators, AString *error = NULL) const {return EvalNumber(0, NULL, allowModifiers, terminators, error);}
     AValue EvalNumber(uint_t i = 0, uint_t *endIndex = NULL, bool allowModifiers = true, const char *terminators = NULL, AString *error = NULL) const;
 
-    sint_t      GetLength()  const {return Length;}
-    const char *GetBuffer() const {return pText;}
+    sint_t      GetLength()    const {return Length;}
+    sint_t      GetCharCount() const {return CountChars();}
+    const char *GetBuffer()    const {return pText;}
 
     sint_t     len()  const {return Length;}
     const char *str() const {return pText;}
@@ -430,6 +431,12 @@ public:
     static void DeleteString(uptr_t item, void *context) {UNUSED(context); if (item) delete (AString *)item;}
 
 protected:
+    bool IsUTF8(bool update = false);
+    sint_t EndOfCurrentChar(sint_t pos) const;
+    sint_t StartOfChar(sint_t n) const;
+    sint_t EndOfChar(sint_t n) const;
+    sint_t CountChars(sint_t p1 = 0, sint_t p2 = INT_MAX) const;
+
     static sint_t FindEndQuote(char q, sint_t length, const char *p, uint_t flags);
 
     AString FindFormatSpecifier(AString& left, AString& right) const;
@@ -454,10 +461,11 @@ protected:
 protected:
     char   *pText;
     sint_t Length;
+    bool   utf8;
 
     NODETYPE_DEFINE(AString);
 
-    static const char *pDefaultText;
+    static char pDefaultText[];
     static bool bSlashFromEnd;
 };
 

@@ -1,9 +1,12 @@
 
+#include <bits/stdint-uintn.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
 #include <ctype.h>
 #include <time.h>
+
+#include <algorithm>
 
 #include "StdFile.h"
 #include "strsup.h"
@@ -32,117 +35,133 @@ static bool Base64LookupInitialised = false;
 
 NODETYPE_IMPLEMENT(AString);
 
-const char *AString::pDefaultText = "";
+char AString::pDefaultText[] = {0};
 bool AString::bSlashFromEnd = true;
 
 AString::AString(char *iText, sint_t iLength) : AListNode(),
-                                                pText((char *)pDefaultText),
-                                                Length(0)
+                                                pText(pDefaultText),
+                                                Length(0),
+                                                utf8(false)
 {
     Create(iText, iLength);
 }
 
 AString::AString(const char *iText, sint_t iLength) : AListNode(),
-                                                      pText((char *)pDefaultText),
-                                                      Length(0)
+                                                      pText(pDefaultText),
+                                                      Length(0),
+                                                      utf8(false)
 {
     Create(iText, iLength);
 }
 
 AString::AString(const AString *pString, sint_t iLength) : AListNode(),
-                                                           pText((char *)pDefaultText),
-                                                           Length(0)
+                                                           pText(pDefaultText),
+                                                           Length(0),
+                                                           utf8(false)
 {
     if (pString) Create(pString->pText, iLength);
 }
 
 AString::AString(const AString& String, sint_t iLength) : AListNode(),
-                                                          pText((char *)pDefaultText),
-                                                          Length(0)
+                                                          pText(pDefaultText),
+                                                          Length(0),
+                                                          utf8(false)
 {
     Create(String.pText, iLength);
 }
 
 AString::AString(bool v) : AListNode(),
-                           pText((char *)pDefaultText),
-                           Length(0)
+                           pText(pDefaultText),
+                           Length(0),
+                           utf8(false)
 {
     operator = (v);
 }
 
 AString::AString(char c) : AListNode(),
-                           pText((char *)pDefaultText),
-                           Length(0)
+                           pText(pDefaultText),
+                           Length(0),
+                           utf8(false)
 {
     operator = (c);
 }
 
 AString::AString(sshort_t val, const char *format) : AListNode(),
-                                                     pText((char *)pDefaultText),
-                                                     Length(0)
+                                                     pText(pDefaultText),
+                                                     Length(0),
+                                                     utf8(false)
 {
     operator = (AValue(val).ToString(format));
 }
 
 AString::AString(ushort_t val, const char *format) : AListNode(),
-                                                     pText((char *)pDefaultText),
-                                                     Length(0)
+                                                     pText(pDefaultText),
+                                                     Length(0),
+                                                     utf8(false)
 {
     operator = (AValue(val).ToString(format));
 }
 
 AString::AString(sint_t val, const char *format) : AListNode(),
-                                                   pText((char *)pDefaultText),
-                                                   Length(0)
+                                                   pText(pDefaultText),
+                                                   Length(0),
+                                                   utf8(false)
 {
     operator = (AValue(val).ToString(format));
 }
 
 AString::AString(uint_t val, const char *format) : AListNode(),
-                                                   pText((char *)pDefaultText),
-                                                   Length(0)
+                                                   pText(pDefaultText),
+                                                   Length(0),
+                                                   utf8(false)
 {
     operator = (AValue(val).ToString(format));
 }
 
 AString::AString(slong_t val, const char *format) : AListNode(),
-                                                    pText((char *)pDefaultText),
-                                                    Length(0)
+                                                    pText(pDefaultText),
+                                                    Length(0),
+                                                    utf8(false)
 {
     operator = (AValue(val).ToString(format));
 }
 
 AString::AString(ulong_t val, const char *format) : AListNode(),
-                                                    pText((char *)pDefaultText),
-                                                    Length(0)
+                                                    pText(pDefaultText),
+                                                    Length(0),
+                                                    utf8(false)
 {
     operator = (AValue(val).ToString(format));
 }
 
 AString::AString(sllong_t val, const char *format) : AListNode(),
-                                                     pText((char *)pDefaultText),
-                                                     Length(0)
+                                                     pText(pDefaultText),
+                                                     Length(0),
+                                                     utf8(false)
 {
     operator = (AValue(val).ToString(format));
 }
 
 AString::AString(ullong_t val, const char *format) : AListNode(),
-                                                     pText((char *)pDefaultText),
-                                                     Length(0)
+                                                     pText(pDefaultText),
+                                                     Length(0),
+                                                     utf8(false)
 {
     operator = (AValue(val).ToString(format));
 }
 
 AString::AString(float val, const char *format) : AListNode(),
-                                                  pText((char *)pDefaultText),
-                                                  Length(0)
+                                                  pText(pDefaultText),
+                                                  Length(0),
+                                                  utf8(false)
 {
     operator = (AValue(val).ToString(format));
 }
 
 AString::AString(double val, const char *format) : AListNode(),
-                                                   pText((char *)pDefaultText),
-                                                   Length(0)
+                                                   pText(pDefaultText),
+                                                   Length(0),
+                                                   utf8(false)
 {
     operator = (AValue(val).ToString(format));
 }
@@ -152,14 +171,28 @@ AString::~AString()
     Delete();
 }
 
+bool AString::IsUTF8(bool update)
+{
+    if (update) {
+        int i;
+
+        utf8 = false;
+        for (i = 0; pText[i] && !utf8; i++) {
+            utf8 = (((uint8_t)pText[i] & 0xc0) == 0xc0);
+        }
+    }
+
+    return utf8;
+}
+
 bool AString::Create(const char *iText, sint_t iLength, bool limit)
 {
     char *pStr;
     bool  res = false;
 
-    if ((iText == NULL) || (iLength == 0)) iText = (char *)pDefaultText;
+    if ((iText == NULL) || (iLength == 0)) iText = pDefaultText;
 
-    if (iText != (char *)pDefaultText) {
+    if (iText != pDefaultText) {
         if (iLength < 0) {
             iLength = strlen(iText);
         }
@@ -176,6 +209,7 @@ bool AString::Create(const char *iText, sint_t iLength, bool limit)
 
             pText  = pStr;
             Length = strlen(pText);
+            IsUTF8(true);
 
             res = true;
         }
@@ -212,6 +246,7 @@ bool AString::Append(const char *iText, sint_t iLength, bool limit)
 
             pText  = pStr;
             Length = strlen(pText);
+            IsUTF8(true);
 
             res = true;
         }
@@ -224,22 +259,75 @@ bool AString::Append(const char *iText, sint_t iLength, bool limit)
 
 void AString::Delete()
 {
-    if (pText && (pText != (char *)pDefaultText)) DELETE_TEXT(pText);
+    if (pText && (pText != pDefaultText)) DELETE_TEXT(pText);
 
-    pText  = (char *)pDefaultText;
+    pText  = pDefaultText;
     Length = 0;
+    utf8   = false;
+}
+
+sint_t AString::EndOfCurrentChar(sint_t pos) const
+{
+    if (((uint8_t)pText[pos] & 0xc0) == 0xc0)
+    {
+        while (((uint8_t)pText[pos + 1] & 0xc0) == 0x80) pos++;
+    }
+    return pos;
+}
+
+sint_t AString::StartOfChar(sint_t n) const
+{
+    sint_t pos;
+
+    if      (n <  0) pos = -1;
+    else if (n == 0) pos = 0;
+    else if (!utf8)  pos = (n < Length) ? n : -1;
+    else {
+        for (pos = 0; pText[pos] && (n > 0); pos++) {
+            pos = EndOfCurrentChar(pos);
+            n--;
+        }
+        if (n > 0) pos = -1;
+    }
+
+    return pos;
+}
+
+sint_t AString::EndOfChar(sint_t n) const
+{
+    sint_t pos;
+
+    if ((pos = StartOfChar(n)) >= 0) {
+        pos = EndOfCurrentChar(pos);
+    }
+
+    return pos;
+}
+
+sint_t AString::CountChars(sint_t p1, sint_t p2) const
+{
+    sint_t p, n = 0;
+
+    p1 = std::max(p1, 0);
+    p2 = std::min(p2, Length);
+    for (p = p1; p < p2; p++) {
+        n += (((uint8_t)pText[p] & 0xc0) != 0x80);
+    }
+
+    return n;
 }
 
 char *AString::Steal(sint_t *pLength)
 {
     char *p = pText;
-    if (p == (char *)pDefaultText) {
+    if (p == pDefaultText) {
         if ((p = CREATE_TEXT(1)) != NULL) p[0] = 0;
     }
     if (pLength) *pLength = Length;
 
-    pText  = (char *)pDefaultText;
+    pText  = pDefaultText;
     Length = 0;
+    utf8   = false;
 
     return p;
 }
@@ -248,9 +336,10 @@ void AString::Take(const char *p, sint_t iLength)
 {
     Delete();
 
-    pText  = (char *)(p ? p : (char *)pDefaultText);
+    pText  = (char *)(p ? p : pDefaultText);
     if (iLength >= 0) Length = iLength;
     else              Length = strlen(pText);
+    IsUTF8(true);
 }
 
 AString AString::ReadFile(const char *filename)
@@ -288,6 +377,7 @@ bool AString::ReadFromFile(const char *filename, bool append)
 
                 pText  = pStr;
                 Length = strlen(pText);
+                IsUTF8(true);
 
                 success = true;
             }
@@ -489,6 +579,7 @@ AString& AString::operator = (bool v)
         Delete();
         pText  = pStr;
         Length = 1;
+        IsUTF8(true);
     }
 
     return *this;
@@ -505,6 +596,7 @@ AString& AString::operator = (char c)
         Delete();
         pText  = pStr;
         Length = 1;
+        IsUTF8(true);
     }
 
     return *this;
@@ -601,8 +693,9 @@ AString& AString::operator = (double val)
 AString& AString::operator += (char c)
 {
     char *pStr;
+    int newlen = Length + 1;
 
-    if ((pStr = CREATE_TEXT(Length + 2)) != NULL) {
+    if ((pStr = CREATE_TEXT(newlen + 1)) != NULL) {
         strcpy(pStr, pText);
 
         pStr[Length] = c;
@@ -611,7 +704,8 @@ AString& AString::operator += (char c)
         Delete();
 
         pText = pStr;
-        Length = strlen(pText);
+        Length = newlen;
+        IsUTF8(true);
     }
 
     return *this;
@@ -619,19 +713,21 @@ AString& AString::operator += (char c)
 
 AString& AString::operator += (const char *iText)
 {
-    sint_t l = strlen(iText);
+    sint_t len = strlen(iText);
 
-    if (l > 0) {
+    if (len > 0) {
         char *pStr;
+        int newlen = Length + len;
 
-        if ((pStr = CREATE_TEXT(Length + l + 1)) != NULL) {
+        if ((pStr = CREATE_TEXT(newlen + 1)) != NULL) {
             strcpy(pStr, pText);
             strcpy(pStr + Length, iText);
 
             Delete();
 
             pText = pStr;
-            Length = strlen(pText);
+            Length = newlen;
+            IsUTF8(true);
         }
     }
 
@@ -640,19 +736,19 @@ AString& AString::operator += (const char *iText)
 
 AString& AString::operator += (const AString *pString)
 {
-    sint_t l = strlen(pString->pText);
-
-    if (l > 0) {
+    if (pString->Valid()) {
         char *pStr;
+        int newlen = Length + pString->Length;
 
-        if ((pStr = CREATE_TEXT(Length + l + 1)) != NULL) {
+        if ((pStr = CREATE_TEXT(newlen + 1)) != NULL) {
             strcpy(pStr, pText);
             strcpy(pStr + Length, pString->pText);
 
             Delete();
 
             pText = pStr;
-            Length = strlen(pText);
+            Length = newlen;
+            IsUTF8(true);
         }
     }
 
@@ -661,23 +757,7 @@ AString& AString::operator += (const AString *pString)
 
 AString& AString::operator += (const AString& String)
 {
-    sint_t l = strlen(String.pText);
-
-    if (l > 0) {
-        char *pStr;
-
-        if ((pStr = CREATE_TEXT(Length + l + 1)) != NULL) {
-            strcpy(pStr, pText);
-            strcpy(pStr + Length, String.pText);
-
-            Delete();
-
-            pText = pStr;
-            Length = strlen(pText);
-        }
-    }
-
-    return *this;
+    return operator += (&String);
 }
 
 AString operator + (const AString& Object1, const char *iText2)
@@ -1703,7 +1783,7 @@ AString& AString::Replace(const char *pSearchChars, const char *pReplaceChars, b
         else        lookup[c] = 0;
     }
 
-    if (pText == (char *)pDefaultText) pText = CREATE_TEXT(Length + 1);
+    if (pText == pDefaultText) pText = CREATE_TEXT(Length + 1);
 
     for (i = j = 0; (i < Length); i++) {
         c = (uint8_t)pText[i];
@@ -1742,6 +1822,7 @@ AString AString::Copies(sint_t n) const
 
             String.Length = l;
             String.pText[String.Length] = 0;
+            String.IsUTF8(true);
         }
     }
 
@@ -2076,17 +2157,18 @@ AString AString::StripUnprintable() const
 AString AString::Abbreviate(sint_t n) const
 {
     AString String;
+    sint_t nchars = GetCharCount();
 
-    if (n >= Length) String = *this;
+    if (n >= nchars) String = *this;
     else {
-        if (n > 3) {
-            String.Create(pText, n - 3);
-            n = 3;
+        static const AString tail = "...";
+
+        if (n > tail.len()) {
+            String.Create(pText, StartOfChar(n - tail.len()));
+            n = tail.len();
         }
 
-        if      (n == 3) String += "...";
-        else if (n == 2) String += "..";
-        else             String += ".";
+        String += tail.Left(n);
     }
 
     return String;
