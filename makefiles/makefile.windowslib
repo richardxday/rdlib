@@ -1,5 +1,5 @@
 
-HEADERS      += $(LIBRARY)_version.h
+HEADERS		 += $(LIBRARY)_version.h
 EXTRA_CFLAGS += -I$(WINDOWSLIB)
 
 VERSION_FILE:= $(WINDOWSLIB)/$(WINDOWSLIB)_private.h

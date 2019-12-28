@@ -79,7 +79,7 @@ $(INSTALLLIBDST)/%$(SHARED_LIBRARY_SUFFIX): $(INSTALLLIBDST)/%$(SHARED_LIBRARY_S
 	@test -f "$@" || $(SUDO) ln -s "$<" "$@"
 endif
 
-%.pc: %.pc.in $(MAKEFILEDIR)/makefile.libbuild makefile $(VERSION_FILE)
+%.pc: %.pc.in $(MAKEFILEDIR)/makefile.* makefile $(VERSION_FILE)
 	@test -d "`dirname "$@"`" || mkdir -p "`dirname "$@"`"													\
 	@cat "$<" |																								\
 	sed -E "s#@prefix@#$(PREFIX)#g" |																		\

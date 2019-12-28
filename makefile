@@ -1,10 +1,10 @@
 
 all: default-build
 
-MAKEFILEDIR=makefiles
+MAKEFILEDIR := makefiles
 
-LIBRARY:=rdlib
-WINDOWSLIB:=winlib
+LIBRARY	   := rdlib
+WINDOWSLIB := winlib
 
 include $(MAKEFILEDIR)/makefile.init
 include $(MAKEFILEDIR)/makefile.windowslib

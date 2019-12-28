@@ -59,8 +59,8 @@ SHARED_LIBRARY_SUFFIX:=.so
 APPLICATION_SUFFIX:=
 endif
 
-ROOTDIR:=$(shell $(CPP) -v /dev/null -o /dev/null 2>&1 | grep -E "^ /.*usr/include$$" | sed -E "s/^ (.+)\/usr\/include/\1/")
-PREFIX:=$(ROOTDIR)/usr/local
+ROOTDIR:=$(shell $(CPP) -v /dev/null -o /dev/null 2>&1 | grep -E "^ +/.*usr/include$$" | sed -E "s/^ +([^ ]*\/)usr\/include/\1/")
+PREFIX:=$(ROOTDIR)usr/local
 
 OBJECTS:=
 HEADERS:=
