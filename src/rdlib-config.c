@@ -8,6 +8,7 @@ int main(int argc, char *argv[])
 {
     bool cflags    = ((argc < 2) || (strcmp(argv[1], "--cflags") == 0));
     bool libs      = ((argc > 1) && (strcmp(argv[1], "--libs") == 0));
+    bool rootdir   = ((argc > 1) && (strcmp(argv[1], "--rootdir") == 0));
     bool prefix    = ((argc > 1) && (strcmp(argv[1], "--prefix") == 0));
     bool makefiles = ((argc > 1) && (strcmp(argv[1], "--makefiles") == 0));
 
@@ -63,6 +64,10 @@ int main(int argc, char *argv[])
 #else
         printf(" -lrt");
 #endif
+    }
+
+    if (rootdir) {
+        printf("%s", RDLIB_ROOTDIR);
     }
 
     if (prefix) {
