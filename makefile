@@ -132,13 +132,19 @@ HEADERS +=										\
 	types.h										\
 	wxsup.h
 
+include $(MAKEFILEDIR)/makefile.prebuild
+
+INSTALLEDMAKEFILESDST := $(INSTALLSHAREDST)/makefiles
+
+RDLIB_CONFIG := rdlib-config
+
 GLOBAL_CFLAGS  += -D_FILE_OFFSET_BITS=64 -fsigned-char
-GLOBAL_CFLAGS  += $(shell $(CC) -Wall -o arch src/arch.c && ./arch)
+GLOBAL_CFLAGS  += $(shell $(CC) $(GLOBAL_CFLAGS) -Wall "-DRDLIB_PREFIX=\"$(PREFIX)\"" "-DRDLIB_MAKEFILES=\"$(INSTALLEDMAKEFILESDST)\"" -o $(RDLIB_CONFIG)$(APPLICATION_SUFFIX) src/$(RDLIB_CONFIG).c && ./$(RDLIB_CONFIG))
 
 EXTRA_CFLAGS   += $(call pkgcflags,libpq)
 EXTRA_CXXFLAGS += -std=c++11
 
-GLOBAL_LIBS	   += -lm $(shell ./arch --libs)
+GLOBAL_LIBS	   += -lm $(shell ./$(RDLIB_CONFIG) --libs)
 GLOBAL_LIBS	   += $(call pkglibs,libpq) -lpthread -ljpeg
 
 include $(MAKEFILEDIR)/makefile.lib
@@ -146,7 +152,14 @@ include $(MAKEFILEDIR)/makefile.lib
 LOCAL_SHARE_FILES := $(shell find makefiles) makefiles/copyifnewer makefiles/library.pc.in
 INSTALLEDSHAREFILES += $(LOCAL_SHARE_FILES:%=$(INSTALLSHAREDST)/%)
 
-$(INSTALLSHAREDST)/makefiles/%: makefiles/%
+$(INSTALLEDMAKEFILESDST)/%: makefiles/%
 	@$(SUDO) $(MAKEFILEDIR)/copyifnewer "$<" "$@"
+
+$(INSTALLBINDST)/$(RDLIB_CONFIG)$(APPLICATION_SUFFIX): $(RDLIB_CONFIG)$(APPLICATION_SUFFIX)
+	@$(SUDO) $(MAKEFILEDIR)/copyifnewer "$<" "$@"
+
+INSTALLEDBINARIES += $(INSTALLBINDST)/$(RDLIB_CONFIG)$(APPLICATION_SUFFIX)
+
+CLEANFILES += $(RDLIB_CONFIG)$(APPLICATION_SUFFIX)
 
 include $(MAKEFILEDIR)/makefile.post

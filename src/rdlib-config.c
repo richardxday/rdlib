@@ -6,32 +6,36 @@ typedef enum {false = 0, true} bool;
 
 int main(int argc, char *argv[])
 {
-    bool cflags = ((argc < 2) || (strcmp(argv[1], "--cflags") == 0));
-    bool libs   = ((argc > 1) && (strcmp(argv[1], "--libs") == 0));
+    bool cflags    = ((argc < 2) || (strcmp(argv[1], "--cflags") == 0));
+    bool libs      = ((argc > 1) && (strcmp(argv[1], "--libs") == 0));
+    bool prefix    = ((argc > 1) && (strcmp(argv[1], "--prefix") == 0));
+    bool makefiles = ((argc > 1) && (strcmp(argv[1], "--makefiles") == 0));
 
+    if (cflags || libs) {
 #ifdef __APPLE__
-    printf(" -arch i386");
+        printf(" -arch i386");
 #endif
 
-    if (cflags) {
+        if (cflags) {
 #ifdef __i386__
-        printf(" -msse3");
+            printf(" -msse3");
 #endif
 
 #ifdef __x86_64__
-        printf(" -msse3");
+            printf(" -msse3");
 #endif
 
 #ifdef __arm__
 #ifdef __SOFTFP__
-        printf(" -mfloat-abi=softfp");
+            printf(" -mfloat-abi=softfp");
 #endif
 #endif
-    }
+        }
 
 #ifdef __linux__
-    printf(" -fPIC");
+        printf(" -fPIC");
 #endif
+    }
 
     if (cflags) {
 #if defined(__linux__) || defined(__CYGWIN__)
@@ -59,6 +63,14 @@ int main(int argc, char *argv[])
 #else
         printf(" -lrt");
 #endif
+    }
+
+    if (prefix) {
+        printf("%s", RDLIB_PREFIX);
+    }
+
+    if (makefiles) {
+        printf("%s", RDLIB_MAKEFILES);
     }
 
     printf("\n");
