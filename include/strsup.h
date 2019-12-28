@@ -69,12 +69,30 @@ public:
 
     LISTNODE_DUPLICATE(AString);
 
+    // UTF8 encoding:
+    // 0x00000000 - 0x0000007F:
+    //      0xxxxxxx
+    //
+    //  0x00000080 - 0x000007FF:
+    //      110xxxxx 10xxxxxx
+    //
+    //  0x00000800 - 0x0000FFFF:
+    //      1110xxxx 10xxxxxx 10xxxxxx
+    //
+    //  0x00010000 - 0x001FFFFF:
+    //      11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
+    static bool IsUTF8Char(char c)      {return (((uint8_t)c & 0x80) == 0x80);}
+    static bool IsUTF8StartChar(char c) {return (((uint8_t)c & 0xc0) == 0xc0);}
+    static bool IsUTF8ContChar(char c)  {return (((uint8_t)c & 0xc0) == 0x80);}
+    static size_t UTF8CharLen(char c);
+    static size_t UTF8Strlen(const char *p);
+
     bool Create(const char *iText, sint_t iLength = -1, bool limit = true);
     bool Append(const char *iText, sint_t iLength = -1, bool limit = true);
     void Delete();
 
     char *Steal(sint_t *pLength = NULL);
-    void Take(const char *p, sint_t iLength = -1);
+    void Take(const char *iText, sint_t iLength = -1);
 
     static AString ReadFile(const char *filename);
     bool ReadFromFile(const char *filename, bool append = false);
@@ -161,12 +179,20 @@ public:
     AValue EvalNumber(bool allowModifiers, const char *terminators, AString *error = NULL) const {return EvalNumber(0, NULL, allowModifiers, terminators, error);}
     AValue EvalNumber(uint_t i = 0, uint_t *endIndex = NULL, bool allowModifiers = true, const char *terminators = NULL, AString *error = NULL) const;
 
+    sint_t GetStartOfCurrentChar(sint_t pos) const;
+    sint_t GetEndOfCurrentChar(sint_t pos) const;
+    sint_t GetCharLength(sint_t pos) const {return GetEndOfCurrentChar(pos) + 1 - GetStartOfCurrentChar(pos);}
+    sint_t GetStartOfChar(sint_t n) const;
+    sint_t GetEndOfChar(sint_t n) const;
+    sint_t CountChars(sint_t p1 = 0, sint_t p2 = INT_MAX) const;
+
     sint_t      GetLength()    const {return Length;}
-    sint_t      GetCharCount() const {return CountChars();}
+    sint_t      GetCharCount() const {return CharCount;}
     const char *GetBuffer()    const {return pText;}
 
-    sint_t     len()  const {return Length;}
-    const char *str() const {return pText;}
+    sint_t     len()   const {return Length;}
+    sint_t     chars() const {return CharCount;}
+    const char *str()  const {return pText;}
 
     void   Format(const char *format, ...) PRINTF_FORMAT_METHOD;
     void   FormatV(const char *format, va_list ap);
@@ -431,11 +457,7 @@ public:
     static void DeleteString(uptr_t item, void *context) {UNUSED(context); if (item) delete (AString *)item;}
 
 protected:
-    bool IsUTF8(bool update = false);
-    sint_t EndOfCurrentChar(sint_t pos) const;
-    sint_t StartOfChar(sint_t n) const;
-    sint_t EndOfChar(sint_t n) const;
-    sint_t CountChars(sint_t p1 = 0, sint_t p2 = INT_MAX) const;
+    void Assign(char *pStr, int iLength = -1);
 
     static sint_t FindEndQuote(char q, sint_t length, const char *p, uint_t flags);
 
@@ -461,7 +483,7 @@ protected:
 protected:
     char   *pText;
     sint_t Length;
-    bool   utf8;
+    sint_t CharCount;
 
     NODETYPE_DEFINE(AString);
 

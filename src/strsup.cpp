@@ -40,7 +40,7 @@ bool AString::bSlashFromEnd = true;
 AString::AString(char *iText, sint_t iLength) : AListNode(),
                                                 pText(pDefaultText),
                                                 Length(0),
-                                                utf8(false)
+                                                CharCount(0)
 {
     Create(iText, iLength);
 }
@@ -48,7 +48,7 @@ AString::AString(char *iText, sint_t iLength) : AListNode(),
 AString::AString(const char *iText, sint_t iLength) : AListNode(),
                                                       pText(pDefaultText),
                                                       Length(0),
-                                                      utf8(false)
+                                                      CharCount(0)
 {
     Create(iText, iLength);
 }
@@ -56,7 +56,7 @@ AString::AString(const char *iText, sint_t iLength) : AListNode(),
 AString::AString(const AString *pString, sint_t iLength) : AListNode(),
                                                            pText(pDefaultText),
                                                            Length(0),
-                                                           utf8(false)
+                                                           CharCount(0)
 {
     if (pString) Create(pString->pText, iLength);
 }
@@ -64,7 +64,7 @@ AString::AString(const AString *pString, sint_t iLength) : AListNode(),
 AString::AString(const AString& String, sint_t iLength) : AListNode(),
                                                           pText(pDefaultText),
                                                           Length(0),
-                                                          utf8(false)
+                                                          CharCount(0)
 {
     Create(String.pText, iLength);
 }
@@ -72,7 +72,7 @@ AString::AString(const AString& String, sint_t iLength) : AListNode(),
 AString::AString(bool v) : AListNode(),
                            pText(pDefaultText),
                            Length(0),
-                           utf8(false)
+                           CharCount(0)
 {
     operator = (v);
 }
@@ -80,7 +80,7 @@ AString::AString(bool v) : AListNode(),
 AString::AString(char c) : AListNode(),
                            pText(pDefaultText),
                            Length(0),
-                           utf8(false)
+                           CharCount(0)
 {
     operator = (c);
 }
@@ -88,7 +88,7 @@ AString::AString(char c) : AListNode(),
 AString::AString(sshort_t val, const char *format) : AListNode(),
                                                      pText(pDefaultText),
                                                      Length(0),
-                                                     utf8(false)
+                                                     CharCount(0)
 {
     operator = (AValue(val).ToString(format));
 }
@@ -96,7 +96,7 @@ AString::AString(sshort_t val, const char *format) : AListNode(),
 AString::AString(ushort_t val, const char *format) : AListNode(),
                                                      pText(pDefaultText),
                                                      Length(0),
-                                                     utf8(false)
+                                                     CharCount(0)
 {
     operator = (AValue(val).ToString(format));
 }
@@ -104,7 +104,7 @@ AString::AString(ushort_t val, const char *format) : AListNode(),
 AString::AString(sint_t val, const char *format) : AListNode(),
                                                    pText(pDefaultText),
                                                    Length(0),
-                                                   utf8(false)
+                                                   CharCount(0)
 {
     operator = (AValue(val).ToString(format));
 }
@@ -112,7 +112,7 @@ AString::AString(sint_t val, const char *format) : AListNode(),
 AString::AString(uint_t val, const char *format) : AListNode(),
                                                    pText(pDefaultText),
                                                    Length(0),
-                                                   utf8(false)
+                                                   CharCount(0)
 {
     operator = (AValue(val).ToString(format));
 }
@@ -120,7 +120,7 @@ AString::AString(uint_t val, const char *format) : AListNode(),
 AString::AString(slong_t val, const char *format) : AListNode(),
                                                     pText(pDefaultText),
                                                     Length(0),
-                                                    utf8(false)
+                                                    CharCount(0)
 {
     operator = (AValue(val).ToString(format));
 }
@@ -128,7 +128,7 @@ AString::AString(slong_t val, const char *format) : AListNode(),
 AString::AString(ulong_t val, const char *format) : AListNode(),
                                                     pText(pDefaultText),
                                                     Length(0),
-                                                    utf8(false)
+                                                    CharCount(0)
 {
     operator = (AValue(val).ToString(format));
 }
@@ -136,7 +136,7 @@ AString::AString(ulong_t val, const char *format) : AListNode(),
 AString::AString(sllong_t val, const char *format) : AListNode(),
                                                      pText(pDefaultText),
                                                      Length(0),
-                                                     utf8(false)
+                                                     CharCount(0)
 {
     operator = (AValue(val).ToString(format));
 }
@@ -144,7 +144,7 @@ AString::AString(sllong_t val, const char *format) : AListNode(),
 AString::AString(ullong_t val, const char *format) : AListNode(),
                                                      pText(pDefaultText),
                                                      Length(0),
-                                                     utf8(false)
+                                                     CharCount(0)
 {
     operator = (AValue(val).ToString(format));
 }
@@ -152,7 +152,7 @@ AString::AString(ullong_t val, const char *format) : AListNode(),
 AString::AString(float val, const char *format) : AListNode(),
                                                   pText(pDefaultText),
                                                   Length(0),
-                                                  utf8(false)
+                                                  CharCount(0)
 {
     operator = (AValue(val).ToString(format));
 }
@@ -160,7 +160,7 @@ AString::AString(float val, const char *format) : AListNode(),
 AString::AString(double val, const char *format) : AListNode(),
                                                    pText(pDefaultText),
                                                    Length(0),
-                                                   utf8(false)
+                                                   CharCount(0)
 {
     operator = (AValue(val).ToString(format));
 }
@@ -170,18 +170,118 @@ AString::~AString()
     Delete();
 }
 
-bool AString::IsUTF8(bool update)
+size_t AString::UTF8CharLen(char c)
 {
-    if (update) {
-        int i;
+    static const size_t lens[32] =
+    {
+        // 0x00000xxx - 0x01111xxx
+        1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1,
+        // 0x10000xxx - 0x10111xxx: illegal
+        0, 0, 0, 0, 0, 0, 0, 0,
+        // 0x11000xxx - 0x11011xxx
+        2, 2, 2, 2,
+        // 0x11100xxx - 0x11001xxx
+        3, 3,
+        // 0x11110xxx
+        4,
+        // 0x11111xxx
+        0,
+    };
+    return lens[(uint8_t)c >> 3U];
+}
 
-        utf8 = false;
-        for (i = 0; pText[i] && !utf8; i++) {
-            utf8 = (((uint8_t)pText[i] & 0xc0) == 0xc0);
+size_t AString::UTF8Strlen(const char *p)
+{
+    size_t i, n;
+    size_t len;
+
+    for (i = n = 0; p[i]; ) {
+        if ((len = UTF8CharLen(p[i])) > 0) {
+            i += len;
+            n++;
         }
+        else i++;
     }
 
-    return utf8;
+    return n;
+}
+
+sint_t AString::GetStartOfCurrentChar(sint_t pos) const
+{
+    while ((UTF8CharLen(pText[pos]) == 0) && (pos > 0)) {
+        pos--;
+    }
+    return pos;
+}
+
+sint_t AString::GetEndOfCurrentChar(sint_t pos) const
+{
+    size_t len;
+
+    while (((len = UTF8CharLen(pText[pos])) == 0) && (pos > 0)) {
+        pos--;
+    }
+
+    return pos + len - 1;
+}
+
+sint_t AString::GetStartOfChar(sint_t n) const
+{
+    sint_t pos;
+
+    if      (n <  0) pos = -1;
+    else if (n == 0) pos = 0;
+    else if (CharCount == Length)  pos = (n < Length) ? n : -1;
+    else {
+        for (pos = 0; pText[pos] && (n > 0); pos++) {
+            pos = GetEndOfCurrentChar(pos);
+            n--;
+        }
+        if (n > 0) pos = -1;
+    }
+
+    return pos;
+}
+
+sint_t AString::GetEndOfChar(sint_t n) const
+{
+    sint_t pos;
+
+    if ((pos = GetStartOfChar(n)) >= 0) {
+        pos = GetEndOfCurrentChar(pos);
+    }
+
+    return pos;
+}
+
+sint_t AString::CountChars(sint_t p1, sint_t p2) const
+{
+    sint_t p, n = 0;
+
+    p1 = std::max(p1, 0);
+    p2 = std::min(p2, Length);
+    for (p = p1; p < p2; p++) {
+        n += !IsUTF8ContChar(pText[p]);
+    }
+
+    return n;
+}
+
+void AString::Assign(char *pStr, int iLength)
+{
+    if ((pStr != NULL) && (iLength < 0)) {
+        iLength = strlen(pStr);
+    }
+    if ((pStr != NULL) && (iLength > 0)) {
+        char *pOldText = pText;
+        pText     = pStr;
+        Length    = iLength;
+        CharCount = (sint_t)UTF8Strlen(pText);
+
+        if ((pOldText != NULL) && (pOldText != pDefaultText)) DELETE_TEXT(pOldText);
+    }
+    else Delete();
 }
 
 bool AString::Create(const char *iText, sint_t iLength, bool limit)
@@ -189,7 +289,9 @@ bool AString::Create(const char *iText, sint_t iLength, bool limit)
     char *pStr;
     bool  res = false;
 
-    if ((iText == NULL) || (iLength == 0)) iText = pDefaultText;
+    if ((iText == NULL) || (iLength == 0)) {
+        iText = pDefaultText;
+    }
 
     if (iText != pDefaultText) {
         if (iLength < 0) {
@@ -204,11 +306,7 @@ bool AString::Create(const char *iText, sint_t iLength, bool limit)
             memcpy(pStr, iText, iLength);
             pStr[iLength] = 0;
 
-            Delete();
-
-            pText  = pStr;
-            Length = strlen(pText);
-            IsUTF8(true);
+            Assign(pStr, iLength);
 
             res = true;
         }
@@ -231,21 +329,16 @@ bool AString::Append(const char *iText, sint_t iLength, bool limit)
         iLength = strlen(iText);
     }
     else if (limit) {
-        int l = strlen(iText);
-        iLength = MIN(iLength, l);
+        iLength = std::min(iLength, (sint_t)strlen(iText));
     }
 
-    if (iText && iLength) {
+    if ((iText != NULL) && (iLength > 0)) {
         if ((pStr = CREATE_TEXT(Length + iLength + 1)) != NULL) {
-            if (Length)  memcpy(pStr, pText, Length);
-            if (iLength) memcpy(pStr + Length, iText, iLength);
+            if (Length  > 0) memcpy(pStr, pText, Length);
+            if (iLength > 0) memcpy(pStr + Length, iText, iLength);
             pStr[Length + iLength] = 0;
 
-            Delete();
-
-            pText  = pStr;
-            Length = strlen(pText);
-            IsUTF8(true);
+            Assign(pStr, Length + iLength);
 
             res = true;
         }
@@ -260,60 +353,9 @@ void AString::Delete()
 {
     if (pText && (pText != pDefaultText)) DELETE_TEXT(pText);
 
-    pText  = pDefaultText;
-    Length = 0;
-    utf8   = false;
-}
-
-sint_t AString::EndOfCurrentChar(sint_t pos) const
-{
-    if (((uint8_t)pText[pos] & 0xc0) == 0xc0)
-    {
-        while (((uint8_t)pText[pos + 1] & 0xc0) == 0x80) pos++;
-    }
-    return pos;
-}
-
-sint_t AString::StartOfChar(sint_t n) const
-{
-    sint_t pos;
-
-    if      (n <  0) pos = -1;
-    else if (n == 0) pos = 0;
-    else if (!utf8)  pos = (n < Length) ? n : -1;
-    else {
-        for (pos = 0; pText[pos] && (n > 0); pos++) {
-            pos = EndOfCurrentChar(pos);
-            n--;
-        }
-        if (n > 0) pos = -1;
-    }
-
-    return pos;
-}
-
-sint_t AString::EndOfChar(sint_t n) const
-{
-    sint_t pos;
-
-    if ((pos = StartOfChar(n)) >= 0) {
-        pos = EndOfCurrentChar(pos);
-    }
-
-    return pos;
-}
-
-sint_t AString::CountChars(sint_t p1, sint_t p2) const
-{
-    sint_t p, n = 0;
-
-    p1 = std::max(p1, 0);
-    p2 = std::min(p2, Length);
-    for (p = p1; p < p2; p++) {
-        n += (((uint8_t)pText[p] & 0xc0) != 0x80);
-    }
-
-    return n;
+    pText     = pDefaultText;
+    Length    = 0;
+    CharCount = 0;
 }
 
 char *AString::Steal(sint_t *pLength)
@@ -324,21 +366,16 @@ char *AString::Steal(sint_t *pLength)
     }
     if (pLength) *pLength = Length;
 
-    pText  = pDefaultText;
-    Length = 0;
-    utf8   = false;
+    pText     = pDefaultText;
+    Length    = 0;
+    CharCount = 0;
 
     return p;
 }
 
-void AString::Take(const char *p, sint_t iLength)
+void AString::Take(const char *iText, sint_t iLength)
 {
-    Delete();
-
-    pText  = (char *)(p ? p : pDefaultText);
-    if (iLength >= 0) Length = iLength;
-    else              Length = strlen(pText);
-    IsUTF8(true);
+    Assign((char *)iText, iLength);
 }
 
 AString AString::ReadFile(const char *filename)
@@ -372,11 +409,7 @@ bool AString::ReadFromFile(const char *filename, bool append)
 
                 pStr[offset + l] = 0;
 
-                Delete();
-
-                pText  = pStr;
-                Length = strlen(pText);
-                IsUTF8(true);
+                Assign(pStr, offset + l);
 
                 success = true;
             }
@@ -411,160 +444,146 @@ bool AString::WriteToFile(const char *filename, const char *mode) const
 
 AString *AString::Find(const char *iText, bool bPartial) const
 {
-    AString *pLine = (AString *)this;
-    bool Found = false;
-    sint_t l1 = strlen(iText), l2;
+    const AString *pLine = this;
+    bool found = false;
+    sint_t l1 = strlen(iText);
 
-    while (pLine && !Found) {
-        l2 = pLine->Length;
+    while (pLine && !found) {
+        if (bPartial) found = (strnicmp(iText, pLine->pText, std::min(l1, pLine->Length)) == 0);
+        else          found = (stricmp(iText, pLine->pText) == 0);
 
-        if (bPartial) Found = (strnicmp(iText, pLine->pText, MIN(l1, l2)) == 0);
-        else          Found = (stricmp(iText, pLine->pText) == 0);
+        if (!found) pLine = pLine->Next();
     }
 
-    return pLine;
+    return (AString *)pLine;
 }
 
 AString *AString::Find(const AString& String, bool bPartial) const
 {
-    AString *pLine = (AString *)this;
-    bool Found = false;
-    sint_t l1 = String.Length, l2;
+    const AString *pLine = this;
+    bool found = false;
+    sint_t l1 = String.Length;
 
-    while (pLine && !Found) {
-        l2 = pLine->Length;
+    while (pLine && !found) {
+        if (bPartial) found = (strnicmp(String.pText, pLine->pText, std::min(l1, pLine->Length)) == 0);
+        else          found = (stricmp(String.pText, pLine->pText) == 0);
 
-        if (bPartial) Found = (strnicmp(String.pText, pLine->pText, MIN(l1, l2)) == 0);
-        else          Found = (stricmp(String.pText, pLine->pText) == 0);
-
-        if (!Found) pLine = pLine->Next();
+        if (!found) pLine = pLine->Next();
     }
 
-    return pLine;
+    return (AString *)pLine;
 }
 
 AString *AString::Find(const char *iText, int& n, bool bPartial) const
 {
-    AString *pLine = (AString *)this;
-    bool Found = false;
-    sint_t l1 = strlen(iText), l2;
+    const AString *pLine = this;
+    bool found = false;
+    sint_t l1 = strlen(iText);
 
     n = 0;
-    while (pLine && !Found) {
-        l2 = pLine->Length;
+    while (pLine && !found) {
+        if (bPartial) found = (strnicmp(iText, pLine->pText, std::min(l1, pLine->Length)) == 0);
+        else          found = (stricmp(iText, pLine->pText) == 0);
 
-        if (bPartial) Found = (strnicmp(iText, pLine->pText, MIN(l1, l2)) == 0);
-        else          Found = (stricmp(iText, pLine->pText) == 0);
-
-        if (!Found) {
+        if (!found) {
             pLine = pLine->Next();
             n++;
         }
     }
 
-    return pLine;
+    return (AString *)pLine;
 }
 
 AString *AString::Find(const AString& String, int& n, bool bPartial) const
 {
-    AString *pLine = (AString *)this;
-    bool Found = false;
-    sint_t l1 = String.Length, l2;
+    const AString *pLine = this;
+    bool found = false;
+    sint_t l1 = String.Length;
 
     n = 0;
-    while (pLine && !Found) {
-        l2 = pLine->Length;
+    while (pLine && !found) {
+        if (bPartial) found = (strnicmp(String.pText, pLine->pText, std::min(l1, pLine->Length)) == 0);
+        else          found = (stricmp(String.pText, pLine->pText) == 0);
 
-        if (bPartial) Found = (strnicmp(String.pText, pLine->pText, MIN(l1, l2)) == 0);
-        else          Found = (stricmp(String.pText, pLine->pText) == 0);
-
-        if (!Found) {
+        if (!found) {
             pLine = pLine->Next();
             n++;
         }
     }
 
-    return pLine;
+    return (AString *)pLine;
 }
 
 AString *AString::FindBackwards(const char *iText, bool bPartial) const
 {
-    AString *pLine = (AString *)this;
-    bool Found = false;
-    sint_t l1 = strlen(iText), l2;
+    const AString *pLine = this;
+    bool found = false;
+    sint_t l1 = strlen(iText);
 
-    while (pLine && !Found) {
-        l2 = pLine->Length;
+    while (pLine && !found) {
+        if (bPartial) found = (strnicmp(iText, pLine->pText, std::min(l1, pLine->Length)) == 0);
+        else          found = (stricmp(iText, pLine->pText) == 0);
 
-        if (bPartial) Found = (strnicmp(iText, pLine->pText, MIN(l1, l2)) == 0);
-        else          Found = (stricmp(iText, pLine->pText) == 0);
-
-        if (!Found) pLine = pLine->Prev();
+        if (!found) pLine = pLine->Prev();
     }
 
-    return pLine;
+    return (AString *)pLine;
 }
 
 AString *AString::FindBackwards(const AString& String, bool bPartial) const
 {
-    AString *pLine = (AString *)this;
-    bool Found = false;
-    sint_t l1 = String.Length, l2;
+    const AString *pLine = this;
+    bool found = false;
+    sint_t l1 = String.Length;
 
-    while (pLine && !Found) {
-        l2 = pLine->Length;
+    while (pLine && !found) {
+        if (bPartial) found = (strnicmp(String.pText, pLine->pText, std::min(l1, pLine->Length)) == 0);
+        else          found = (stricmp(String.pText, pLine->pText) == 0);
 
-        if (bPartial) Found = (strnicmp(String.pText, pLine->pText, MIN(l1, l2)) == 0);
-        else          Found = (stricmp(String.pText, pLine->pText) == 0);
-
-        if (!Found) pLine = pLine->Prev();
+        if (!found) pLine = pLine->Prev();
     }
 
-    return pLine;
+    return (AString *)pLine;
 }
 
 AString *AString::FindBackwards(const char *iText, int& n, bool bPartial) const
 {
-    AString *pLine = (AString *)this;
-    bool Found = false;
-    sint_t l1 = strlen(iText), l2;
+    const AString *pLine = this;
+    bool found = false;
+    sint_t l1 = strlen(iText);
 
     n = 0;
-    while (pLine && !Found) {
-        l2 = pLine->Length;
+    while (pLine && !found) {
+        if (bPartial) found = (strnicmp(iText, pLine->pText, std::min(l1, pLine->Length)) == 0);
+        else          found = (stricmp(iText, pLine->pText) == 0);
 
-        if (bPartial) Found = (strnicmp(iText, pLine->pText, MIN(l1, l2)) == 0);
-        else          Found = (stricmp(iText, pLine->pText) == 0);
-
-        if (!Found) {
+        if (!found) {
             pLine = pLine->Prev();
             n--;
         }
     }
 
-    return pLine;
+    return (AString *)pLine;
 }
 
 AString *AString::FindBackwards(const AString& String, int& n, bool bPartial) const
 {
-    AString *pLine = (AString *)this;
-    bool Found = false;
-    sint_t l1 = String.Length, l2;
+    const AString *pLine = this;
+    bool found = false;
+    sint_t l1 = String.Length;
 
     n = 0;
-    while (pLine && !Found) {
-        l2 = pLine->Length;
+    while (pLine && !found) {
+        if (bPartial) found = (strnicmp(String.pText, pLine->pText, std::min(l1, pLine->Length)) == 0);
+        else          found = (stricmp(String.pText, pLine->pText) == 0);
 
-        if (bPartial) Found = (strnicmp(String.pText, pLine->pText, MIN(l1, l2)) == 0);
-        else          Found = (stricmp(String.pText, pLine->pText) == 0);
-
-        if (!Found) {
+        if (!found) {
             pLine = pLine->Prev();
             n--;
         }
     }
 
-    return pLine;
+    return (AString *)pLine;
 }
 
 AString& AString::operator = (bool v)
@@ -575,10 +594,7 @@ AString& AString::operator = (bool v)
         pStr[0] = v ? '1' : '0';
         pStr[1] = 0;
 
-        Delete();
-        pText  = pStr;
-        Length = 1;
-        IsUTF8(true);
+        Assign(pStr, 1);
     }
 
     return *this;
@@ -592,10 +608,7 @@ AString& AString::operator = (char c)
         pStr[0] = c;
         pStr[1] = 0;
 
-        Delete();
-        pText  = pStr;
-        Length = 1;
-        IsUTF8(true);
+        Assign(pStr, 1);
     }
 
     return *this;
@@ -695,16 +708,11 @@ AString& AString::operator += (char c)
     int newlen = Length + 1;
 
     if ((pStr = CREATE_TEXT(newlen + 1)) != NULL) {
-        strcpy(pStr, pText);
-
+        memcpy(pStr, pText, Length);
         pStr[Length] = c;
         pStr[Length + 1] = 0;
 
-        Delete();
-
-        pText = pStr;
-        Length = newlen;
-        IsUTF8(true);
+        Assign(pStr, newlen);
     }
 
     return *this;
@@ -712,21 +720,18 @@ AString& AString::operator += (char c)
 
 AString& AString::operator += (const char *iText)
 {
-    sint_t len = strlen(iText);
+    sint_t iLength = strlen(iText);
 
-    if (len > 0) {
+    if (iLength > 0) {
         char *pStr;
-        int newlen = Length + len;
+        int newlen = Length + iLength;
 
         if ((pStr = CREATE_TEXT(newlen + 1)) != NULL) {
-            strcpy(pStr, pText);
-            strcpy(pStr + Length, iText);
+            memcpy(pStr, pText, Length);
+            memcpy(pStr + Length, iText, iLength);
+            pStr[newlen] = 0;
 
-            Delete();
-
-            pText = pStr;
-            Length = newlen;
-            IsUTF8(true);
+            Assign(pStr, newlen);
         }
     }
 
@@ -740,14 +745,11 @@ AString& AString::operator += (const AString *pString)
         int newlen = Length + pString->Length;
 
         if ((pStr = CREATE_TEXT(newlen + 1)) != NULL) {
-            strcpy(pStr, pText);
-            strcpy(pStr + Length, pString->pText);
+            memcpy(pStr, pText, Length);
+            memcpy(pStr + Length, pString->pText, pString->Length);
+            pStr[newlen] = 0;
 
-            Delete();
-
-            pText = pStr;
-            Length = newlen;
-            IsUTF8(true);
+            Assign(pStr, newlen);
         }
     }
 
@@ -1057,7 +1059,7 @@ AString AString::Left(sint_t length) const
 {
     AString String;
 
-    length = MIN(length, Length);
+    length = std::min(length, Length);
     if (length > 0) String.Create(pText, length);
 
     return String;
@@ -1417,12 +1419,12 @@ sint_t AString::PosEx(const char *text, sint_t len, sint_t startpos, sint_t endp
 
     if (len < 0) len = strlen(text);
 
-    if (len > Length) return -1;
+    if (len > CharCount) return -1;
 
-    startpos = MIN(startpos, Length);
-    startpos = MAX(startpos, 0);
-    endpos   = MIN(endpos,   Length);
-    endpos   = MAX(endpos,   0);
+    startpos = std::min(startpos, CharCount);
+    startpos = std::max(startpos, 0);
+    endpos   = std::min(endpos,   CharCount);
+    endpos   = std::max(endpos,   0);
 
     sint_t i, inc = (endpos > startpos) ? 1 : -1;
     for (i = startpos; !(found = ((*fn)(pText + i, text, len) == 0)) && (i != endpos); i += inc) ;
@@ -1800,28 +1802,29 @@ AString AString::Copies(sint_t n) const
     sint_t l = n * Length;
 
     if (l > 0) {
-        if ((String.pText = CREATE_TEXT(l + 1)) != NULL) {
+        char *pStr;
+
+        if ((pStr = CREATE_TEXT(l + 1)) != NULL) {
             if (Length == 1) {
-                memset(String.pText, pText[0], l);
+                memset(pStr, pText[0], l);
             }
             else {
                 sint_t p;
 
-                memcpy(String.pText, pText, Length);
+                memcpy(pStr, pText, Length);
                 for (p = Length; p < l;) {
-                    sint_t nchars = MIN(p, l - p);
+                    sint_t nchars = std::min(p, l - p);
 
                     if (!nchars) break;
 
-                    memcpy(String.pText + p, String.pText, nchars);
+                    memcpy(pStr + p, pStr, nchars);
 
                     p += nchars;
                 }
             }
+            pStr[l] = 0;
 
-            String.Length = l;
-            String.pText[String.Length] = 0;
-            String.IsUTF8(true);
+            String.Assign(pStr, l);
         }
     }
 
@@ -1844,32 +1847,44 @@ void AString::UpperCase()
 {
     sint_t i;
 
-    for (i = 0; i < Length; i++) pText[i] = toupper(pText[i]);
+    for (i = 0; i < Length; i++) {
+        if (!IsUTF8Char(pText[i])) {
+            pText[i] = toupper(pText[i]);
+        }
+    }
 }
 
 void AString::LowerCase()
 {
     sint_t i;
 
-    for (i = 0; i < Length; i++) pText[i] = tolower(pText[i]);
+    for (i = 0; i < Length; i++)  {
+        if (!IsUTF8Char(pText[i])) {
+            pText[i] = tolower(pText[i]);
+        }
+    }
 }
 
 void AString::ApplyCase(const char *iText)
 {
-    uint_t i, l = MIN(strlen(iText), (uint_t)Length);
+    sint_t i, l = std::min((sint_t)strlen(iText), Length);
     for (i = 0; i < l; i++) {
-        if (islower(iText[i])) pText[i] = tolower(pText[i]);
-        else                   pText[i] = toupper(pText[i]);
+        if (!IsUTF8Char(pText[i])) {
+            if (islower(iText[i])) pText[i] = tolower(pText[i]);
+            else                   pText[i] = toupper(pText[i]);
+        }
     }
 }
 
 void AString::ApplyCase(const AString& String)
 {
-    sint_t i, l = MIN(String.len(), Length);
+    sint_t i, l = std::min(String.len(), Length);
     const char *iText = String.str();
     for (i = 0; i < l; i++) {
-        if (islower(iText[i])) pText[i] = tolower(pText[i]);
-        else                   pText[i] = toupper(pText[i]);
+        if (!IsUTF8Char(pText[i])) {
+            if (islower(iText[i])) pText[i] = tolower(pText[i]);
+            else                   pText[i] = toupper(pText[i]);
+        }
     }
 }
 
@@ -2163,7 +2178,7 @@ AString AString::Abbreviate(sint_t n) const
         static const AString tail = "...";
 
         if (n > tail.len()) {
-            String.Create(pText, StartOfChar(n - tail.len()));
+            String.Create(pText, GetStartOfChar(n - tail.len()));
             n = tail.len();
         }
 
