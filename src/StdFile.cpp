@@ -6,7 +6,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#if defined(ANDROID) || defined(__IPHONEOS__)
+#if defined(__ANDROID__) || defined(__IPHONEOS__)
 #include <dirent.h>
 #endif
 
@@ -14,7 +14,7 @@
 extern "C" {
 #include <sys/dirent.h>
 };
-#elif !defined(ANDROID)
+#elif !defined(__ANDROID__)
 #include <sys/dir.h>
 #endif
 

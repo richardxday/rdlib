@@ -8,6 +8,8 @@ else
 COMPILER=
 endif
 
+# preprocessor
+CPP = $(COMPILER)cpp
 # C compiler
 CC = $(COMPILER)gcc
 # C++ compiler
@@ -57,7 +59,7 @@ SHARED_LIBRARY_SUFFIX:=.so
 APPLICATION_SUFFIX:=
 endif
 
-PREFIX:=/usr/local
+PREFIX:=$(shell $(CPP) -v /dev/null -o /dev/null 2>&1 | grep -E "^ /.*usr/include$$" | sed -E "s/^ (.+)\/include/\1/")/local
 
 OBJECTS:=
 HEADERS:=
