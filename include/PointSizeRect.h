@@ -695,6 +695,11 @@ public:
     AColour& operator = (const AString& text) {FromText(text); return *this;}
     AColour& operator = (const char    *text) {FromText(AString(text)); return *this;}
 
+    AColour& operator = (const AColour& col) {
+        r = col.r; g = col.g; b = col.b; a = col.a;
+        return *this;
+    }
+
     AColour& SetColour(uint8_t ir = 0, uint8_t ig = 0, uint8_t ib = 0, uint8_t ia = 0) {
         r = ir; g = ig; b = ib; a = ia;
         return *this;
