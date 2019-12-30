@@ -191,12 +191,12 @@ size_t AString::UTF8CharLen(char c)
     return lens[(uint8_t)c >> 3U];
 }
 
-size_t AString::UTF8Strlen(const char *p)
+size_t AString::UTF8Strlen(const char *p, size_t maxlen)
 {
     size_t i, n;
     size_t len;
 
-    for (i = n = 0; p[i]; ) {
+    for (i = n = 0; (i < maxlen) && p[i]; ) {
         if ((len = UTF8CharLen(p[i])) > 0) {
             i += len;
             n++;
@@ -277,7 +277,7 @@ void AString::Assign(char *pStr, int iLength)
         char *pOldText = pText;
         pText     = pStr;
         Length    = iLength;
-        CharCount = (sint_t)UTF8Strlen(pText);
+        CharCount = (sint_t)UTF8Strlen(pText, iLength);
 
         if ((pOldText != NULL) && (pOldText != pDefaultText)) DELETE_TEXT(pOldText);
     }
@@ -1419,11 +1419,11 @@ sint_t AString::PosEx(const char *text, sint_t len, sint_t startpos, sint_t endp
 
     if (len < 0) len = strlen(text);
 
-    if (len > CharCount) return -1;
+    if (len > Length) return -1;
 
-    startpos = std::min(startpos, CharCount);
+    startpos = std::min(startpos, Length);
     startpos = std::max(startpos, 0);
-    endpos   = std::min(endpos,   CharCount);
+    endpos   = std::min(endpos,   Length);
     endpos   = std::max(endpos,   0);
 
     sint_t i, inc = (endpos > startpos) ? 1 : -1;

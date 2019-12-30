@@ -85,7 +85,7 @@ public:
     static bool IsUTF8StartChar(char c) {return (((uint8_t)c & 0xc0) == 0xc0);}
     static bool IsUTF8ContChar(char c)  {return (((uint8_t)c & 0xc0) == 0x80);}
     static size_t UTF8CharLen(char c);
-    static size_t UTF8Strlen(const char *p);
+    static size_t UTF8Strlen(const char *p, size_t maxlen = (size_t)-1);
 
     bool Create(const char *iText, sint_t iLength = -1, bool limit = true);
     bool Append(const char *iText, sint_t iLength = -1, bool limit = true);
