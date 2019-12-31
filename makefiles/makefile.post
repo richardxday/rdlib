@@ -19,6 +19,7 @@ release: $(RELEASE_TARGETS)
 INSTALLTARGETS:=$(INSTALLEDLIBS) $(INSTALLEDHEADERS) $(INSTALLEDPKGCONFIG) $(INSTALLEDSHAREFILES) $(INSTALLEDBINARIES) $(NONINSTALLEDBINARIES)
 
 install: default-build $(INSTALLTARGETS) post-install
+	@echo "Dependencies: $(INSTALLTARGETS)"
 	@test "$(PREFIX)" = "/usr" && $(SUDO) ldconfig || true
 
 uninstall:
