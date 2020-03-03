@@ -96,7 +96,7 @@ void ASocketServer::__DeleteSocket(uptr_t item, void *context)
     }
 
     if (handler->socket >= 0) {
-        uint32_t wrsocket;
+        uptr_t wrsocket;
 
         if ((wrsocket = server->WriteSocketList[handler->socket]) != 0) {
             __DeleteWriteSocket(wrsocket, NULL);

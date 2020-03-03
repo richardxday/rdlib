@@ -15,7 +15,7 @@
 #endif
 
 #ifdef _WIN32
-#include "windows.h"
+#include "Windows.h"
 #endif
 
 #ifndef _WIN32
