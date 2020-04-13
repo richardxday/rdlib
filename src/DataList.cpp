@@ -206,13 +206,12 @@ sint_t ADataList::Find(uptr_t Item, sint_t Index) const
 
     Index = std::max(Index, 0);
     if ((it = std::find(data.begin() + Index, data.end(), Item)) != data.end()) {
-        index = it - data.begin();
+        index = (uint_t)(it - data.begin());
     }
 
     return index;
 }
 
-#ifdef _WIN32
 void ADataList::SwapAndSort(uint_t Index, int (*fn)(uptr_t Item1, uptr_t Item2, void *pContext), void *pContext)
 {
     SwapEx(Index, Index + 1);
@@ -220,13 +219,11 @@ void ADataList::SwapAndSort(uint_t Index, int (*fn)(uptr_t Item1, uptr_t Item2, 
     if ((Index > 0)                 && ((*fn)(data[Index - 1], data[Index],     pContext) > 0)) SwapAndSort(Index - 1, fn, pContext);
     if ((Index < (data.size() - 2)) && ((*fn)(data[Index + 1], data[Index + 2], pContext) > 0)) SwapAndSort(Index + 1, fn, pContext);
 }
-#endif
 
 void ADataList::Sort(int (*fn)(uptr_t Item1, uptr_t Item2, void *pContext), void *pContext)
 {
-#ifdef _WIN32
     if (data.size() > 1) {
-        uint_t i, n = data.size() - 1;
+        uint_t i, n = (uint_t)(data.size() - 1);
         bool   bSort;
 
         do {
@@ -241,14 +238,14 @@ void ADataList::Sort(int (*fn)(uptr_t Item1, uptr_t Item2, void *pContext), void
             }
         } while (bSort);
     }
-#else
+#if 0
     struct {
         int (*fn)(uptr_t Item1, uptr_t Item2, void *pContext);
         void *pContext;
 
         bool operator()(uptr_t Item1, uptr_t Item2)
         {
-            return ((*fn)(Item1, Item2, pContext) < 0);
+            return ((*fn)(Item1, Item2, pContext) > 0);
         }
     } cmp;
     cmp.fn = fn;
