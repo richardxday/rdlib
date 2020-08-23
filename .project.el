@@ -6,5 +6,8 @@
                          "__LINUX__"))
              (flags . ("-xc++"
                        "-std=c++11"))
+             (warnings . ("all"
+                          "extra"
+                          "everything"))
              (sources . ("src"))
-             (buildcmd . "make -f makefile")))
+             (buildcmd . "make -j4 -f makefile")))

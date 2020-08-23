@@ -15,12 +15,16 @@ CC = $(COMPILER)gcc
 # C++ compiler
 CXX = $(COMPILER)g++
 
-# Standard preprocessor flags (common for CC and CXX)
-CFLAGS=-Wall -Wextra -Werror
+# Standard flags (common for CC and CXX)
+COMMON_FLAGS:=-Wall -Wextra -Werror
+LOCAL_COMMON_FLAGS:=
+
+# Standard flags for C
+CFLAGS:=
 LOCAL_CFLAGS:=
 
 # Standard flags for C++
-CXXFLAGS=
+CXXFLAGS:=
 LOCAL_CXXFLAGS:=
 
 # Standard linker flags
@@ -31,13 +35,17 @@ CPPDEPS=-MT$@ -MF`echo $@ | sed -e 's,\.o$$,.d,'` -MMD
 
 LINKTYPE=
 
-DEBUG_CFLAGS:=-g -O0
+DEBUG_COMMON_FLAGS:=-g -O0
+DEBUG_CFLAGS:=
 DEBUG_CXXFLAGS:=
 DEBUG_LDFLAGS:=-g -O0
-RELEASE_CFLAGS:=-O3
+RELEASE_COMMON_FLAGS:=-O3
+RELEASE_CFLAGS:=
 RELEASE_CXXFLAGS:=
 RELEASE_LDFLAGS:=-s
 
+GLOBAL_COMMON_FLAGS:=
+EXTRA_COMMON_FLAGS:=
 GLOBAL_CFLAGS:=
 EXTRA_CFLAGS:=
 GLOBAL_CXXFLAGS:=
@@ -88,6 +96,7 @@ NONINSTALLEDBINARIES:=
 
 makevar=$(subst /,_,$(subst .,_,$(subst -,_,$(1))))
 pkgcflags=$(shell pkg-config --cflags $(1))
+pkgcxxflags=$(shell pkg-config --cflags $(1)-cxx)
 pkglibs=$(shell pkg-config --libs $(1))
 staticlib=$(subst $(2),$(2)-static,$(1))
 

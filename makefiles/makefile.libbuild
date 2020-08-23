@@ -79,14 +79,38 @@ $(INSTALLLIBDST)/%$(SHARED_LIBRARY_SUFFIX): $(INSTALLLIBDST)/%$(SHARED_LIBRARY_S
 	@test -f "$@" || $(SUDO) ln -s "$<" "$@"
 endif
 
-%.pc: %.pc.in $(MAKEFILEDIR)/makefile.* makefile $(VERSION_FILE)
-	@test -d "`dirname "$@"`" || mkdir -p "`dirname "$@"`"													\
+# %.pc: %.pc.in $(MAKEFILEDIR)/makefile.* makefile $(VERSION_FILE)
+# 	@test -d "`dirname "$@"`" || mkdir -p "`dirname "$@"`"													\
+# 	@cat "$<" |																								\
+# 	sed -E "s#@prefix@#$(PREFIX)#g" |																		\
+# 	sed -E "s#@includedir@#$(INSTALLHDRDST)#g" |															\
+# 	sed -E "s#@libdir@#$(INSTALLLIBDST)#g" |																\
+# 	sed -E "s#@EXTRA_COMMON_FLAGS@#$(EXTRA_COMMON_FLAGS)#g" |												\
+# 	sed -E "s#@EXTRA_CFLAGS@#$(EXTRA_CFLAGS)#g" |															\
+# 	sed -E "s#@EXTRA_LIBS@#$(EXTRA_LIBS)#g" |																\
+# 	sed -E "s#@GLOBAL_COMMON_FLAGS@#$(GLOBAL_COMMON_FLAGS)#g" |												\
+# 	sed -E "s#@GLOBAL_CFLAGS@#$(GLOBAL_CFLAGS)#g" |															\
+# 	sed -E "s#@GLOBAL_LIBS@#$(GLOBAL_LIBS)#g" |																\
+# 	sed -E "s#@LIBRARY@#$(LIBRARY)#g" |																		\
+# 	sed -E "s#@LIBRARY_DESCRIPTION@#$(LIBRARY_DESCRIPTION)#g" |												\
+# 	sed -E "s#@LIBRARY_VERSION_BUILD@#$(LIBRARY_VERSION_BUILD)#g" |											\
+# 	sed -E "s#@LIBRARY_VERSION_FULL@#$(LIBRARY_VERSION_FULL)#g" |											\
+# 	sed -E "s#@LIBRARY_VERSION_MAJOR@#$(LIBRARY_VERSION_MAJOR)#g" |											\
+# 	sed -E "s#@LIBRARY_VERSION_MINOR@#$(LIBRARY_VERSION_MINOR)#g" |											\
+# 	sed -E "s#@LIBRARY_VERSION_RELEASE@#$(LIBRARY_VERSION_RELEASE)#g" |										\
+# 	sed -E "s#@LIBRARY_WITH_VERSION_MAJOR_MINOR@#$(LIBRARY_WITH_VERSION_MAJOR_MINOR)#g" |					\
+# 	sed -E "s#@LIBRARY_WITH_LINKTYPE_VERSION_MAJOR_MINOR@#$(LIBRARY_WITH_LINKTYPE_VERSION_MAJOR_MINOR)#g" |	\
+# 	cat >"$@"
+
+%.pc: $(MAKEFILEDIR)/library.pc.in $(MAKEFILEDIR)/makefile.libbuild makefile $(VERSION_FILE)
 	@cat "$<" |																								\
 	sed -E "s#@prefix@#$(PREFIX)#g" |																		\
 	sed -E "s#@includedir@#$(INSTALLHDRDST)#g" |															\
 	sed -E "s#@libdir@#$(INSTALLLIBDST)#g" |																\
+	sed -E "s#@EXTRA_COMMON_FLAGS@#$(EXTRA_COMMON_FLAGS)#g" |												\
 	sed -E "s#@EXTRA_CFLAGS@#$(EXTRA_CFLAGS)#g" |															\
 	sed -E "s#@EXTRA_LIBS@#$(EXTRA_LIBS)#g" |																\
+	sed -E "s#@GLOBAL_COMMON_FLAGS@#$(GLOBAL_COMMON_FLAGS)#g" |												\
 	sed -E "s#@GLOBAL_CFLAGS@#$(GLOBAL_CFLAGS)#g" |															\
 	sed -E "s#@GLOBAL_LIBS@#$(GLOBAL_LIBS)#g" |																\
 	sed -E "s#@LIBRARY@#$(LIBRARY)#g" |																		\
@@ -100,14 +124,16 @@ endif
 	sed -E "s#@LIBRARY_WITH_LINKTYPE_VERSION_MAJOR_MINOR@#$(LIBRARY_WITH_LINKTYPE_VERSION_MAJOR_MINOR)#g" |	\
 	cat >"$@"
 
-%.pc: $(MAKEFILEDIR)/library.pc.in $(MAKEFILEDIR)/makefile.libbuild makefile $(VERSION_FILE)
+%-cxx.pc: $(MAKEFILEDIR)/library.pc.in $(MAKEFILEDIR)/makefile.libbuild makefile $(VERSION_FILE)
 	@cat "$<" |																								\
 	sed -E "s#@prefix@#$(PREFIX)#g" |																		\
 	sed -E "s#@includedir@#$(INSTALLHDRDST)#g" |															\
 	sed -E "s#@libdir@#$(INSTALLLIBDST)#g" |																\
-	sed -E "s#@EXTRA_CFLAGS@#$(EXTRA_CFLAGS)#g" |															\
+	sed -E "s#@EXTRA_COMMON_FLAGS@#$(EXTRA_COMMON_FLAGS)#g" |												\
+	sed -E "s#@EXTRA_CFLAGS@#$(EXTRA_CXXFLAGS)#g" |															\
 	sed -E "s#@EXTRA_LIBS@#$(EXTRA_LIBS)#g" |																\
-	sed -E "s#@GLOBAL_CFLAGS@#$(GLOBAL_CFLAGS)#g" |															\
+	sed -E "s#@GLOBAL_COMMON_FLAGS@#$(GLOBAL_COMMON_FLAGS)#g" |												\
+	sed -E "s#@GLOBAL_CFLAGS@#$(GLOBAL_CXXFLAGS)#g" |														\
 	sed -E "s#@GLOBAL_LIBS@#$(GLOBAL_LIBS)#g" |																\
 	sed -E "s#@LIBRARY@#$(LIBRARY)#g" |																		\
 	sed -E "s#@LIBRARY_DESCRIPTION@#$(LIBRARY_DESCRIPTION)#g" |												\
@@ -121,5 +147,9 @@ endif
 	cat >"$@"
 
 $(INSTALLPKGCONFIGDST)/%-$(LIBRARY_VERSION_MAJOR_MINOR).pc: %.pc
+	@$(SUDO) test -d "`dirname "$@"`" || $(SUDO) mkdir -p "`dirname "$@"`"
+	@$(SUDO) $(MAKEFILEDIR)/copyifnewer "$<" "$@"
+
+$(INSTALLPKGCONFIGDST)/%-$(LIBRARY_VERSION_MAJOR_MINOR)-cxx.pc: %-cxx.pc
 	@$(SUDO) test -d "`dirname "$@"`" || $(SUDO) mkdir -p "`dirname "$@"`"
 	@$(SUDO) $(MAKEFILEDIR)/copyifnewer "$<" "$@"

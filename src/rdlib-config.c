@@ -7,17 +7,18 @@ typedef enum {false = 0, true} bool;
 int main(int argc, char *argv[])
 {
     bool cflags    = ((argc < 2) || (strcmp(argv[1], "--cflags") == 0));
+    bool cxxflags  = ((argc < 2) || (strcmp(argv[1], "--cxxflags") == 0));
     bool libs      = ((argc > 1) && (strcmp(argv[1], "--libs") == 0));
     bool rootdir   = ((argc > 1) && (strcmp(argv[1], "--rootdir") == 0));
     bool prefix    = ((argc > 1) && (strcmp(argv[1], "--prefix") == 0));
     bool makefiles = ((argc > 1) && (strcmp(argv[1], "--makefiles") == 0));
 
-    if (cflags || libs) {
+    if (cflags || cxxflags || libs) {
 #ifdef __APPLE__
         printf(" -arch i386");
 #endif
 
-        if (cflags) {
+        if (cflags || cxxflags) {
 #ifdef __i386__
             printf(" -msse3");
 #endif
@@ -38,7 +39,7 @@ int main(int argc, char *argv[])
 #endif
     }
 
-    if (cflags) {
+    if (cflags || cxxflags) {
 #if defined(__linux__) || defined(__CYGWIN__)
         printf(" -D__LINUX__");
 #endif
@@ -48,7 +49,7 @@ int main(int argc, char *argv[])
 #endif
     }
 
-    if (cflags) {
+    if (cflags || cxxflags) {
 #ifdef __MINGW64__
         printf(" -D__WORDSIZE=64");
 #else

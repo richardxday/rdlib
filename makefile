@@ -138,14 +138,39 @@ INSTALLEDMAKEFILESDST := $(INSTALLSHAREDST)/makefiles
 
 RDLIB_CONFIG := rdlib-config
 
-GLOBAL_CFLAGS  += -D_FILE_OFFSET_BITS=64 -fsigned-char
-GLOBAL_CFLAGS  += $(shell $(CC) $(GLOBAL_CFLAGS) -Wall "-DRDLIB_ROOTDIR=\"$(ROOTDIR)\"" "-DRDLIB_PREFIX=\"$(PREFIX)\"" "-DRDLIB_MAKEFILES=\"$(INSTALLEDMAKEFILESDST)\"" -o $(RDLIB_CONFIG)$(APPLICATION_SUFFIX) src/$(RDLIB_CONFIG).c && ./$(RDLIB_CONFIG))
+GLOBAL_COMMON_FLAGS += -D_FILE_OFFSET_BITS=64 -fsigned-char
+GLOBAL_COMMON_FLAGS += $(shell $(CC) $(GLOBAL_COMMON_FLAGS) $(GLOBAL_CFLAGS) "-DRDLIB_ROOTDIR=\"$(ROOTDIR)\"" "-DRDLIB_PREFIX=\"$(PREFIX)\"" "-DRDLIB_MAKEFILES=\"$(INSTALLEDMAKEFILESDST)\"" -o $(RDLIB_CONFIG)$(APPLICATION_SUFFIX) src/$(RDLIB_CONFIG).c && ./$(RDLIB_CONFIG))
 
-EXTRA_CFLAGS   += $(call pkgcflags,libpq)
-EXTRA_CXXFLAGS += -std=c++11
+#GLOBAL_CFLAGS      += -Wpedantic -pedantic-errors
+#GLOBAL_CFLAGS      += -Waggregate-return
+#GLOBAL_CFLAGS      += -Wbad-function-cast
+#GLOBAL_CFLAGS      += -Wcast-align
+#GLOBAL_CFLAGS      += -Wcast-qual
+#GLOBAL_CFLAGS      += -Wdeclaration-after-statement
+#GLOBAL_CFLAGS      += -Wfloat-equal
+#GLOBAL_CFLAGS      += -Wformat=2
+#GLOBAL_CFLAGS      += -Wlogical-op
+#GLOBAL_CFLAGS      += -Wmissing-declarations
+#GLOBAL_CFLAGS      += -Wmissing-include-dirs
+#GLOBAL_CFLAGS      += -Wmissing-prototypes
+#GLOBAL_CFLAGS      += -Wnested-externs
+#GLOBAL_CFLAGS      += -Wpointer-arith
+#GLOBAL_CFLAGS      += -Wredundant-decls
+#GLOBAL_CFLAGS      += -Wsequence-point
+#GLOBAL_CFLAGS      += -Wshadow
+#GLOBAL_CFLAGS      += -Wstrict-prototypes
+#GLOBAL_CFLAGS      += -Wswitch
+#GLOBAL_CFLAGS      += -Wundef
+#GLOBAL_CFLAGS      += -Wunreachable-code
+#GLOBAL_CFLAGS      += -Wunused-but-set-parameter
+#GLOBAL_CFLAGS      += -Wwrite-strings
 
-GLOBAL_LIBS	   += -lm $(shell ./$(RDLIB_CONFIG) --libs)
-GLOBAL_LIBS	   += $(call pkglibs,libpq) -lpthread -ljpeg
+EXTRA_COMMON_FLAGS += $(call pkgcflags,libpq)
+EXTRA_CFLAGS       += -std=c99
+EXTRA_CXXFLAGS     += -std=c++11
+
+GLOBAL_LIBS	       += -lm $(shell ./$(RDLIB_CONFIG) --libs)
+GLOBAL_LIBS	       += $(call pkglibs,libpq) -lpthread -ljpeg
 
 include $(MAKEFILEDIR)/makefile.lib
 

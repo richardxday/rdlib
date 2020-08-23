@@ -138,7 +138,7 @@ void MD5Update (MD5_CONTEXT *context, const unsigned char *input, unsigned int i
      */
     if (inputLen >= partLen) {
         MD5_memcpy
-        ((POINTER)&context->buffer[index], (POINTER)input, partLen);
+        ((POINTER)&context->buffer[index], (const POINTER)input, partLen);
         MD5Transform (context->state, context->buffer);
 
         for (i = partLen; i + 63 < inputLen; i += 64)
@@ -151,7 +151,7 @@ void MD5Update (MD5_CONTEXT *context, const unsigned char *input, unsigned int i
 
     /* Buffer remaining input */
     MD5_memcpy
-    ((POINTER)&context->buffer[index], (POINTER)&input[i],
+    ((POINTER)&context->buffer[index], (const POINTER)&input[i],
      inputLen-i);
 }
 
