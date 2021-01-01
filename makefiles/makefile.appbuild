@@ -66,4 +66,6 @@ $(INSTALLSHAREDST)/%: share/%
 	@$(SUDO) $(MAKEFILEDIR)/copyifnewer "$<" "$@"
 
 -include $(DEBUG_OBJDIR)/*.d
+-include $(DEBUG_OBJDIR)/$(APPLICATION)/*.d
 -include $(RELEASE_OBJDIR)/*.d
+-include $(RELEASE_OBJDIR)/$(APPLICATION)/*.d
