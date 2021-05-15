@@ -1,6 +1,4 @@
 
-CLEANFILES += $(DEBUG_OBJDIR)/*.d $(RELEASE_OBJDIR)/*.d
-
 .PHONY: all default-build debug release uninstall clean cleanbins post-install includedirs
 
 ifdef DEBUG
