@@ -62,6 +62,9 @@ bool AStdSocket::open(const char *host, uint_t port, uint_t type)
                                            isserver ? NULL : &__destructor,
                                            NULL,
                                            this)) >= 0) {
+#if DEBUG_STDSOCKET
+            debug("AStdSocket<%08lx>: created handler to %s:%u, socket %d\n", (uptr_t)this, host, port, socket);
+#endif
             success = true;
         }
     }
@@ -145,7 +148,7 @@ void AStdSocket::readcallback(ASocketServer *server, int socket)
             if ((newbuf = new uint8_t[newbuflen]) != NULL) {
                 if (bufferpos) memcpy(newbuf, buffer, bufferpos);
                 delete[] buffer;
-                buffer  = newbuf;
+                buffer    = newbuf;
                 bufferlen = newbuflen;
             }
         }
@@ -153,9 +156,17 @@ void AStdSocket::readcallback(ASocketServer *server, int socket)
         if ((bytes = server->ReadSocket(socket, buffer + bufferpos, (uint_t)bytes)) > 0) {
             bufferpos += (uint_t)bytes;
         }
-        else server->DeleteHandler(socket);
+        else {
+#if DEBUG_STDSOCKET
+            debug("AStdSocket<%08lx>: closing socket %d because read returned %d\n", (uptr_t)this, socket, bytes);
+#endif
+            server->DeleteHandler(socket);
+        }
     }
     else if (bytes < 0) {
+#if DEBUG_STDSOCKET
+        debug("AStdSocket<%08lx>: closing socket %d because %d bytes available\n", (uptr_t)this, socket, bytes);
+#endif
         server->DeleteHandler(socket);
     }
 }

@@ -201,7 +201,7 @@ bool ASocketServer::Resolve(const char *host, uint_t port, struct sockaddr_in *s
 
     memset(sockaddr, 0, sizeof(*sockaddr));
     sockaddr->sin_family = AF_INET;
-    sockaddr->sin_port = htons((short) (port & 0xFFFF));
+    sockaddr->sin_port = htons((short)(port & 0xFFFF));
 
     if (host) {
         sockaddr->sin_addr.s_addr = inet_addr(host);
@@ -217,6 +217,7 @@ bool ASocketServer::Resolve(const char *host, uint_t port, struct sockaddr_in *s
             }
             else debug("Host '%s' not found\n", host);
         }
+        else success = true;
     }
     else {
         sockaddr->sin_addr.s_addr = INADDR_ANY;
@@ -244,9 +245,10 @@ int ASocketServer::CreateHandler(uint_t type,
     resolved = Resolve(host, port, &sockaddr);
 
     if ((socket = ::socket(sockaddr.sin_family, (type == Type_Datagram) ? SOCK_DGRAM : SOCK_STREAM, 0)) >= 0) {
-        if (host && resolved && (type == Type_Client)) {
-            SetNonBlocking(socket);
-            SetNoDelay(socket);
+        if (type == Type_Client) {
+            if (host && resolved) {
+                SetNonBlocking(socket);
+                SetNoDelay(socket);
 
 #ifdef __LINUX__
 #define ERROR_IN_PROGRESS (errno == EINPROGRESS)
@@ -254,40 +256,47 @@ int ASocketServer::CreateHandler(uint_t type,
 #define ERROR_IN_PROGRESS (WSAGetLastError() == WSAEWOULDBLOCK)
 #endif
 
-            if ((connect(socket, (struct sockaddr *)&sockaddr, sizeof(sockaddr)) >= 0) ||
-                ERROR_IN_PROGRESS) {
-                HANDLER *handler;
+                if ((connect(socket, (struct sockaddr *)&sockaddr, sizeof(sockaddr)) >= 0) ||
+                    ERROR_IN_PROGRESS) {
+                    HANDLER *handler;
 
-                if ((handler = new HANDLER) != NULL) {
-                    memset(handler, 0, sizeof(*handler));
+                    if ((handler = new HANDLER) != NULL) {
+                        memset(handler, 0, sizeof(*handler));
 
-                    handler->socket            = socket;
-                    handler->type              = type;
-                    handler->connectcallback   = connectcallback;
-                    handler->readcallback      = readcallback;
-                    handler->writecallback     = writecallback;
-                    handler->destructor        = destructor;
-                    handler->needwritecallback = needwritecallback;
-                    handler->context           = context;
-                    handler->sockaddr          = sockaddr;
-                    handler->starttick         = GetTickCount();
-                    handler->connected         = !autocloseunestablishedsockets;
+                        handler->socket            = socket;
+                        handler->type              = type;
+                        handler->connectcallback   = connectcallback;
+                        handler->readcallback      = readcallback;
+                        handler->writecallback     = writecallback;
+                        handler->destructor        = destructor;
+                        handler->needwritecallback = needwritecallback;
+                        handler->context           = context;
+                        handler->sockaddr          = sockaddr;
+                        handler->starttick         = GetTickCount();
+                        handler->connected         = !autocloseunestablishedsockets;
 
-                    SocketList.Add(handler);
+                        SocketList.Add(handler);
 
 #if DEBUG_SOCKETS
-                    debug("New client socket %d at %s (context %s) to %s:%u\n", socket, AValue(handler->starttick).ToString().str(), AValue(handler->context).ToString().str(), host, port);
+                        debug("New client socket %d at %s (context %s) to %s:%u\n", socket, AValue(handler->starttick).ToString().str(), AValue(handler->context).ToString().str(), host, port);
 #endif
 
-                    if (handler->connectcallback) (*handler->connectcallback)(this, handler->socket, handler->context);
+                        if (handler->connectcallback) (*handler->connectcallback)(this, handler->socket, handler->context);
+                    }
+                    else {
+                        CloseSocket(socket);
+                        socket = -1;
+                    }
                 }
                 else {
+                    debug("connect on socket %d failed: %s\n", socket, strerror(errno));
+
                     CloseSocket(socket);
                     socket = -1;
                 }
             }
             else {
-                debug("connect on socket %d failed: %s\n", socket, strerror(errno));
+                debug("Host %s:%u not resolved\n", host, port);
 
                 CloseSocket(socket);
                 socket = -1;
