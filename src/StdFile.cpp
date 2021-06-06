@@ -1,4 +1,5 @@
 
+#include "misc.h"
 #include <stdio.h>
 
 #ifdef __LINUX__
@@ -114,20 +115,22 @@ slong_t AStdFile::bytesavailable()
 
     if (fp && (eof() == 0)) {
         if ((fp == stdout) || (fp == stderr)) res = 0;
-        else                                  res = MAX_SIGNED(slong_t);
+        else                                  res = MAX_SIGNED(sint32_t);
     }
+
+    //debug("AStdFile:<$%016lx>: fp=$%016lx, eof() = %d, res = %ld\n", (uint64_t)this, (uint64_t)fp, eof(), res);
 
     return res;
 }
 
 slong_t AStdFile::readdata(void *buf, size_t bytes)
 {
-    return fp ? ::fread(buf, 1, bytes, fp) : -1;
+    return fp ? (slong_t)::fread(buf, 1, bytes, fp) : -1;
 }
 
 slong_t AStdFile::writedata(const void *buf, size_t bytes)
 {
-    slong_t res = fp ? ::fwrite(buf, 1, bytes, fp) : -1;
+    slong_t res = fp ? (slong_t)::fwrite(buf, 1, bytes, fp) : -1;
     // this prevents some problems on Linux when writing files
     (void)tell();
     return res;

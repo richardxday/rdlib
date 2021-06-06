@@ -5,6 +5,8 @@
 
 #include "StdSocket.h"
 
+#define DEBUG_STDSOCKET 0
+
 NODETYPE_IMPLEMENT(AStdSocket);
 
 AStdSocket::AStdSocket(ASocketServer& iserver) : AStdData(),
@@ -71,7 +73,9 @@ bool AStdSocket::open(const char *host, uint_t port, uint_t type)
 
 sint_t AStdSocket::close()
 {
-    //debug("AStdSocket<%08lx>: close client %08lx socket %d\n", (uptr_t)this, (uint32_t)client, socket);
+#if DEBUG_STDSOCKET
+    debug("AStdSocket<%08lx>: close client %08lx socket %d\n", (uptr_t)this, (uptr_t)client, socket);
+#endif
 
     flush();
 
@@ -102,18 +106,24 @@ void AStdSocket::connectcallback(ASocketServer *server, int socket)
     if (!client) {
         if ((client = new AStdSocket(*server)) != NULL) {
             if (client->open(socket)) {
-                //debug("AStdSocket<%08lx>: Client connected, socket = %d\n", (uptr_t)this, socket);
+#if DEBUG_STDSOCKET
+                debug("AStdSocket<%08lx>: Client %08lx connected, socket = %d\n", (uptr_t)this, (uptr_t)client, socket);
+#endif
             }
             else {
                 delete client;
                 client = NULL;
             }
         }
-        else server->DeleteHandler(socket);
+        else {
+            server->DeleteHandler(socket);
+        }
     }
     else {
-        //debug("AStdSocket<%08lx>: Client rejected because client = %08lx\n", (uptr_t)this, (uint32_t)client);
+#if DEBUG_STDSOCKET
+        debug("AStdSocket<%08lx>: Client rejected because client = %08lx\n", (uptr_t)this, (uptr_t)client);
         server->DeleteHandler(socket);
+#endif
     }
 }
 
@@ -122,7 +132,7 @@ void AStdSocket::readcallback(ASocketServer *server, int socket)
     int bytes;
 
     if ((bytes = server->BytesAvailable(socket)) > 0) {
-        uint_t newbuflen = bufferpos + bytes;
+        uint_t newbuflen = bufferpos + (uint_t)bytes;
 
         if (!buffer) {
             if ((buffer = new uint8_t[newbuflen]) != NULL) {
@@ -140,17 +150,21 @@ void AStdSocket::readcallback(ASocketServer *server, int socket)
             }
         }
 
-        if ((bytes = server->ReadSocket(socket, buffer + bufferpos, bytes)) > 0) {
-            bufferpos += bytes;
+        if ((bytes = server->ReadSocket(socket, buffer + bufferpos, (uint_t)bytes)) > 0) {
+            bufferpos += (uint_t)bytes;
         }
         else server->DeleteHandler(socket);
     }
-    else server->DeleteHandler(socket);
+    else if (bytes < 0) {
+        server->DeleteHandler(socket);
+    }
 }
 
 void AStdSocket::destructor(ASocketServer *server, int socket)
 {
-    //debug("AStdSocket<%08lx>: destructor\n", (uptr_t)this);
+#if DEBUG_STDSOCKET
+    debug("AStdSocket<%08lx>: destructor\n", (uptr_t)this);
+#endif
     UNUSED(server);
     UNUSED(socket);
 
@@ -164,7 +178,7 @@ slong_t AStdSocket::bytesavailable()
     if (isopen()) {
         server.Process(0);
 
-        if (client && ((res = client->bytesavailable()) == 0)) {
+        if (client && ((res = client->bytesavailable()) < 0)) {
             delete client;
             client = NULL;
         }
@@ -174,7 +188,11 @@ slong_t AStdSocket::bytesavailable()
             if ((res == 0) && socketclosed) res = -1;
         }
 
-        //debug("AStdSocket<%08lx>: bytesavailable() client %08lx res %1d\n", (uptr_t)this, (uint32_t)client, res);
+#if DEBUG_STDSOCKET
+        if (res != 0) {
+            debug("AStdSocket<%08lx>: bytesavailable() client %08lx res %ld\n", (uptr_t)this, (uptr_t)client, res);
+        }
+#endif
     }
 
     return res;
@@ -187,7 +205,7 @@ slong_t AStdSocket::bytesqueued()
     if (isopen()) {
         server.Process(0);
 
-        if (client && ((res = client->bytesqueued()) == 0)) {
+        if (client && ((res = client->bytesqueued()) < 0)) {
             delete client;
             client = NULL;
         }
@@ -196,6 +214,12 @@ slong_t AStdSocket::bytesqueued()
             res = server.BytesLeftToWrite(socket);
             if ((res == 0) && socketclosed) res = -1;
         }
+
+#if DEBUG_STDSOCKET
+        if (res != 0) {
+            debug("AStdSocket<%08lx>: bytesqueued() client %08lx res %ld\n", (uptr_t)this, (uptr_t)client, res);
+        }
+#endif
     }
 
     return res;
@@ -227,14 +251,16 @@ slong_t AStdSocket::readdata(void *buf, size_t bytes)
 
     if (isopen()) {
         if (client && ((res = client->readdata(buf, bytes)) < 0)) {
-            //debug("Shutting down client\n");
+#if DEBUG_STDSOCKET
+            debug("Shutting down client\n");
+#endif
             delete client;
             client = NULL;
         }
 
         if (!client) {
-            res = MIN(bytes, (size_t)bufferpos);
-            if (res) memcpy((uint8_t *)buf, buffer, res);
+            res = (slong_t)MIN((size_t)bytes, (size_t)bufferpos);
+            if (res) memcpy((uint8_t *)buf, buffer, (size_t)res);
             bufferpos -= res;
             if (bufferpos) memmove(buffer, buffer + res, bufferpos);
             if ((res == 0) && socketclosed) res = -1;
@@ -249,10 +275,16 @@ slong_t AStdSocket::writedata(const void *buf, size_t bytes)
     slong_t res = -1;
 
     if (isopen()) {
-        //debug("AStdSocket<%08lx>: writedata\n", (uptr_t)this);
+#if DEBUG_STDSOCKET
+        if (!isserver || (client != NULL)) {
+            debug("AStdSocket<%08lx>: writedata %u bytes\n", (uptr_t)this, (uint_t)bytes);
+        }
+#endif
 
         if (client && ((res = client->writedata(buf, bytes)) < 0)) {
-            //debug("Shutting down client\n");
+#if DEBUG_STDSOCKET
+            debug("AStdSocket<%08lx>: Shutting down client %08lx\n", (uptr_t)this, (uptr_t)client);
+#endif
             delete client;
             client = NULL;
         }
@@ -266,7 +298,9 @@ slong_t AStdSocket::writedata(const void *buf, size_t bytes)
         server.Process(0);
 
         if (client && !client->isopen()) {
-            //debug("Shutting down client\n");
+#if DEBUG_STDSOCKET
+            debug("Shutting down client\n");
+#endif
             delete client;
             client = NULL;
         }

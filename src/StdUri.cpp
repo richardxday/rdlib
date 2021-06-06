@@ -340,8 +340,8 @@ bool AStdUri::open(const AString& uri, bool writehint)
         else if (type == "serial") {
             AStdSerial *ihandler;
             AString name = addr;
-            uint_t    baud = getdefault("serialbaud", 9600);
-            uint_t    mode = getdefault("serialmode", AStdSerial::DataMode_8N1);
+            uint_t  baud = (uint_t)getdefault("serialbaud", 9600);
+            uint_t  mode = (uint_t)getdefault("serialmode", AStdSerial::DataMode_8N1);
             bool    flow = (getdefault("serialflow", false) != 0);
 
             splitserialparams(addr, name, baud, mode, flow);
@@ -358,7 +358,7 @@ bool AStdUri::open(const AString& uri, bool writehint)
             ASocketServer *server = (ASocketServer *)getdefault("socketserver");
             AStdSocket *ihandler;
             AString host;
-            uint_t    port = getdefault("tcpport", 8080);
+            uint_t  port = (uint_t)getdefault("tcpport", 8080);
             uint_t  type = ASocketServer::Type_Client;
 
             splittcpparams(addr, host, port, type);
@@ -375,8 +375,8 @@ bool AStdUri::open(const AString& uri, bool writehint)
             ASocketServer *server = (ASocketServer *)getdefault("socketserver");
             AStdSocket *ihandler;
             AString host, desthost;
-            uint_t    port = getdefault("udpport", 8080);
-            uint_t    destport = getdefault("udpdestport", 8080);
+            uint_t    port     = (uint_t)getdefault("udpport", 8080);
+            uint_t    destport = (uint_t)getdefault("udpdestport", 8080);
 
             splitudpparams(addr, host, port, desthost, destport);
 
