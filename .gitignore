@@ -1,0 +1,10 @@
+**/*.o
+**/*.d
+bin/*
+libs/*
+.clang_complete
+compile_flags.txt
+GPATH
+GRTAGS
+GTAGS
+src/.vscode/*
