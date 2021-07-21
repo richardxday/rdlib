@@ -30,10 +30,3 @@ $(INSTALLSHAREDST)/%: %
 
 CLEANFILES += $(DEBUG_OBJDIR)/*.d
 CLEANFILES += $(RELEASE_OBJDIR)/*.d
-
-compile_flags.txt: makefile
-	@echo "Generating $@..."
-	@cpp -x c++ -v 2>&1 </dev/null | grep -A 1000 -E "search starts here" | grep -E "^ " | sed -E "s/^ /-I/" >$@.tmp
-	@echo "$(COMMON_FLAGS) $(LOCAL_COMMON_FLAGS) $(GLOBAL_COMMON_FLAGS) $(EXTRA_COMMON_FLAGS) $(CXXFLAGS) $(LOCAL_CXXFLAGS) $(GLOBAL_CXXFLAGS) $(EXTRA_CXXFLAGS)" | tr " " "\n" >>$@.tmp
-	@cat $@.tmp | sort | uniq | grep -E "^.+" | sed -E "s#-I([^/])#-I$(shell pwd)/\1#" >$@
-	@rm $@.tmp
