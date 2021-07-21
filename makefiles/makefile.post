@@ -2,9 +2,9 @@
 .PHONY: all default-build debug release uninstall clean cleanbins post-install includedirs
 
 ifdef DEBUG
-default-build: debug
+default-build: debug compile_flags.txt
 else
-default-build: release
+default-build: release compile_flags.txt
 endif
 
 clean:
@@ -27,7 +27,7 @@ cleanbins:
 
 includedirs:
 ifdef DEBUG
-	@$(MAKEFILEDIR)/extractincludes "$(CFLAGS) $(LOCAL_CFLAGS) $(CXXFLAGS) $(LOCAL_CXXFLAGS) $(GLOBAL_CFLAGS) $(EXTRA_CFLAGS) $(EXTRA_CXXFLAGS) $(DEBUG_CFLAGS) $(DEBUG_CXXFLAGS)"
+	@$(MAKEFILEDIR)/extractincludes "$(COMMON_FLAGS) $(LOCAL_COMMON_FLAGS) $(GLOBAL_COMMON_FLAGS) $(EXTRA_COMMON_FLAGS) $(DEBUG_COMMON_FLAGS) $(CXXFLAGS) $(LOCAL_CXXFLAGS) $(GLOBAL_CXXFLAGS) $(EXTRA_CXXFLAGS) $(DEBUG_CXXFLAGS)"
 else
-	@$(MAKEFILEDIR)/extractincludes "$(CFLAGS) $(LOCAL_CFLAGS) $(CXXFLAGS) $(LOCAL_CXXFLAGS) $(GLOBAL_CFLAGS) $(EXTRA_CFLAGS) $(EXTRA_CXXFLAGS) $(RELEASE_CFLAGS) $(RELEASE_CXXFLAGS)"
+	@$(MAKEFILEDIR)/extractincludes "$(COMMON_FLAGS) $(LOCAL_COMMON_FLAGS) $(GLOBAL_COMMON_FLAGS) $(EXTRA_COMMON_FLAGS) $(RELEASE_COMMON_FLAGS) $(CXXFLAGS) $(LOCAL_CXXFLAGS) $(GLOBAL_CXXFLAGS) $(EXTRA_CXXFLAGS) $(RELEASE_CXXFLAGS)"
 endif

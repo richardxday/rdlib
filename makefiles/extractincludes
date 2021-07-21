@@ -1,13 +1,13 @@
 #!/bin/bash
 CURDIR="`pwd`"
-ARGS="$1"
+ARGS="$*"
 for ARG in $ARGS ; do
-	if [[ $ARG =~ ^-I ]] ; then
-		if [[ $ARG =~ ^-I/ ]] ; then
-			echo "${ARG:2}"
-		else
-			echo "$CURDIR/${ARG:2}"
-		fi
-	fi
+    if [[ $ARG =~ ^-I ]] ; then
+        if [[ $ARG =~ ^-I/ ]] ; then
+            echo "${ARG:2}"
+        else
+            echo "$CURDIR/${ARG:2}"
+        fi
+    fi
 done
 exit 0
