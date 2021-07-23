@@ -4,9 +4,9 @@ DSTFILE="$2"
 LOGNAME="$(whoami)"
 test -e /usr/bin/sudo && USER="-o root" || USER="-o $LOGNAME"
 if [ -d "$SRCFILE" ] ; then
-	install $USER -d "$DSTFILE"
+    install $USER -d "$DSTFILE"
 else
-	DSTDIR="`dirname "$DSTFILE"`"
-	install -v $USER -d "$DSTDIR"
-	install -C -v $USER "$SRCFILE" "$DSTFILE"
+    DSTDIR="`dirname "$DSTFILE"`"
+    install -v $USER -d "$DSTDIR"
+    install -C -v $USER "$SRCFILE" "$DSTFILE"
 fi
