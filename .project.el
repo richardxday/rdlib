@@ -10,4 +10,4 @@
                           "extra"
                           "everything"))
              (sources . ("src"))
-             (buildcmd . "make -j4 -f makefile")))
+             (buildcmd . "make -j8 -f makefile")))
