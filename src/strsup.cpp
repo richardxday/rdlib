@@ -289,6 +289,10 @@ bool AString::Create(const char *iText, sint_t iLength, bool limit)
     char *pStr;
     bool  res = false;
 
+    if ((iText != NULL) && (iLength < 0)) {
+        iLength = strlen(iText);
+    }
+
     if ((iText == NULL) || (iLength == 0)) {
         iText = pDefaultText;
     }
