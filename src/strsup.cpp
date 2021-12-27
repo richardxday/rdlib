@@ -279,7 +279,9 @@ void AString::Assign(char *pStr, int iLength)
         Length    = iLength;
         CharCount = (sint_t)UTF8Strlen(pText, iLength);
 
-        if ((pOldText != NULL) && (pOldText != pDefaultText)) DELETE_TEXT(pOldText);
+        if ((pOldText != NULL) && (pOldText != pDefaultText)) {
+            DELETE_TEXT(pOldText);
+        }
     }
     else Delete();
 }
@@ -355,7 +357,9 @@ bool AString::Append(const char *iText, sint_t iLength, bool limit)
 
 void AString::Delete()
 {
-    if (pText && (pText != pDefaultText)) DELETE_TEXT(pText);
+    if ((pText != NULL) && (pText != pDefaultText)) {
+        DELETE_TEXT(pText);
+    }
 
     pText     = pDefaultText;
     Length    = 0;
@@ -366,9 +370,13 @@ char *AString::Steal(sint_t *pLength)
 {
     char *p = pText;
     if (p == pDefaultText) {
-        if ((p = CREATE_TEXT(1)) != NULL) p[0] = 0;
+        if ((p = CREATE_TEXT(1)) != NULL) {
+            p[0] = 0;
+        }
     }
-    if (pLength) *pLength = Length;
+    if (pLength != NULL) {
+        *pLength = Length;
+    }
 
     pText     = pDefaultText;
     Length    = 0;
