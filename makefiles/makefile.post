@@ -2,9 +2,9 @@
 .PHONY: all default-build debug release uninstall clean cleanbins post-install includedirs
 
 ifdef DEBUG
-default-build: debug compile_flags.txt
+default-build: debug
 else
-default-build: release compile_flags.txt
+default-build: release
 endif
 
 clean:
@@ -31,10 +31,3 @@ ifdef DEBUG
 else
 	@$(MAKEFILEDIR)/extractincludes "$(COMMON_FLAGS) $(LOCAL_COMMON_FLAGS) $(GLOBAL_COMMON_FLAGS) $(EXTRA_COMMON_FLAGS) $(RELEASE_COMMON_FLAGS) $(CXXFLAGS) $(LOCAL_CXXFLAGS) $(GLOBAL_CXXFLAGS) $(EXTRA_CXXFLAGS) $(RELEASE_CXXFLAGS)"
 endif
-
-compile_flags.txt: makefile
-	@echo "Generating $@..."
-	@cpp -x c++ -v 2>&1 </dev/null | grep -A 1000 -E "search starts here" | grep -E "^ " | sed -E "s/^ /-I/" >$@.tmp
-	@echo "$(COMMON_FLAGS) $(LOCAL_COMMON_FLAGS) $(GLOBAL_COMMON_FLAGS) $(EXTRA_COMMON_FLAGS) $(CXXFLAGS) $(LOCAL_CXXFLAGS) $(GLOBAL_CXXFLAGS) $(EXTRA_CXXFLAGS)" | tr " " "\n" >>$@.tmp
-	@cat $@.tmp | sort | uniq | grep -E "^.+" | sed -E "s#-I([^/])#-I$(shell pwd)/\1#" >$@
-	@rm $@.tmp

@@ -1211,30 +1211,6 @@ AString ParseRegex(const AString& str, char escchar)
 }
 
 /*------------------------------------------------------------
-  Function: Parse regex pattern
-  Enter   : str     = pattern
-  Exit    : Parsed regex pattern
-  Notes   : Escape character is '
-  ----------------------------------------------------------*/
-AString ParsePathRegex(const AString& str)
-{
-    AString errors;
-    return ParseRegex(str, errors);
-}
-
-/*------------------------------------------------------------
-  Function: Parse regex pattern as path
-  Enter   : str     = pattern
-            errors  = error string (UPDATED)
-  Exit    : Parsed regex pattern
-  Notes   : Escape character is '
-  ----------------------------------------------------------*/
-AString ParsePathRegex(const AString& str, AString& errors)
-{
-    return ParseRegex(str, errors, '\'');
-}
-
-/*------------------------------------------------------------
   Function: Desctructor for region lists
   Notes   :
   ----------------------------------------------------------*/
@@ -1294,34 +1270,6 @@ bool MatchRegex(const AString& str, const AString& pat, ADataList& regionlist, b
     else success = (pat.len() && (IsRegexAnyPattern(pat) || matchex(str, pat, &regionlist, errors, casesens)));
 
     return success;
-}
-
-/*------------------------------------------------------------
-  Function: Match string against parsed or unparsed pattern
-            assuming pattern is a path
-  Enter   : str = string
-            pat = pattern (parsed or unparsed)
-  Exit    : true if match is successful
-  Notes   :
-  ----------------------------------------------------------*/
-bool MatchPathRegex(const AString& str, const AString& pat)
-{
-    return MatchRegex(str, pat, PATH_REGEX_CASE_SENSITIVE, '\'');
-}
-
-/*------------------------------------------------------------
-  Function: Match string against parsed or unparsed pattern
-            assuming pattern is a path and save regions in
-            a list
-  Enter   : str        = string
-            pat        = pattern (parsed or unparsed)
-            regionlist = list of regions (of type REGEXREGION)
-  Exit    : true if match is successful
-  Notes   :
-  ----------------------------------------------------------*/
-bool MatchPathRegex(const AString& str, const AString& pat, ADataList& regionlist)
-{
-    return MatchRegex(str, pat, regionlist, PATH_REGEX_CASE_SENSITIVE, '\'');
 }
 
 /*------------------------------------------------------------
