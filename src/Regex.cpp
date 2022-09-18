@@ -1492,3 +1492,227 @@ bool IsRegexAnyPattern(const AString& pat)
     return ((pat == anypattern1) || (pat == anypattern2) ||
             (pat == anypattern3) || (pat == anypattern4));
 }
+
+/*--------------------------------------------------------------------------------*/
+/** Parse regex pattern
+ *
+ * @param pattern regex pattern as text
+ * @param matchcase true if match should be case sensitive
+ *
+ * @return parsed regex pattern
+ *
+ * @note this uses the std::regex_constants::ECMAScript grammar
+ * @note this is required because std::regex() does NOT work in an wxWidgets based files
+ *
+ * @note calls to this (with non-empty pattern) *must* be wrapped in a try-catch since
+ * @note an exception will be thrown if an invalid pattern is passed!
+ */
+/*--------------------------------------------------------------------------------*/
+std::regex ParseRegex(const std::string& pattern, bool matchcase)
+{
+    return std::regex(pattern, matchcase ? std::regex_constants::ECMAScript : (std::regex_constants::ECMAScript | std::regex_constants::icase));
+}
+
+/*--------------------------------------------------------------------------------*/
+/** Return whether string matches pattern
+ *
+ * @param string string to match
+ * @param pattern unparsed regex pattern
+ * @param matchcase true if match should be case sensitive
+ *
+ * @return true if entire string matches
+ *
+ * @note this uses the std::regex_constants::ECMAScript grammar
+ * @note this is required because std::regex() does NOT work in an wxWidgets based files
+ *
+ * @note calls to this (with non-empty pattern) *must* be wrapped in a try-catch since
+ * @note an exception will be thrown if an invalid pattern is passed!
+ */
+/*--------------------------------------------------------------------------------*/
+bool MatchRegex(const std::string& pattern, const std::string& string, bool matchcase)
+{
+    return MatchRegex(string, ParseRegex(pattern, matchcase));
+}
+
+/*--------------------------------------------------------------------------------*/
+/** Return whether string matches pattern
+ *
+ * @param string string to match
+ * @param pattern parsed regex pattern
+ *
+ * @return true if entire string matches
+ *
+ * @note this uses the std::regex_constants::ECMAScript grammar
+ * @note this is required because std::regex() does NOT work in an wxWidgets based files
+ */
+/*--------------------------------------------------------------------------------*/
+bool MatchRegex(const std::string& string, const std::regex& pattern)
+{
+    return std::regex_match(string, pattern);
+}
+
+/*--------------------------------------------------------------------------------*/
+/** Return whether string contains pattern
+ *
+ * @param string string to search for
+ * @param pattern unparsed regex pattern
+ * @param matchcase true if match should be case sensitive
+ *
+ * @return true if string contains regex
+ *
+ * @note this uses the std::regex_constants::ECMAScript grammar
+ * @note this is required because std::regex() does NOT work in an wxWidgets based files
+ */
+/*--------------------------------------------------------------------------------*/
+bool ContainsRegex(const std::string& pattern, const std::string& string, bool matchcase)
+{
+    return ContainsRegex(string, ParseRegex(pattern, matchcase));
+}
+
+/*--------------------------------------------------------------------------------*/
+/** Return whether string contains pattern
+ *
+ * @param string string to search for
+ * @param pattern parsed regex pattern
+ *
+ * @return true if string contains regexs
+ *
+ * @note this uses the std::regex_constants::ECMAScript grammar
+ * @note this is required because std::regex() does NOT work in an wxWidgets based files
+ */
+/*--------------------------------------------------------------------------------*/
+bool ContainsRegex(const std::string& string, const std::regex& pattern)
+{
+    return std::regex_search(string, pattern);
+}
+
+/*--------------------------------------------------------------------------------*/
+/** Parse a regex/replacement pair from a single string
+ *
+ * @param str string
+ * @param replace regex_replace_t structure to be populated
+ * @param matchcase true if contains is case sensitive
+ *
+ * @return true if parsed correctly
+ *
+ * @note the string should be in the format <sep><regex><sep><replacement><sep> like
+ * @note sed, e.g. '/<regex>/<replacement>/'
+ * @note the string will be de-escaped using backslashes, this can be used to include
+ * @note <sep> characters as part of the regex or replacement.  It also means existing
+ * @note backslashes need to be double-escaped, e.g. '/path\/to\/\\(whereever|whenever\\)/new\/path/'
+ * @note regex is basic regex so parentheses for groups do not need to be escaped
+ * @note (literal parentheses need to be escaped)
+ * @note e.g. '/^.+\/([a-zA-Z0-9]+)\/.+$/\\1/'
+ * @note       ^------------------------------ separator marking start of search regex
+ * @note        ^----------------------------- start at start of string
+ * @note         ^^--------------------------- at least one of any character
+ * @note           ^^------------------------- separator character as part of regex (will be converted to '/')
+ * @note             ^------------------------ group start
+ * @note              ^^^^^^^^^^^------------- class specifier
+ * @note                         ^------------ at least one of class required
+ * @note                          ^----------- group end
+ * @note                           ^^--------- separator character as part of regex (will be converted to '/')
+ * @note                             ^^------- at least one of any character
+ * @note                               ^------ end at end of string
+ * @note                                ^----- separator separating regex and replacement
+ * @note                                 ^^^-- double escaped replace group (will be converted to '\1')
+ * @note                                    ^- separator marking end of replacement
+ *
+ * @note calls to this (with non-empty pattern) *must* be wrapped in a try-catch since
+ * @note an exception will be thrown if an invalid pattern is passed!
+ */
+/*--------------------------------------------------------------------------------*/
+bool ParseRegexReplacement(const std::string& str, regex_replace_t& replace, bool matchcase)
+{
+    std::string str2;
+    uint32_t stage = 0;
+    char sep = 0;
+    size_t i;
+
+    // run through string until the end of the string (failure)
+    // or both decoding stages are complete (success)
+    for (i = 0; (i < str.length()) && (stage < 2); i++)
+    {
+        if (i == 0)
+        {
+            // first character is separator
+            sep = str[i];
+        }
+        // handle escaping
+        else if (str[i] == '\\')
+        {
+            switch (str[++i])
+            {
+                case 0:
+                    // orphaned escape character -> do nothing
+                    break;
+
+                case 'n':
+                    // linefeed
+                    str2 += "\n";
+                    break;
+
+                case 'r':
+                    // carriage return
+                    str2 += "\r";
+                    break;
+
+                case 't':
+                    // tab
+                    str2 += "\t";
+                    break;
+
+                default:
+                    // de-escape next character
+                    str2 += str[i];
+                    break;
+            }
+        }
+        else if (str[i] == sep)
+        {
+            switch (stage)
+            {
+                case 0:
+                    replace.regex   = ParseRegex(str2, matchcase);
+                    break;
+
+                case 1:
+                    replace.replace = str2;
+                    break;
+
+                default:
+                    break;
+            }
+
+            stage++;
+            str2 = "";
+        }
+        else
+        {
+            str2 += str[i];
+        }
+    }
+
+    // success is when both stages are successfully decoded
+    return (stage == 2);
+}
+
+/*--------------------------------------------------------------------------------*/
+/** Perform a regex replacement on a string
+ *
+ * @param str string
+ * @param replace regex_replace_t structure describing search regex and replacement
+ * @param flags match flags
+ *
+ * @return modified string unless regex is empty in which case the original string is returned
+ *
+ * @note see note above regarding regex format
+ *
+ * @note calls to this (with non-empty pattern) *must* be wrapped in a try-catch since
+ * @note an exception will be thrown if an invalid pattern is passed!
+ */
+/*--------------------------------------------------------------------------------*/
+std::string RegexReplace(const std::string& str, const regex_replace_t& replace, std::regex_constants::match_flag_type flags)
+{
+    return std::regex_replace(str, replace.regex, replace.replace, flags);
+}
