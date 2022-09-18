@@ -22,7 +22,6 @@ extern bool    IsRegexPattern(const AString& pat);
 extern bool    IsExclusionPattern(const AString& pat);
 extern bool    IsRegexAnyPattern(const AString& pat);
 
-
 /*--------------------------------------------------------------------------------*/
 /** Parse regex pattern
  *
