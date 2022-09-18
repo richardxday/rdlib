@@ -37,14 +37,6 @@ NODETYPE_IMPLEMENT(AString);
 char AString::pDefaultText[] = {0};
 bool AString::bSlashFromEnd = true;
 
-AString::AString(char *iText, sint_t iLength) : AListNode(),
-                                                pText(pDefaultText),
-                                                Length(0),
-                                                CharCount(0)
-{
-    Create(iText, iLength);
-}
-
 AString::AString(const char *iText, sint_t iLength) : AListNode(),
                                                       pText(pDefaultText),
                                                       Length(0),
@@ -67,6 +59,14 @@ AString::AString(const AString& String, sint_t iLength) : AListNode(),
                                                           CharCount(0)
 {
     Create(String.pText, iLength);
+}
+
+AString::AString(const std::string& String, sint_t iLength) : AListNode(),
+                                                              pText(pDefaultText),
+                                                              Length(0),
+                                                              CharCount(0)
+{
+    Create(String.c_str(), iLength);
 }
 
 AString::AString(bool v) : AListNode(),
@@ -626,30 +626,9 @@ AString& AString::operator = (char c)
     return *this;
 }
 
-AString& AString::operator = (char *iText)
-{
-    Create(iText);
-
-    return *this;
-}
-
 AString& AString::operator = (const char *iText)
 {
     Create(iText);
-
-    return *this;
-}
-
-AString& AString::operator = (const AString *pString)
-{
-    Create(pString->pText);
-
-    return *this;
-}
-
-AString& AString::operator = (const AString& String)
-{
-    Create(String.pText);
 
     return *this;
 }
@@ -999,16 +978,6 @@ AString AString::Arg(const char *iText) const
     AString str;
 
     str.printf(fmt, iText);
-    return left + str + right;
-}
-
-AString AString::Arg(const AString& String) const
-{
-    AString left, right;
-    AString fmt = "%" + FindFormatSpecifier(left, right) + "s";
-    AString str;
-
-    str.printf(fmt, String.str());
     return left + str + right;
 }
 

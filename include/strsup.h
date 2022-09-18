@@ -4,6 +4,8 @@
 
 #include <time.h>
 
+#include <string>
+
 #include "ListNode.h"
 #include "StdData.h"
 #include "EvalNumber.h"
@@ -47,10 +49,10 @@ extern AString Base64Encode(const uint8_t *ptr, uint_t bytes);
 
 class AString : public AListNode {
 public:
-    AString(char *iText = NULL, sint_t iLength = -1);
-    AString(const char *iText, sint_t iLength = -1);
+    AString(const char *iText = NULL, sint_t iLength = -1);
     AString(const AString *pString, sint_t iLength = -1);
     AString(const AString& String, sint_t iLength = -1);
+    AString(const std::string& String, sint_t iLength = -1);
     AString(bool     v);
     AString(char     c);
     AString(sshort_t val, const char *format = "");
@@ -100,10 +102,10 @@ public:
 
     AString& operator = (bool v);
     AString& operator = (char c);
-    AString& operator = (char *iText);
     AString& operator = (const char *iText);
-    AString& operator = (const AString *pString);
-    AString& operator = (const AString& String);
+    AString& operator = (const AString *pString) {return operator = (pString->pText);}
+    AString& operator = (const AString& String) {return operator = (String.pText);}
+    AString& operator = (const std::string& String) {return operator = (String.c_str());}
 
     AString& operator = (sshort_t val);
     AString& operator = (ushort_t val);
@@ -120,25 +122,26 @@ public:
     AString& operator += (const char *iText);
     AString& operator += (const AString *pString);
     AString& operator += (const AString& String);
+    AString& operator += (const std::string& String) {return operator = (String.c_str());}
     friend AString operator + (const AString& Object1, const char *iText2);
     friend AString operator + (const char *iText1, const AString& Object2);
     friend AString operator + (const AString& Object1, const AString& Object2);
 
-    COMP_OPERATOR(==);
-    COMP_OPERATOR(!=);
-    COMP_OPERATOR(<=);
-    COMP_OPERATOR(>=);
-    COMP_OPERATOR(<);
-    COMP_OPERATOR(>);
+    COMP_OPERATOR(==)
+    COMP_OPERATOR(!=)
+    COMP_OPERATOR(<=)
+    COMP_OPERATOR(>=)
+    COMP_OPERATOR(<)
+    COMP_OPERATOR(>)
 
     bool Empty() const {return (Length == 0);}
     bool Valid() const {return (Length > 0);}
 
-    COMP_CASE_OPERATOR(Case, strcmp);
-    COMP_CASE_OPERATOR_N(Case, strncmp);
+    COMP_CASE_OPERATOR(Case, strcmp)
+    COMP_CASE_OPERATOR_N(Case, strncmp)
 
-    COMP_CASE_OPERATOR(NoCase, stricmp);
-    COMP_CASE_OPERATOR_N(NoCase, strnicmp);
+    COMP_CASE_OPERATOR(NoCase, stricmp)
+    COMP_CASE_OPERATOR_N(NoCase, strnicmp)
 
     friend sint_t CompareWordWise(const AString& String1, const AString& String2, bool comparenumbers = true) {return CompareWordWise(String1.pText, String2.pText, comparenumbers);}
     friend sint_t CompareWordWise(const AString& String1, const char *pText2, bool comparenumbers = true) {return CompareWordWise(String1.pText, pText2, comparenumbers);}
@@ -162,7 +165,7 @@ public:
 
     operator sint8_t()        const {return (sint8_t)operator sllong_t();}
     operator uint8_t()        const {return (uint8_t)operator ullong_t();}
-    operator sshort_t()       const {return (ushort_t)operator sllong_t();}
+    operator sshort_t()       const {return (sshort_t)operator sllong_t();}
     operator ushort_t()       const {return (ushort_t)operator ullong_t();}
     operator sint_t()         const {return (sint_t)operator sllong_t();}
     operator uint_t()         const {return (uint_t)operator ullong_t();}
@@ -174,6 +177,8 @@ public:
     operator float()          const;
     operator double()         const;
     //operator uptr_t()       const {return (uptr_t)operator ullong_t();}
+
+    operator std::string()    const {return std::string(pText);}
 
     AValue EvalNumber(AString *error) const {return EvalNumber(0, NULL, true, NULL, error);}
     AValue EvalNumber(bool allowModifiers, const char *terminators, AString *error = NULL) const {return EvalNumber(0, NULL, allowModifiers, terminators, error);}
@@ -203,7 +208,9 @@ public:
     void   vprintf(const char *format, va_list ap);
 
     AString Arg(const char *iText) const;
-    AString Arg(const AString& String) const;
+    AString Arg(const AString *pString) const {return Arg(pString->pText);}
+    AString Arg(const AString& String) const {return Arg(String.pText);}
+    AString Arg(const std::string& String) const {return Arg(String.c_str());}
     AString Arg(bool n) const {return Arg((ulong_t)n);}
     AString Arg(sshort_t n) const;
     AString Arg(ushort_t n) const;
