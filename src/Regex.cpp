@@ -900,7 +900,7 @@ static bool match(const AString& str, const AString& pat, uint_t strpos, uint_t 
             AString marker;
             uint_t  patpos1;
             AString pat1, pat2;
-            REGEXREGION *reg = NULL;
+            GLOBREGION *reg = NULL;
 
             patpos1 = find(pat, patpos + 1, '}', *data.errors, TOKEN_ESCAPE);
             pat1    = pat.Mid(patpos + 1, patpos1 - patpos - 1);
@@ -913,7 +913,7 @@ static bool match(const AString& str, const AString& pat, uint_t strpos, uint_t 
 
                 if (data.errors->Empty()) {
                     // if region list supplied, create region structure
-                    if (data.regions && ((reg = new REGEXREGION) != NULL)) {
+                    if (data.regions && ((reg = new GLOBREGION) != NULL)) {
 #ifdef DEBUG_REGEX
                         debug("%sRegion %u: marker = '%s', pos = %u - '%s'\n", AString("  ").Copies(level).str(), data.regions->Count(), marker.str(), strpos, str.Mid(strpos, 20).str());
 #endif
@@ -963,12 +963,12 @@ static bool match(const AString& str, const AString& pat, uint_t strpos, uint_t 
         }
 
         case '}': {     // close region (either real or fake)
-            REGEXREGION *reg = NULL;
+            GLOBREGION *reg = NULL;
 
             patpos++;
             if (pat[patpos] != ':') {
                 // assume real region -> extract address of region structure
-                reg = (REGEXREGION *)(uptr_t)pat.Mid(patpos);
+                reg = (GLOBREGION *)(uptr_t)pat.Mid(patpos);
 
                 patpos = pat.Pos(":", patpos) + 1;
 
@@ -1188,7 +1188,7 @@ static bool matchex(const AString& str, const AString& pat, ADataList *regions, 
   Exit    : Parsed regex pattern
   Notes   :
   ----------------------------------------------------------*/
-AString ParseRegex(const AString& str, AString& errors, char escchar)
+AString ParseGlob(const AString& str, AString& errors, char escchar)
 {
     uint_t pos = find(str, 0, 0, errors, escchar);
     if (errors.Empty() && str[pos]) errors.printf("Extra characters at '%s'\n", str.Mid(pos).str());
@@ -1204,10 +1204,10 @@ AString ParseRegex(const AString& str, AString& errors, char escchar)
   Exit    : Parsed regex pattern
   Notes   :
   ----------------------------------------------------------*/
-AString ParseRegex(const AString& str, char escchar)
+AString ParseGlob(const AString& str, char escchar)
 {
     AString errors;
-    return ParseRegex(str, errors, escchar);
+    return ParseGlob(str, errors, escchar);
 }
 
 /*------------------------------------------------------------
@@ -1217,7 +1217,7 @@ AString ParseRegex(const AString& str, char escchar)
 static void __DeleteRegion(uptr_t val, void *context)
 {
     UNUSED(context);
-    delete (REGEXREGION *)val;
+    delete (GLOBREGION *)val;
 }
 
 /*------------------------------------------------------------
@@ -1229,16 +1229,16 @@ static void __DeleteRegion(uptr_t val, void *context)
   Exit    : true if match is successful
   Notes   :
   ----------------------------------------------------------*/
-bool MatchRegex(const AString& str, const AString& pat, bool casesens, char escchar)
+bool MatchGlob(const AString& str, const AString& pat, bool casesens, char escchar)
 {
     AString errors;
     bool success;
 
-    if (!IsRegexPattern(pat)) {
-        AString pat1 = ParseRegex(pat, errors, escchar);
-        success = (errors.Empty() && pat1.len() && (IsRegexAnyPattern(pat1) || matchex(str, pat1, NULL, errors, casesens)));
+    if (!IsGlobPattern(pat)) {
+        AString pat1 = ParseGlob(pat, errors, escchar);
+        success = (errors.Empty() && pat1.len() && (IsGlobAnyPattern(pat1) || matchex(str, pat1, NULL, errors, casesens)));
     }
-    else success = (pat.len() && (IsRegexAnyPattern(pat) || matchex(str, pat, NULL, errors, casesens)));
+    else success = (pat.len() && (IsGlobAnyPattern(pat) || matchex(str, pat, NULL, errors, casesens)));
 
     return success;
 }
@@ -1248,13 +1248,13 @@ bool MatchRegex(const AString& str, const AString& pat, bool casesens, char escc
             save region info in list
   Enter   : str        = string
             pat        = pattern (parsed or unparsed)
-            regionlist = list of regions (of type REGEXREGION)
+            regionlist = list of regions (of type GLOBREGION)
             casesens   = true if match is case-sensitive
             escchar    = escape character
   Exit    : true if match is successful
   Notes   :
   ----------------------------------------------------------*/
-bool MatchRegex(const AString& str, const AString& pat, ADataList& regionlist, bool casesens, char escchar)
+bool MatchGlob(const AString& str, const AString& pat, ADataList& regionlist, bool casesens, char escchar)
 {
     AString errors;
     bool success;
@@ -1263,11 +1263,11 @@ bool MatchRegex(const AString& str, const AString& pat, ADataList& regionlist, b
     regionlist.SetDestructor(&__DeleteRegion);
     regionlist.EnableDuplication();
 
-    if (!IsRegexPattern(pat)) {
-        AString pat1 = ParseRegex(pat, errors, escchar);
-        success = (errors.Empty() && pat1.len() && (IsRegexAnyPattern(pat1) || matchex(str, pat1, &regionlist, errors, casesens)));
+    if (!IsGlobPattern(pat)) {
+        AString pat1 = ParseGlob(pat, errors, escchar);
+        success = (errors.Empty() && pat1.len() && (IsGlobAnyPattern(pat1) || matchex(str, pat1, &regionlist, errors, casesens)));
     }
-    else success = (pat.len() && (IsRegexAnyPattern(pat) || matchex(str, pat, &regionlist, errors, casesens)));
+    else success = (pat.len() && (IsGlobAnyPattern(pat) || matchex(str, pat, &regionlist, errors, casesens)));
 
     return success;
 }
@@ -1282,13 +1282,13 @@ bool MatchRegex(const AString& str, const AString& pat, ADataList& regionlist, b
   Exit    : true if expansion work
   Notes   :
   ----------------------------------------------------------*/
-bool GetRegexRegion(const AString& str, const AString& expandstr, uint_t& i, const ADataList& regionlist, AStringUpdate& updater)
+static bool GetGlobRegion(const AString& str, const AString& expandstr, uint_t& i, const ADataList& regionlist, AStringUpdate& updater)
 {
     uint_t n = regionlist.Count();
     bool success = false;
 
     if (IsNumeralChar(expandstr[i])) {
-        const REGEXREGION *reg;
+        const GLOBREGION *reg;
         uint_t n = 0;
 
         while (IsNumeralChar(expandstr[i])) {
@@ -1302,7 +1302,7 @@ bool GetRegexRegion(const AString& str, const AString& expandstr, uint_t& i, con
             success = true;
         }
         // regions 1 upwards represent those captured in match
-        else if ((reg = (const REGEXREGION *)regionlist[n - 1]) != NULL) {
+        else if ((reg = (const GLOBREGION *)regionlist[n - 1]) != NULL) {
             marker  = reg->marker;
             text    = str.Mid(reg->pos, reg->len);
             success = true;
@@ -1364,7 +1364,7 @@ bool GetRegexRegion(const AString& str, const AString& expandstr, uint_t& i, con
 
         // find named marker
         for (j = 0; j < n; j++) {
-            const REGEXREGION *reg = (const REGEXREGION *)regionlist[j];
+            const GLOBREGION *reg = (const GLOBREGION *)regionlist[j];
 
             if (marker == reg->marker) {
                 text    = str.Mid(reg->pos, reg->len);
@@ -1414,7 +1414,7 @@ bool GetRegexRegion(const AString& str, const AString& expandstr, uint_t& i, con
   Exit    :
   Notes   :
   ----------------------------------------------------------*/
-AString ExpandRegexRegions(const AString& str, const AString& expandstr, const ADataList& regionlist, char expandchar)
+AString ExpandGlobRegions(const AString& str, const AString& expandstr, const ADataList& regionlist, char expandchar)
 {
     AString res;
     AStringUpdate updater(&res);
@@ -1422,7 +1422,7 @@ AString ExpandRegexRegions(const AString& str, const AString& expandstr, const A
 
 #ifdef SHOW_REGEX_REGIONS
     for (i = 0; i < regionlist.Count(); i++) {
-        const REGEXREGION *reg = (const REGEXREGION *)regionlist[i];
+        const GLOBREGION *reg = (const GLOBREGION *)regionlist[i];
 
         debug("Region %u/%u: marker = '%s', string = '%s' (pos = %u, len = %u)\n",
               i, regionlist.Count(),
@@ -1438,7 +1438,7 @@ AString ExpandRegexRegions(const AString& str, const AString& expandstr, const A
 
             if (IsNumeralChar(expandstr[i]) || (expandstr[i] == 'm')) {
                 // update result with extracted region
-                GetRegexRegion(str, expandstr, i, regionlist, updater);
+                GetGlobRegion(str, expandstr, i, regionlist, updater);
             }
             // else if the expansion character is the escape character, de-escape character
             else if (expandchar == '\\') updater.Update(deescape(expandstr, i));
@@ -1464,7 +1464,7 @@ AString ExpandRegexRegions(const AString& str, const AString& expandstr, const A
             pattern
   Notes   :
   ----------------------------------------------------------*/
-bool IsRegexPattern(const AString& pat)
+bool IsGlobPattern(const AString& pat)
 {
     return (pat[0] == TOKEN_REGEX);
 }
@@ -1483,7 +1483,7 @@ bool IsExclusionPattern(const AString& pat)
   Function: Returns whether supplied pattern matches anything
   Notes   :
   ----------------------------------------------------------*/
-bool IsRegexAnyPattern(const AString& pat)
+bool IsGlobAnyPattern(const AString& pat)
 {
     static const char anypattern1[] = {TOKEN_REGEX, '#', '?', 0};
     static const char anypattern2[] = {TOKEN_REGEX, '*', 0};
@@ -1529,7 +1529,7 @@ std::regex ParseRegex(const std::string& pattern, bool matchcase)
  * @note an exception will be thrown if an invalid pattern is passed!
  */
 /*--------------------------------------------------------------------------------*/
-bool MatchRegex(const std::string& pattern, const std::string& string, bool matchcase)
+bool MatchRegex(const std::string& string, const std::string& pattern, bool matchcase)
 {
     return MatchRegex(string, ParseRegex(pattern, matchcase));
 }
@@ -1564,7 +1564,7 @@ bool MatchRegex(const std::string& string, const std::regex& pattern)
  * @note this is required because std::regex() does NOT work in an wxWidgets based files
  */
 /*--------------------------------------------------------------------------------*/
-bool ContainsRegex(const std::string& pattern, const std::string& string, bool matchcase)
+bool ContainsRegex(const std::string& string, const std::string& pattern, bool matchcase)
 {
     return ContainsRegex(string, ParseRegex(pattern, matchcase));
 }

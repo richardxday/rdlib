@@ -267,13 +267,13 @@ void ASettingsHandler::AddLine(const AString& str)
 uint_t ASettingsHandler::GetAllLike(ADataList& list, const AString& str, bool regex) const
 {
     const Value *item = GetFirst();
-    AString pat;
+    std::regex pat;
 
-    if (regex) pat = ParseRegex(str);
+    if (regex) pat = ParseRegex(str, true);
 
     while (item)
     {
-        if (( regex && MatchRegex(item->String1, pat, true)) ||
+        if (( regex && MatchRegex(item->String1, pat)) ||
             (!regex && (CompareCaseN(item->String1, str, str.len()) == 0))) {
             list.Add((uptr_t)item);
         }

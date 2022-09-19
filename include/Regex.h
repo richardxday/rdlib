@@ -10,17 +10,17 @@
 typedef struct {
     AString marker;
     uint_t pos, len;
-} REGEXREGION;
+} GLOBREGION;
 
-extern AString ParseRegex(const AString& str, char escchar = '\\');
-extern AString ParseRegex(const AString& str, AString& errors, char escchar = '\\');
-extern bool    MatchRegex(const AString& str, const AString& pat, bool casesens = false, char escchar = '\\');
-extern bool    MatchRegex(const AString& str, const AString& pat, ADataList& regionlist, bool casesens = false, char escchar = '\\');
+extern AString ParseGlob(const AString& str, char escchar = '\\');
+extern AString ParseGlob(const AString& str, AString& errors, char escchar = '\\');
+extern bool    MatchGlob(const AString& str, const AString& pat, bool casesens = false, char escchar = '\\');
+extern bool    MatchGlob(const AString& str, const AString& pat, ADataList& regionlist, bool casesens = false, char escchar = '\\');
 
-extern AString ExpandRegexRegions(const AString& str, const AString& expandstr, const ADataList& regionlist, char expandchar = '\\');
-extern bool    IsRegexPattern(const AString& pat);
+extern AString ExpandGlobRegions(const AString& str, const AString& expandstr, const ADataList& regionlist, char expandchar = '\\');
+extern bool    IsGlobPattern(const AString& pat);
 extern bool    IsExclusionPattern(const AString& pat);
-extern bool    IsRegexAnyPattern(const AString& pat);
+extern bool    IsGlobAnyPattern(const AString& pat);
 
 /*--------------------------------------------------------------------------------*/
 /** Parse regex pattern
@@ -38,6 +38,9 @@ extern bool    IsRegexAnyPattern(const AString& pat);
  */
 /*--------------------------------------------------------------------------------*/
 extern std::regex ParseRegex(const std::string& pattern, bool matchcase = false);
+inline std::regex ParseRegex(const AString& pattern, bool matchcase = false) {
+    return ParseRegex(pattern.operator std::string(), matchcase);
+}
 
 /*--------------------------------------------------------------------------------*/
 /** Return whether string matches pattern
@@ -55,7 +58,10 @@ extern std::regex ParseRegex(const std::string& pattern, bool matchcase = false)
  * @note an exception will be thrown if an invalid pattern is passed!
  */
 /*--------------------------------------------------------------------------------*/
-extern bool MatchRegex(const std::string& pattern, const std::string& string, bool matchcase = false);
+extern bool MatchRegex(const std::string& string, const std::string& pattern, bool matchcase = false);
+inline bool MatchRegex(const AString& string, const AString& pattern, bool matchcase = false) {
+    return MatchRegex(string.operator std::string(), pattern.operator std::string(), matchcase);
+}
 
 /*--------------------------------------------------------------------------------*/
 /** Return whether string matches pattern
@@ -70,6 +76,10 @@ extern bool MatchRegex(const std::string& pattern, const std::string& string, bo
  */
 /*--------------------------------------------------------------------------------*/
 extern bool MatchRegex(const std::string& string, const std::regex& pattern);
+inline bool MatchRegex(const AString& string, const std::regex& pattern)
+{
+    return MatchRegex(string.operator std::string(), pattern);
+}
 
 /*--------------------------------------------------------------------------------*/
 /** Return whether string contains pattern
@@ -88,6 +98,9 @@ extern bool MatchRegex(const std::string& string, const std::regex& pattern);
  */
 /*--------------------------------------------------------------------------------*/
 extern bool ContainsRegex(const std::string& pattern, const std::string& string, bool matchcase = false);
+inline bool ContainsRegex(const AString& pattern, const AString& string, bool matchcase = false) {
+    return ContainsRegex(pattern.operator std::string(), string.operator std::string(), matchcase);
+}
 
 /*--------------------------------------------------------------------------------*/
 /** Return whether string contains pattern
@@ -102,6 +115,9 @@ extern bool ContainsRegex(const std::string& pattern, const std::string& string,
  */
 /*--------------------------------------------------------------------------------*/
 extern bool ContainsRegex(const std::string& string, const std::regex& pattern);
+inline bool ContainsRegex(const AString& string, const std::regex& pattern) {
+    return ContainsRegex(string.operator std::string(), pattern);
+}
 
 typedef struct
 {
@@ -146,6 +162,9 @@ typedef struct
  */
 /*--------------------------------------------------------------------------------*/
 extern bool ParseRegexReplacement(const std::string& str, regex_replace_t& replace, bool matchcase = false);
+inline bool ParseRegexReplacement(const AString& str, regex_replace_t& replace, bool matchcase = false) {
+    return ParseRegexReplacement(str.operator std::string(), replace, matchcase);
+}
 
 /*--------------------------------------------------------------------------------*/
 /** Perform a regex replacement on a string
@@ -163,5 +182,8 @@ extern bool ParseRegexReplacement(const std::string& str, regex_replace_t& repla
  */
 /*--------------------------------------------------------------------------------*/
 extern std::string RegexReplace(const std::string& str, const regex_replace_t& replace, std::regex_constants::match_flag_type flags = std::regex_constants::format_sed);
+inline std::string RegexReplace(const AString& str, const regex_replace_t& replace, std::regex_constants::match_flag_type flags = std::regex_constants::format_sed) {
+    return RegexReplace(str.operator std::string(), replace, flags);
+}
 
 #endif

@@ -76,10 +76,10 @@ static bool SetFileData(const AString& path, const struct dirent& finddata, FILE
 
 bool Recurse(const AString& Path, const AString& Pattern, uint_t nSubDirs, bool (*fn)(const FILE_INFO *file, void *Context), void *Context)
 {
-    AString   pattern = ParseRegex(Pattern);
+    AString   pattern = ParseGlob(Pattern);
     FILE_INFO file;
     DIR       *handle;
-    bool      ok = true, any = IsRegexAnyPattern(pattern);
+    bool      ok = true, any = IsGlobAnyPattern(pattern);
 
     if ((handle = opendir(Path.Valid() ? Path : ".")) != NULL) {
         struct dirent *ent;
@@ -89,7 +89,7 @@ bool Recurse(const AString& Path, const AString& Pattern, uint_t nSubDirs, bool 
                 if ((file.ShortName != ".") && (file.ShortName != "..")) {
                     bool done = false;
 
-                    if (any || MatchRegex(file.ShortName, pattern)) {
+                    if (any || MatchGlob(file.ShortName, pattern)) {
                         ok = (*fn)(&file, Context);
                         if (!ok) break;
                         done = true;
@@ -158,10 +158,10 @@ static void SetFileData(const AString& path, const WIN32_FIND_DATA& finddata, FI
 bool Recurse(const AString& Path, const AString& Pattern, uint_t nSubDirs, bool (*fn)(const FILE_INFO *file, void *Context), void *Context)
 {
     WIN32_FIND_DATA finddata;
-    AString   pattern, pattern1 = ParseRegex(Pattern);
+    AString   pattern, pattern1 = ParseGlob(Pattern);
     FILE_INFO file;
     HANDLE    handle;
-    bool      ok = true, any = IsRegexAnyPattern(pattern1);
+    bool      ok = true, any = IsGlobAnyPattern(pattern1);
 
     pattern = Path.CatPath("*");
     if ((handle = ::FindFirstFile(pattern, &finddata)) != INVALID_HANDLE_VALUE) {
@@ -171,7 +171,7 @@ bool Recurse(const AString& Path, const AString& Pattern, uint_t nSubDirs, bool 
             if ((file.ShortName != ".") && (file.ShortName != "..")) {
                 bool done = false;
 
-                if (any || MatchRegex(file.ShortName, pattern1)) {
+                if (any || MatchGlob(file.ShortName, pattern1)) {
                     ok = (*fn)(&file, Context);
                     if (!ok) break;
                     done = true;
@@ -232,10 +232,10 @@ static bool __CollectFiles(const FILE_INFO *file, void *Context)
         debug("Matching '%s' against '%s': %u\n",
               file->FileName.FilePart().str(),
               p->Pattern.str(),
-              (uint_t)MatchRegex(file->FileName.FilePart(), p->Pattern));
+              (uint_t)MatchGlob(file->FileName.FilePart(), p->Pattern));
 #endif
 
-        if (p->bAnyName || MatchRegex(file->FileName.FilePart(), p->Pattern)) {
+        if (p->bAnyName || MatchGlob(file->FileName.FilePart(), p->Pattern)) {
             AString *str = new AString(file->FileName);
             if (str) p->pList->Add(str, &AString::AlphaCompareNoCase);
         }
@@ -248,12 +248,12 @@ bool CollectFiles(const AString& Path, const AString& Pattern, uint_t nSubdirs, 
 {
     COLLECT_CONTEXT context;
 
-    context.Pattern       = ParseRegex(Pattern);
+    context.Pattern       = ParseGlob(Pattern);
     context.pList         = &list;
     context.pQuitHandler  = pQuitHandler;
     context.AttribMask    = attribMask;
     context.AttribCompare = attribCmp;
-    context.bAnyName      = IsRegexAnyPattern(context.Pattern);
+    context.bAnyName      = IsGlobAnyPattern(context.Pattern);
 
     return ::Recurse(Path.CatPath("*"), nSubdirs, &__CollectFiles, &context);
 }
@@ -467,7 +467,7 @@ static bool __CollectFilesEx(const FILE_INFO *file, void *Context)
     COLLECTEX_CONTEXT *p = (COLLECTEX_CONTEXT *)Context;
 
     if (!(file->Attrib & p->AttribClr) && !((~file->Attrib) & p->AttribSet)) {
-        if (p->bAnyName || MatchRegex(file->FileName.FilePart(), p->Pattern)) {
+        if (p->bAnyName || MatchGlob(file->FileName.FilePart(), p->Pattern)) {
             AFileNode *node = new AFileNode(*file);
             if (node) p->pList->Add(node, p->CmpFunc, &p->CmpFlags);
         }
@@ -480,12 +480,12 @@ bool CollectFilesEx(const AString& Path, const AString& Pattern, uint_t nSubdirs
 {
     COLLECTEX_CONTEXT context;
 
-    context.Pattern       = ParseRegex(Pattern);
+    context.Pattern       = ParseGlob(Pattern);
     context.pList         = &list;
     context.pQuitHandler  = pQuitHandler;
     context.AttribSet     = attribSet;
     context.AttribClr     = attribClr;
-    context.bAnyName      = IsRegexAnyPattern(context.Pattern);
+    context.bAnyName      = IsGlobAnyPattern(context.Pattern);
     context.CmpFunc       = AFileNode::GetSortFunction(sortFlags);
     context.CmpFlags      = sortFlags;
 
