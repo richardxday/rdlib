@@ -41,6 +41,9 @@ extern std::regex ParseRegex(const std::string& pattern, bool matchcase = false)
 inline std::regex ParseRegex(const AString& pattern, bool matchcase = false) {
     return ParseRegex(pattern.operator std::string(), matchcase);
 }
+inline std::regex ParseRegex(const char *pattern, bool matchcase = false) {
+    return ParseRegex(std::string(pattern), matchcase);
+}
 
 /*--------------------------------------------------------------------------------*/
 /** Return whether string matches pattern
@@ -62,6 +65,9 @@ extern bool MatchRegex(const std::string& string, const std::string& pattern, bo
 inline bool MatchRegex(const AString& string, const AString& pattern, bool matchcase = false) {
     return MatchRegex(string.operator std::string(), pattern.operator std::string(), matchcase);
 }
+inline bool MatchRegex(const char *string, const char *pattern, bool matchcase = false) {
+    return MatchRegex(std::string(string), std::string(pattern), matchcase);
+}
 
 /*--------------------------------------------------------------------------------*/
 /** Return whether string matches pattern
@@ -79,6 +85,10 @@ extern bool MatchRegex(const std::string& string, const std::regex& pattern);
 inline bool MatchRegex(const AString& string, const std::regex& pattern)
 {
     return MatchRegex(string.operator std::string(), pattern);
+}
+inline bool MatchRegex(const char *string, const std::regex& pattern)
+{
+    return MatchRegex(std::string(string), pattern);
 }
 
 /*--------------------------------------------------------------------------------*/
@@ -101,6 +111,9 @@ extern bool ContainsRegex(const std::string& pattern, const std::string& string,
 inline bool ContainsRegex(const AString& pattern, const AString& string, bool matchcase = false) {
     return ContainsRegex(pattern.operator std::string(), string.operator std::string(), matchcase);
 }
+inline bool ContainsRegex(const char *pattern, const char *string, bool matchcase = false) {
+    return ContainsRegex(std::string(pattern), std::string(string), matchcase);
+}
 
 /*--------------------------------------------------------------------------------*/
 /** Return whether string contains pattern
@@ -117,6 +130,9 @@ inline bool ContainsRegex(const AString& pattern, const AString& string, bool ma
 extern bool ContainsRegex(const std::string& string, const std::regex& pattern);
 inline bool ContainsRegex(const AString& string, const std::regex& pattern) {
     return ContainsRegex(string.operator std::string(), pattern);
+}
+inline bool ContainsRegex(const char *string, const std::regex& pattern) {
+    return ContainsRegex(std::string(string), pattern);
 }
 
 typedef struct
@@ -165,6 +181,9 @@ extern bool ParseRegexReplacement(const std::string& str, regex_replace_t& repla
 inline bool ParseRegexReplacement(const AString& str, regex_replace_t& replace, bool matchcase = false) {
     return ParseRegexReplacement(str.operator std::string(), replace, matchcase);
 }
+inline bool ParseRegexReplacement(const char *str, regex_replace_t& replace, bool matchcase = false) {
+    return ParseRegexReplacement(std::string(str), replace, matchcase);
+}
 
 /*--------------------------------------------------------------------------------*/
 /** Perform a regex replacement on a string
@@ -182,8 +201,11 @@ inline bool ParseRegexReplacement(const AString& str, regex_replace_t& replace, 
  */
 /*--------------------------------------------------------------------------------*/
 extern std::string RegexReplace(const std::string& str, const regex_replace_t& replace, std::regex_constants::match_flag_type flags = std::regex_constants::format_sed);
-inline std::string RegexReplace(const AString& str, const regex_replace_t& replace, std::regex_constants::match_flag_type flags = std::regex_constants::format_sed) {
-    return RegexReplace(str.operator std::string(), replace, flags);
+inline AString RegexReplace(const AString& str, const regex_replace_t& replace, std::regex_constants::match_flag_type flags = std::regex_constants::format_sed) {
+    return AString(RegexReplace(str.operator std::string(), replace, flags));
+}
+inline AString RegexReplace(const char *str, const regex_replace_t& replace, std::regex_constants::match_flag_type flags = std::regex_constants::format_sed) {
+    return AString(RegexReplace(std::string(str), replace, flags));
 }
 
 #endif
