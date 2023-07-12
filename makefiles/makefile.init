@@ -68,7 +68,7 @@ APPLICATION_SUFFIX:=
 endif
 
 ROOTDIR:=$(shell echo | $(CPP) -E -Wp,-v - 2>&1 | grep -E "^ +/.*usr/include$$" | sed -E "s/^ +([^ ]*\/)usr\/include/\1/")
-PREFIX:=$(ROOTDIR)usr$(shell grep -h -E "^/.*usr/local/lib$$" /etc/ld.so.conf.d/* >/dev/null && echo "/local")
+PREFIX:=$(ROOTDIR)usr$(shell grep -h -E "^/.*usr/local/lib$$" /etc/ld.so.conf.d/* 2>/dev/null >/dev/null && echo "/local")
 
 OBJECTS:=
 HEADERS:=
