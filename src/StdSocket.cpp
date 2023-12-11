@@ -125,8 +125,8 @@ void AStdSocket::connectcallback(ASocketServer *server, int socket)
     else {
 #if DEBUG_STDSOCKET
         debug("AStdSocket<%08lx>: Client rejected because client = %08lx\n", (uptr_t)this, (uptr_t)client);
-        server->DeleteHandler(socket);
 #endif
+        server->DeleteHandler(socket);
     }
 }
 
@@ -152,6 +152,10 @@ void AStdSocket::readcallback(ASocketServer *server, int socket)
                 bufferlen = newbuflen;
             }
         }
+
+#if DEBUG_STDSOCKET
+        debug("AStdSocket<%08lx>: attempting to read %d bytes from socket %d\n", (uptr_t)this, bytes, socket);
+#endif
 
         if ((bytes = server->ReadSocket(socket, buffer + bufferpos, (uint_t)bytes)) > 0) {
             bufferpos += (uint_t)bytes;

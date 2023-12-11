@@ -457,6 +457,10 @@ void ASocketServer::DeleteAllHandlers()
 {
     uint_t i, n = SocketList.Count();
 
+#if DEBUG_SOCKETS
+    debug("Delete all sockets\n");
+#endif
+
     for (i = 0; i < n; i++) {
         DeleteSocketList.Add(SocketList[i]);
     }
@@ -481,7 +485,17 @@ int ASocketServer::Process(uint_t timeout)
 
     if (ProcessingDepth) {
         // don't allow Process to be called recursively!!
+#if DEBUG_SOCKETS
+        debug("Processing depth: %u, exiting...\n", ProcessingDepth);
+#endif
         return res;
+    }
+
+    if (SocketList.Count() == 0) {
+#if DEBUG_SOCKETS
+        debug("No sockets to process\n");
+#endif
+        return -1;
     }
 
     ProcessingDepth++;
@@ -674,6 +688,10 @@ void ASocketServer::DeleteHandler(int socket)
 {
     HANDLER *handler;
 
+#if DEBUG_SOCKETS
+    debug("Delete handler for socket %d\n", socket);
+#endif
+
     if ((handler = (HANDLER *)FindSocket(socket)) != NULL) {
         DeleteSocketList.Add((uptr_t)handler);
     }
@@ -736,7 +754,14 @@ bool ASocketServer::SetDatagramDestination(int socket, const struct sockaddr_in 
 
 sint_t ASocketServer::BytesAvailable(int socket)
 {
-    if (DeleteSocketList.Find(socket) >= 0) return -1;
+    HANDLER *handler = (HANDLER *)FindSocket(socket);
+
+    if ((handler == NULL) || (DeleteSocketList.Find(handler) >= 0)) {
+#if DEBUG_SOCKETS
+        debug("Socket %d handler $%016lx position in delete list %d\n", socket, (uptr_t)handler, DeleteSocketList.Find(handler));
+#endif
+        return -1;
+    }
 
 #ifdef __LINUX__
     return recv(socket, staticbuf, sizeof(staticbuf), MSG_PEEK);
@@ -754,7 +779,14 @@ sint_t ASocketServer::BytesAvailable(int socket)
 
 sint_t ASocketServer::BytesLeftToWrite(int socket)
 {
-    if (DeleteSocketList.Find(socket) >= 0) return -1;
+    HANDLER *handler = (HANDLER *)FindSocket(socket);
+
+    if ((handler == NULL) || (DeleteSocketList.Find(handler) >= 0)) {
+#if DEBUG_SOCKETS
+        debug("Socket %d handler $%016lx position in delete list %d\n", socket, (uptr_t)handler, DeleteSocketList.Find(handler));
+#endif
+        return -1;
+    }
 
     int res = 0;
     const WRITEBUFFER *wrbuf;
@@ -768,16 +800,29 @@ sint_t ASocketServer::BytesLeftToWrite(int socket)
 sint_t ASocketServer::ReadSocket(int socket, uint8_t *buffer, uint_t bytes, struct sockaddr *from)
 {
     HANDLER *handler = (HANDLER *)FindSocket(socket);
-    socklen_t _len;
+    socklen_t _len = sizeof(handler->from);
     sint_t res;
 
-    if ((DeleteSocketList.Find(socket) >= 0) || !handler) return -1;
+    if ((handler == NULL) || (DeleteSocketList.Find(handler) >= 0)) {
+#if DEBUG_SOCKETS
+        debug("Socket %d handler $%016lx position in delete list %d\n", socket, (uptr_t)handler, DeleteSocketList.Find(handler));
+#endif
+        return -1;
+    }
+
+#if DEBUG_SOCKETS
+    debug("Trying to read %u bytes from socket %d to buffer $%016lx\n", bytes, socket, (uptr_t)buffer);
+#endif
 
     if (handler->type == Type_Datagram) {
         res = recvfrom(socket, (char *)buffer, bytes, 0, &handler->from, &_len);
         if (from) *from = handler->from;
     }
     else res = recv(socket, (char *)buffer, bytes, 0);
+
+#if DEBUG_SOCKETS
+    debug("ReadSocket returning -1, errno %d ('%s')\n", errno, strerror(errno));
+#endif
 
     return res;
 }
@@ -787,7 +832,7 @@ sint_t ASocketServer::WriteSocket(int socket, const uint8_t *buffer, uint_t byte
     HANDLER     *handler = (HANDLER *)FindSocket(socket);
     WRITEBUFFER *wrbuf   = (WRITEBUFFER *)WriteSocketList[socket];
 
-    if ((DeleteSocketList.Find(socket) >= 0) || !handler) return -1;
+    if ((handler == NULL) || (DeleteSocketList.Find(handler) >= 0)) return -1;
 
     if (!wrbuf) {
         if ((wrbuf = new WRITEBUFFER) != NULL) {
