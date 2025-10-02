@@ -1,8 +1,7 @@
 
 #include <stdio.h>
 #include <string.h>
-
-typedef enum {false = 0, true} bool;
+#include <stdbool.h>
 
 int main(int argc, char *argv[])
 {
